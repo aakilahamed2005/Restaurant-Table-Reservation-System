@@ -150,11 +150,7 @@ This project demonstrates:
 
 # 👨‍💻 Contributors
 
-- Aakil Ahamed
-- Anfas Rasheed
-- Nivetha Ramanan
-- Jeniviya George
-- Rithika Ramakrishnan
+- [Aakil Ahamed](https://github.com/aakilahamed2005)
 
 ---
 
