@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Restaurant — DineElite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+        }}
+    }
+  </script>
+  <style>
+    body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+    .topbar { background: #1C1917; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; color: #8A7E78; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+    .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
+    .sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 13px; }
+    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #8A7E78; padding: 8px 16px 4px; }
+    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-primary:hover { background: #44312A; }
+    .btn-ghost { background: transparent; border: 1.5px solid #E5DFD8; color: #8A7E78; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-ghost:hover { border-color: #8A7E78; color: #1C1917; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1.5px solid #E5DFD8; border-radius: 4px; font-family: 'Lato'; font-size: 0.875rem; background: white; transition: border-color 0.2s; }
+    .form-input:focus { outline: none; border-color: #C4633A; }
+    .form-label { display: block; font-family: 'Lato'; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #8A7E78; margin-bottom: 6px; }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; font-family: 'Lato'; font-size: 0.875rem; color: #1C1917; cursor: pointer; }
+    .time-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .time-row input[type="time"] { padding: 8px; border: 1.5px solid #E5DFD8; border-radius: 4px; font-family: 'Lato'; background: white; }
+    .fade-in { animation: fadeUp 0.4s ease both; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+  </style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP NAV -->
+<nav class="topbar flex items-center justify-between px-8 py-4">
+  <a href="/" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="flex items-center gap-6">
+    <div class="flex items-center gap-2 cursor-pointer">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#44312A;" th:text="${firstLetter}">J</div>
+      <span class="text-gray-300 text-sm font-body" th:text="${userFullName}">John Doe</span>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE WRAPPER -->
+<div class="max-w-4xl mx-auto px-6 py-10 flex gap-8">
+
+  <!-- SIDEBAR (same as owner-restaurants) -->
+  <aside class="profile-sidebar flex flex-col w-full md:w-56 gap-1 flex-shrink-0">
+    <div class="bg-white rounded-lg p-5 mb-4 flex flex-col items-center text-center">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-br from-warm-brown to-gold flex items-center justify-center text-white text-2xl font-display mb-3" th:text="${firstLetter}">J</div>
+      <p class="font-display text-lg text-charcoal" th:text="${userFullName}">John Doe</p>
+      <p class="text-xs text-muted font-body mt-1">Restaurant Owner</p>
+    </div>
+    <p class="sidebar-section-label">Account</p>
+    <a href="/owner-profile-view" class="sidebar-link">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      My Profile
+    </a>
+    <a href="/owner-profile-edit" class="sidebar-link">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+      Edit Profile
+    </a>
+    <p class="sidebar-section-label mt-2">Restaurants</p>
+    <a href="/restaurant-register" class="sidebar-link">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add Restaurant
+    </a>
+    <a href="/owner-restaurants" class="sidebar-link active">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M9 14h6m-9 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      My Restaurants
+    </a>
+    <div class="mt-4 pt-4 border-t border-gray-100">
+      <a href="/owner-profile-delete" class="sidebar-link" style="color:#C4633A;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        Deactivate Account
+      </a>
+      <a href="/user-logout" class="sidebar-link" style="color:#ef4444;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN FORM -->
+  <main class="flex-1 fade-in">
+    <div class="bg-white rounded-lg p-8">
+
+      <!-- Header -->
+      <div class="mb-8 pb-6 border-b border-gray-100">
+        <div class="w-10 h-0.5 bg-gold mb-3"></div>
+        <h2 class="font-display text-2xl text-charcoal">Edit Restaurant</h2>
+        <p class="text-muted text-sm font-body mt-1">Update your restaurant details</p>
+      </div>
+
+      <div th:if="${error}" class="mb-4 p-3 rounded bg-red-50 text-red-700 text-sm font-body" th:text="${error}"></div>
+      <div th:if="${message}" class="mb-4 p-3 rounded bg-green-50 text-green-800 text-sm font-body" th:text="${message}"></div>
+
+      <div class="pt-4 border-t border-gray-100 mb-6">
+        <h3 class="font-display text-lg text-charcoal mb-2">Restaurant Photos</h3>
+        <p class="text-xs text-muted font-body mb-4">Click Remove to delete a photo immediately. Use the form below to add new ones (max 10 total, 20MB each).</p>
+
+        <div th:if="${not #lists.isEmpty(existingImages)}" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div th:each="img : ${existingImages}" class="relative rounded border border-gray-200 overflow-hidden">
+            <img th:src="@{'/uploads/' + ${img.filePath}}" alt="Restaurant photo" class="w-full h-28 object-cover"/>
+            <form th:action="@{/restaurant-edit/{rid}/images/{iid}/delete(rid=${restaurantId}, iid=${img.id})}"
+                  method="post" class="absolute top-2 right-2" onsubmit="return confirm('Remove this photo?');">
+              <button type="submit" class="bg-terracotta hover:bg-warm-brown text-white text-xs font-body font-bold px-2 py-1 rounded shadow">Remove</button>
+            </form>
+          </div>
+        </div>
+        <p th:if="${#lists.isEmpty(existingImages)}" class="text-sm text-muted font-body mb-4">No photos uploaded yet.</p>
+      </div>
+
+      <form th:action="@{/restaurant-edit/{id}(id=${restaurantId})}"
+            th:object="${restaurantRegisterDto}"
+            method="post"
+            enctype="multipart/form-data"
+            class="flex flex-col gap-6">
+
+        <!-- Basic Info -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="form-label">Restaurant Name *</label>
+            <input type="text" th:field="*{name}" class="form-input" required th:value="${restaurantRegisterDto.name}"/>
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+          <div>
+            <label class="form-label">Cuisine *</label>
+            <select th:field="*{cuisine}" class="form-input" required>
+              <option value="">Select cuisine...</option>
+              <option th:each="c : ${cuisines}" th:value="${c}" th:text="${c}" th:selected="${c == restaurantRegisterDto.cuisine}"></option>
+            </select>
+            <p th:if="${#fields.hasErrors('cuisine')}" th:errors="*{cuisine}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+          <div>
+            <label class="form-label">Price Range *</label>
+            <select th:field="*{priceRange}" class="form-input" required>
+              <option value="BUDGET" th:selected="${restaurantRegisterDto.priceRange == 'BUDGET'}">$ Budget</option>
+              <option value="MODERATE" th:selected="${restaurantRegisterDto.priceRange == 'MODERATE'}">$$ Moderate</option>
+              <option value="UPSCALE" th:selected="${restaurantRegisterDto.priceRange == 'UPSCALE'}">$$$ Upscale</option>
+              <option value="LUXURY" th:selected="${restaurantRegisterDto.priceRange == 'LUXURY'}">$$$$ Luxury</option>
+            </select>
+            <p th:if="${#fields.hasErrors('priceRange')}" th:errors="*{priceRange}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+          <div>
+            <label class="form-label">Short Description <span class="text-muted normal-case tracking-normal font-normal">(optional)</span></label>
+            <input type="text" th:field="*{shortDescription}" class="form-input" th:value="${restaurantRegisterDto.shortDescription}"/>
+            <p th:if="${#fields.hasErrors('shortDescription')}" th:errors="*{shortDescription}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Full Description *</label>
+          <textarea th:field="*{description}" class="form-input" rows="4" th:text="${restaurantRegisterDto.description}" required></textarea>
+          <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+
+        <!-- Location & Contact -->
+        <div class="pt-4 border-t border-gray-100">
+          <h3 class="font-display text-lg text-charcoal mb-4">Location & Contact</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="form-label">Street Address *</label>
+              <input type="text" th:field="*{streetAddress}" class="form-input" required th:value="${restaurantRegisterDto.streetAddress}"/>
+              <p th:if="${#fields.hasErrors('streetAddress')}" th:errors="*{streetAddress}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="form-label">City *</label>
+              <input type="text" th:field="*{city}" class="form-input" required th:value="${restaurantRegisterDto.city}"/>
+              <p th:if="${#fields.hasErrors('city')}" th:errors="*{city}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="form-label" for="province">Province *</label>
+              <select id="province" th:field="*{province}" class="form-input" required>
+                <option value="">Select province...</option>
+                <option value="Western">Western</option>
+                <option value="Central">Central</option>
+                <option value="Southern">Southern</option>
+                <option value="Northern">Northern</option>
+                <option value="Eastern">Eastern</option>
+                <option value="North Western">North Western</option>
+                <option value="North Central">North Central</option>
+                <option value="Uva">Uva</option>
+                <option value="Sabaragamuwa">Sabaragamuwa</option>
+              </select>
+              <p th:if="${#fields.hasErrors('province')}" th:errors="*{province}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="form-label">Phone *</label>
+              <input type="tel" th:field="*{phoneNumber}" class="form-input" required th:value="${restaurantRegisterDto.phoneNumber}"/>
+              <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="form-label">Email *</label>
+              <input type="email" th:field="*{email}" class="form-input" required th:value="${restaurantRegisterDto.email}"/>
+              <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="form-label">Website</label>
+              <input type="url" th:field="*{website}" class="form-input" th:value="${restaurantRegisterDto.website}"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Capacity -->
+        <div class="pt-4 border-t border-gray-100">
+          <h3 class="font-display text-lg text-charcoal mb-4">Capacity</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="form-label">Seating Capacity *</label>
+              <input type="number" th:field="*{seatingCapacity}" class="form-input" min="1" required th:value="${restaurantRegisterDto.seatingCapacity}"/>
+              <p th:if="${#fields.hasErrors('seatingCapacity')}" th:errors="*{seatingCapacity}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="form-label">Max Party Size <span class="text-muted normal-case tracking-normal font-normal">(optional)</span></label>
+              <input type="number" th:field="*{maxPartySize}" class="form-input" min="1" th:value="${restaurantRegisterDto.maxPartySize}"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="pt-4 border-t border-gray-100">
+          <h3 class="font-display text-lg text-charcoal mb-4">Amenities</h3>
+          <div class="flex flex-wrap gap-4">
+            <label class="checkbox-label">
+              <input type="checkbox" th:field="*{hasParking}" th:checked="${restaurantRegisterDto.hasParking}"/>
+              <span>Parking Available</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" th:field="*{hasWifi}" th:checked="${restaurantRegisterDto.hasWifi}"/>
+              <span>Free Wi-Fi</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" th:field="*{halalCertified}" th:checked="${restaurantRegisterDto.halalCertified}"/>
+              <span>Halal Certified</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Add new photos -->
+        <div class="pt-4 border-t border-gray-100">
+          <label class="form-label">Add New Photos</label>
+          <input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple class="form-input"/>
+        </div>
+
+        <!-- Operating Hours -->
+        <div class="pt-4 border-t border-gray-100">
+          <h3 class="font-display text-lg text-charcoal mb-4">Operating Hours</h3>
+
+          <div th:each="day : ${weekDays}"
+               th:with="d=${#strings.toLowerCase(day)},
+                        openProp=${d + 'Open'},
+                        openingProp=${d + 'OpeningTime'},
+                        closingProp=${d + 'ClosingTime'}"
+               class="time-row items-center pb-3 border-b border-gray-50 last:border-0">
+            <label class="checkbox-label min-w-[100px]">
+              <input type="checkbox"
+                     th:id="${openProp}"
+                     th:name="${openProp}"
+                     th:checked="${restaurantRegisterDto[openProp]}"/>
+              <span th:text="${day}">Monday</span>
+            </label>
+            <input type="time"
+                   th:id="${openingProp}"
+                   th:name="${openingProp}"
+                   th:value="${restaurantRegisterDto[openingProp]}"
+                   class="form-input" style="width:auto; padding:6px 10px;"/>
+            <span class="text-muted">to</span>
+            <input type="time"
+                   th:id="${closingProp}"
+                   th:name="${closingProp}"
+                   th:value="${restaurantRegisterDto[closingProp]}"
+                   class="form-input" style="width:auto; padding:6px 10px;"/>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-6 flex items-center justify-end gap-3 border-t border-gray-100">
+          <a th:href="@{/owner-restaurants}" class="btn-ghost px-6 py-2.5 rounded-sm">Cancel</a>
+          <button type="submit" class="btn-primary px-6 py-2.5 rounded-sm">Save Changes</button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Enable/disable time inputs based on day checkbox
+  document.querySelectorAll('input[type="checkbox"][name$="Open"]').forEach(checkbox => {
+    const day = checkbox.name.replace('Open', '');
+    const openInput = document.getElementById(day + 'OpeningTime');
+    const closeInput = document.getElementById(day + 'ClosingTime');
+
+    function toggleInputs() {
+      if (checkbox.checked) {
+        openInput.disabled = false;
+        closeInput.disabled = false;
+        openInput.required = true;
+        closeInput.required = true;
+      } else {
+        openInput.disabled = true;
+        closeInput.disabled = true;
+        openInput.required = false;
+        closeInput.required = false;
+        openInput.value = '';
+        closeInput.value = '';
+      }
+    }
+
+    checkbox.addEventListener('change', toggleInputs);
+    toggleInputs(); // Initialize on load
+  });
+</script>
+
+</body>
+</html>

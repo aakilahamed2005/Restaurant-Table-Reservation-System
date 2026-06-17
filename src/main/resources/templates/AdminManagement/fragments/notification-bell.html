@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!--
+  Admin topbar notification bell: fetches /admin/api/support-messages JSON,
+  mark read/delete via REST. unreadSupportMessageCount from AdminSupportUnreadModelAdvice.
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="notificationBell">
+  <div class="admin-notif-wrap">
+    <button type="button"
+            class="topbar-btn admin-notif-btn"
+            style="position:relative;"
+            onclick="window.adminSupportNotifToggle(event)"
+            aria-label="Support messages">
+
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+
+      <span class="notif-dot admin-notif-dot"
+            th:classappend="${unreadSupportMessageCount != null and unreadSupportMessageCount > 0} ? '' : ' is-hidden'"></span>
+    </button>
+
+    <div id="adminSupportNotifPanel" class="admin-notif-panel" onclick="event.stopPropagation()">
+      <div class="admin-notif-head-row">
+        <div class="admin-notif-head">Support &amp; contact messages</div>
+        <div class="admin-notif-toolbar">
+          <button type="button" class="admin-notif-action" id="adminSupportReadAll" title="Mark all as read" aria-label="Mark all as read">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+          <button type="button" class="admin-notif-action" id="adminSupportDeleteAll" title="Delete all" aria-label="Delete all">&times;</button>
+        </div>
+      </div>
+      <div id="adminSupportNotifList" class="admin-notif-empty">Loading…</div>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    (function () {
+      window.__ADMIN_API_SUPPORT = /*[[@{/admin/api/support-messages}]]*/ '/admin/api/support-messages';
+
+      window.adminSupportNotifToggle = function (ev) {
+        ev.stopPropagation();
+        const panel = document.getElementById('adminSupportNotifPanel');
+        if (!panel) return;
+        const open = panel.classList.toggle('is-open');
+        if (open) {
+          window.adminSupportNotifLoad();
+        }
+      };
+
+      document.addEventListener('click', function () {
+        const panel = document.getElementById('adminSupportNotifPanel');
+        if (panel) panel.classList.remove('is-open');
+      });
+
+      const CATEGORY_LABELS = {
+        DEACTIVATED_ACCOUNT: 'Deactivated account',
+        SUSPENDED_RESTAURANT: 'Suspended restaurant',
+        RESERVATION_ISSUE: 'Reservation issue',
+        PAYMENT_OR_BILLING: 'Payment or billing',
+        ACCOUNT_ACCESS: 'Account access',
+        OTHER: 'Other'
+      };
+
+      const SOURCE_LABELS = {
+        USER_ACCOUNT: 'User',
+        RESTAURANT_LISTING: 'Restaurant'
+      };
+
+      function labelCategory(code) {
+        return CATEGORY_LABELS[code] || code || '—';
+      }
+
+      function labelSource(code) {
+        return SOURCE_LABELS[code] || code || '—';
+      }
+
+      function formatWhen(iso) {
+        if (!iso) return '';
+        try {
+          return new Date(iso).toLocaleString();
+        } catch (e) {
+          return iso;
+        }
+      }
+
+      function updateDot(unread) {
+        const dot = document.querySelector('.admin-notif-dot');
+        if (!dot) return;
+        if (unread > 0) dot.classList.remove('is-hidden');
+        else dot.classList.add('is-hidden');
+      }
+
+      function renderMessages(items) {
+        const listEl = document.getElementById('adminSupportNotifList');
+        if (!listEl) return;
+
+        if (!items.length) {
+          listEl.className = 'admin-notif-empty';
+          listEl.textContent = 'No messages yet.';
+          updateDot(0);
+          return;
+        }
+
+        const unread = items.filter(function (m) { return !m.adminRead; }).length;
+        updateDot(unread);
+        listEl.className = 'admin-notif-list';
+        listEl.innerHTML = '';
+
+        items.forEach(function (m) {
+          const row = document.createElement('div');
+          row.className = 'admin-notif-item' + (m.adminRead ? '' : ' is-unread');
+          row.dataset.messageId = m.id;
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'button';
+          deleteBtn.className = 'admin-notif-item-delete';
+          deleteBtn.title = 'Remove message';
+          deleteBtn.setAttribute('aria-label', 'Remove message');
+          deleteBtn.innerHTML = '&times;';
+          deleteBtn.addEventListener('click', async function (ev) {
+            ev.stopPropagation();
+            try {
+              const r = await fetch(window.__ADMIN_API_SUPPORT + '/' + m.id, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+              });
+              const data = await r.json();
+              if (data && typeof data.unreadCount === 'number') {
+                updateDot(data.unreadCount);
+              }
+              row.remove();
+              if (!listEl.querySelector('.admin-notif-item')) {
+                listEl.className = 'admin-notif-empty';
+                listEl.textContent = 'No messages yet.';
+                updateDot(0);
+              }
+            } catch (e) { /* ignore */ }
+          });
+
+          const title = document.createElement('div');
+          title.className = 'admin-notif-item-title';
+          title.textContent = labelCategory(m.category) + ' · ' + labelSource(m.messageSource);
+
+          const meta = document.createElement('div');
+          meta.className = 'admin-notif-meta';
+          const bits = [formatWhen(m.createdAt), m.email];
+          if (m.restaurantName) {
+            bits.push('Restaurant: ' + m.restaurantName + (m.restaurantId ? ' (#' + m.restaurantId + ')' : ''));
+          }
+          meta.textContent = bits.filter(Boolean).join(' · ');
+
+          const body = document.createElement('div');
+          body.className = 'admin-notif-body';
+          body.textContent = m.description || '';
+
+          row.appendChild(deleteBtn);
+          row.appendChild(title);
+          row.appendChild(meta);
+          row.appendChild(body);
+
+          row.addEventListener('click', async function () {
+            if (m.adminRead) return;
+            try {
+              const r = await fetch(window.__ADMIN_API_SUPPORT + '/' + m.id + '/read', {
+                method: 'POST',
+                credentials: 'same-origin'
+              });
+              const data = await r.json();
+              if (data && typeof data.unreadCount === 'number') {
+                updateDot(data.unreadCount);
+              }
+              m.adminRead = true;
+              row.classList.remove('is-unread');
+            } catch (e) { /* ignore */ }
+          });
+
+          listEl.appendChild(row);
+        });
+      }
+
+      window.adminSupportNotifLoad = async function () {
+        const listEl = document.getElementById('adminSupportNotifList');
+        if (!listEl) return;
+        listEl.className = 'admin-notif-empty';
+        listEl.textContent = 'Loading…';
+        try {
+          const res = await fetch(window.__ADMIN_API_SUPPORT, { credentials: 'same-origin' });
+          if (!res.ok) {
+            listEl.textContent = 'Could not load messages.';
+            return;
+          }
+          renderMessages(await res.json());
+        } catch (e) {
+          listEl.className = 'admin-notif-empty';
+          listEl.textContent = 'Could not load messages.';
+        }
+      };
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const readAllBtn = document.getElementById('adminSupportReadAll');
+        if (readAllBtn) {
+          readAllBtn.addEventListener('click', async function (ev) {
+            ev.stopPropagation();
+            try {
+              const r = await fetch(window.__ADMIN_API_SUPPORT + '/read-all', {
+                method: 'POST',
+                credentials: 'same-origin'
+              });
+              const data = await r.json();
+              if (data && typeof data.unreadCount === 'number') {
+                updateDot(data.unreadCount);
+              }
+              document.querySelectorAll('.admin-notif-item.is-unread').forEach(function (row) {
+                row.classList.remove('is-unread');
+              });
+            } catch (e) { /* ignore */ }
+          });
+        }
+
+        const deleteAllBtn = document.getElementById('adminSupportDeleteAll');
+        if (deleteAllBtn) {
+          deleteAllBtn.addEventListener('click', async function (ev) {
+            ev.stopPropagation();
+            if (!confirm('Delete all support messages?')) return;
+            try {
+              const r = await fetch(window.__ADMIN_API_SUPPORT, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+              });
+              const data = await r.json();
+              if (data && typeof data.unreadCount === 'number') {
+                updateDot(data.unreadCount);
+              }
+              const listEl = document.getElementById('adminSupportNotifList');
+              if (listEl) {
+                listEl.className = 'admin-notif-empty';
+                listEl.textContent = 'No messages yet.';
+              }
+            } catch (e) { /* ignore */ }
+          });
+        }
+      });
+    })();
+  </script>
+</th:block>
+</html>

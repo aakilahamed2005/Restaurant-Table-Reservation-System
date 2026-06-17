@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta
+        name="viewport" content="width=device-width, initial-scale=1.0"
+>
+<title>DineElite – My Reviews</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet">
+<script
+        src="https://cdn.tailwindcss.com">
+
+</script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+        colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+        fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+      }
+
+      }
+  }
+</script>
+<style>
+body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+
+/* ── Topbar ── */
+.topbar { background: #1C1917; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 56px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: white; text-decoration: none; letter-spacing: -0.01em; }
+.logo span { color: #D4A853; }
+.nav-link { color: #9CA3AF; font-size: 0.85rem; font-family: 'Lato', sans-serif; text-decoration: none; transition: color 0.2s; }
+.nav-link:hover { color: #D4A853; }
+.nav-user { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: #C4633A; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; }
+.nav-name { color: #9CA3AF; font-size: 0.85rem; }
+
+/* ── Layout ── */
+.layout { display: flex; gap: 24px; padding: 32px; max-width: 1100px; margin: 0 auto; }
+
+/* ── Sidebar ── */
+.sidebar { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+.sb-profile { background: white; border-radius: 8px; padding: 20px 16px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #C4633A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 2rem; color: white; }
+.sb-name { font-family: 'Playfair Display', serif; font-size: 1rem; color: #1C1917; }
+.sb-role { font-size: 0.72rem; color: #8A7E78; margin-top: 2px; }
+.sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; color: #8A7E78; text-decoration: none; transition: all 0.18s; cursor: pointer; border: none; background: none; width: 100%; font-family: 'Lato', sans-serif; text-align: left; }
+.sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
+.sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 11px; border-radius: 0 6px 6px 0; }
+.sidebar-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+.sb-divider { border: none; border-top: 1px solid #F0EBE3; margin: 10px 0; }
+.sidebar-link.danger { color: #C4633A; }
+.sidebar-link.signout { color: #ef4444; }
+
+/* ── Main ── */
+.main { flex: 1; min-width: 0; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: white; border-radius: 8px; padding: 18px; text-align: center; }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; line-height: 1; }
+.stat-lbl { font-size: 0.68rem; color: #8A7E78; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+/* ── Section Card ── */
+.section-card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+.gold-bar { width: 36px; height: 2px; background: #D4A853; margin-bottom: 10px; }
+.section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #1C1917; }
+.section-sub { font-size: 0.8rem; color: #8A7E78; margin-top: 3px; }
+
+/* ── Buttons ── */
+.btn-primary { background: #C4633A; color: white; font-family: 'Lato', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.18s; }
+.btn-primary:hover { background: #44312A; }
+.btn-sm { background: none; border: 1px solid #E8E2DB; border-radius: 4px; padding: 4px 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #8A7E78; cursor: pointer; font-family: 'Lato', sans-serif; transition: all 0.18s; }
+.btn-sm:hover { border-color: #C4633A; color: #C4633A; }
+.btn-sm.del:hover { border-color: #ef4444; color: #ef4444; }
+.btn-cancel { background: none; border: 1px solid #E8E2DB; border-radius: 4px; padding: 9px 16px; font-family: 'Lato', sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #8A7E78; cursor: pointer; }
+
+/* ── Filter ── */
+.filter-row { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+.filter-btn { background: white; border: 1px solid #E8E2DB; border-radius: 999px; padding: 4px 14px; font-size: 0.72rem; font-weight: 700; color: #8A7E78; cursor: pointer; font-family: 'Lato', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; transition: all 0.18s; }
+.filter-btn.active { background: #1C1917; color: white; border-color: #1C1917; }
+
+/* ── Review Cards ── */
+.review-card { border-top: 1px solid #F0EBE3; padding: 18px 0; }
+.review-card:first-child { border-top: none; padding-top: 4px; }
+.rest-badge { display: inline-flex; align-items: center; padding: 3px 10px; background: rgba(196, 99, 58, 0.08); color: #C4633A; border: 1px solid rgba(196, 99, 58, 0.2); border-radius: 999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.cuisine-tag { display: inline-flex; padding: 4px 10px; background: rgba(122, 140, 110, 0.12); color: #5E7A50; border: 1px solid rgba(122, 140, 110, 0.3); border-radius: 999px; font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.review-text { font-size: 0.88rem; color: #44312A; line-height: 1.65; margin: 10px 0 12px; }
+
+/* ── Modal ── */
+.modal-wrap { display: none; position: fixed; inset: 0; background: rgba(28, 25, 23, 0.55); align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+.modal-wrap.open { display: flex; }
+.modal { background: white; border-radius: 10px; padding: 28px; width: 100%; max-width: 440px; }
+.modal-hd { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #1C1917; margin-bottom: 4px; }
+.modal-sub2 { font-size: 0.78rem; color: #8A7E78; margin-bottom: 18px; }
+.field-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #8A7E78; margin-bottom: 6px; }
+.field-input { width: 100%; border: 1px solid #E8E2DB; border-radius: 6px; padding: 9px 12px; font-family: 'Lato', sans-serif; font-size: 0.85rem; color: #1C1917; outline: none; margin-bottom: 12px; }
+.field-input:focus { border-color: #C4633A; }
+.star-row span { font-size: 26px; cursor: pointer; color: #E8E2DB; transition: color 0.12s; line-height: 1; }
+.star-row span.lit { color: #D4A853; }
+textarea.field-input { resize: vertical; min-height: 90px; }
+
+/* ── Delete Modal ── */
+.delete-info { background: #FAF7F2; border: 1px solid #E8E2DB; border-radius: 8px; padding: 14px 16px; margin-bottom: 18px; }
+.delete-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #1C1917; margin-bottom: 4px; }
+.delete-text { font-size: 0.84rem; color: #44312A; line-height: 1.6; }
+.btn-danger { background: #ef4444; color: white; font-family: 'Lato', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.18s; }
+.btn-danger:hover { background: #b91c1c; }
+
+/* ── Empty state ── */
+.empty-state { text-align: center; padding: 40px 0; }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<nav class="topbar flex items-center justify-between px-8 py-4">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="flex items-center gap-6">
+    <a th:href="@{/restaurant-listing}" class="text-gray-300 text-sm font-body hover:text-gold transition-colors">Explore</a>
+    <div class="flex items-center gap-2 cursor-pointer">
+      <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+      <span class="text-gray-300 text-sm font-body" th:text="${customerFullName}">Jane Doe</span>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-10 flex gap-8">
+  <div th:replace="~{UserManagement/fragments/customer-profile-sidebar :: customerSidebar('reviews', ${customerFullName}, ${firstLetter})}"></div>
+
+  <main class="flex-1">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" style="color:#C4633A;" id="s-total" th:text="${totalReviews}">0</div><div class="stat-lbl">Total Reviews</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#7A8C6E;" id="s-five" th:text="${fiveStarCount}">0</div><div class="stat-lbl">5-Star</div></div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:#1C1917;" id="s-avg" th:text="${avgRating}">0.0</div>
+        <div class="stat-lbl">Avg Rating</div>
+        <div style="margin-top:8px;">
+          <span th:each="i : ${#numbers.sequence(1,5)}" th:classappend="${i <= avgRating} ? 'text-yellow-600' : 'text-gray-300'" style="font-size:14px;">★</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+        <div>
+          <div class="gold-bar"></div>
+          <div class="section-title">My Reviews</div>
+          <div class="section-sub">Your dining feedback across all visits</div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter(5,this)">★ 5</button>
+        <button class="filter-btn" onclick="setFilter(4,this)">★ 4</button>
+        <button class="filter-btn" onclick="setFilter(3,this)">★ 3</button>
+        <button class="filter-btn" onclick="setFilter(2,this)">★ 1–2</button>
+      </div>
+
+      <div
+              id="review-list"
+      >
+        <div th:if="${feedbacks == null || #lists.isEmpty(feedbacks)}" class="empty-state">
+          <div style="font-size:1.8rem;color:#E8E2DB;margin-bottom:10px;">✦</div>
+          <p style="font-family:'Playfair Display',serif;font-size:1rem;color:#1C1917;margin:0 0 4px;">No reviews here</p>
+          <p style="font-size:0.8rem;color:#8A7E78;">Write a review to see it here.</p>
+        </div>
+        <div th:each="review : ${feedbacks}" class="review-card" th:attr="data-rating=${review.overall_rating}">
+          <!-- hidden fields for client-side editing -->
+          <input type="hidden" class="rv-id" th:value="${review.id}" />
+          <input type="hidden" class="rv-rating" th:value="${review.overall_rating}" />
+          <input type="hidden" class="rv-review" th:value="${review.review}" />
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+              <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold"
+                   th:text="${(review.restaurant != null and review.restaurant.restaurantName != null) ? #strings.toUpperCase(#strings.substring(review.restaurant.restaurantName,0,1)) : 'R'}">R</div>
+              <span class="text-gray-500 text-md font-body rv-restaurant" th:text="${review.restaurant.restaurantName}">Dine Elite</span>
+              <!--
+              <span class="cuisine-tag" th:text="${review.restaurant.cuisine}">Cuisine</span>
+              -->
+              <span class="ml-1 text-sm text-yellow-600" th:text="${review.overall_rating} + '.0 ★'">4.0</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:0.7rem;color:#8A7E78;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;flex-shrink:0;">
+                <span th:text="${review.createdAt != null ? #temporals.format(review.createdAt, 'dd MMMM yyyy') : '—'}">
+                  Date</span>
+              </span>
+              <button type="button" class="btn-sm" onclick="openEditFromCard(this)">Edit</button>
+              <form th:action="@{/customer-my-reviews/delete/{id}(id=${review.id})}" method="post" style="display:inline;margin:0;">
+                <button type="button" class="btn-sm del" th:attr="data-review-id=${review.id},data-review-restaurant=${review.restaurant != null ? review.restaurant.restaurantName : 'this review'}" onclick="openDeleteModal(this)">Delete</button>
+              </form>
+            </div>
+          </div>
+          <div style="color:#D4A853;font-size:14px;letter-spacing:1px;margin-bottom:8px;">
+
+
+
+          </div>
+          <p class="review-text" th:text="'&quot;' + ${review.review} + '&quot;'">"Review text"</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal (Edit Review) -->
+<div class="modal-wrap" id="modal">
+  <div class="modal">
+    <form id="editForm" method="post" th:action="@{/customer-my-reviews/edit}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div>
+          <div class="modal-hd" id="m-title">Edit Review</div>
+          <div class="modal-sub2" id="m-sub">Update your dining feedback</div>
+        </div>
+        <button type="button" onclick="closeModal()" style="background:none;border:none;font-size:18px;color:#8A7E78;cursor:pointer;">✕</button>
+      </div>
+      <input type="hidden" name="id" id="m-id" />
+      <input type="hidden" name="overallRating" id="m-overall" />
+      <div id="m-rest-wrap">
+        <div class="field-lbl">Restaurant Name</div>
+        <input class="field-input" id="m-rest" placeholder="e.g. Ember & Oak" type="text" readonly>
+      </div>
+      <div class="field-lbl">Your Rating</div>
+      <div class="star-row" id="star-row" style="display:flex;gap:6px;margin-bottom:14px;">
+        <span onclick="setStar(1)">★</span><span onclick="setStar(2)">★</span><span onclick="setStar(3)">★</span><span onclick="setStar(4)">★</span><span onclick="setStar(5)">★</span>
+      </div>
+      <div class="field-lbl">Your Review</div>
+      <textarea class="field-input" id="m-text" name="review" placeholder="Describe the food, ambiance, service…"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-wrap" id="deleteModal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <div class="modal-hd">Delete Review</div>
+        <div class="modal-sub2">Please confirm before removing this feedback</div>
+      </div>
+      <button type="button" onclick="closeDeleteModal()" style="background:none;border:none;font-size:18px;color:#8A7E78;cursor:pointer;">✕</button>
+    </div>
+
+    <div class="delete-info">
+      <div class="delete-title" id="deleteRestaurantName">Restaurant</div>
+      <div class="delete-text">This action will permanently delete your review and cannot be undone.</div>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button type="button" class="btn-danger" onclick="confirmDeleteReview()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// JS rendering removed; keep modal helpers only if you still need them.
+
+let currentDeleteForm = null;
+
+(function () {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const reviewCards = document.querySelectorAll('.review-card');
+  const emptyState = document.querySelector('.empty-state');
+
+  function applyFilter(filterValue, button) {
+    filterButtons.forEach(b => b.classList.remove('active'));
+    button.classList.add('active');
+
+    let visibleCount = 0;
+    reviewCards.forEach(card => {
+      const rating = Number(card.getAttribute('data-rating') || 0);
+      let show = true;
+
+      if (filterValue === 'all') {
+        show = true;
+      } else if (filterValue === 5) {
+        show = rating === 5;
+      } else if (filterValue === 4) {
+        show = rating === 4;
+      } else if (filterValue === 3) {
+        show = rating === 3;
+      } else if (filterValue === 2) {
+        show = rating <= 2;
+      }
+
+      card.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+
+    if (emptyState) {
+      emptyState.style.display = visibleCount === 0 ? '' : 'none';
+    }
+  }
+
+  window.setFilter = function (value, button) {
+    applyFilter(value, button);
+  };
+
+})();
+
+// Modal helpers for edit
+function openEditFromCard(btn) {
+  const card = btn.closest('.review-card');
+  if (!card) return;
+  const id = card.querySelector('.rv-id').value;
+  const rating = Number(card.querySelector('.rv-rating').value || 0);
+  const review = card.querySelector('.rv-review').value || '';
+  const restaurant = card.querySelector('.rv-restaurant') ? card.querySelector('.rv-restaurant').textContent.trim() : '';
+
+  document.getElementById('m-id').value = id;
+  document.getElementById('m-rest').value = restaurant;
+  document.getElementById('m-text').value = review;
+  setStar(rating);
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+
+function openDeleteModal(btn) {
+  const form = btn.closest('form');
+  if (!form) return;
+
+  currentDeleteForm = form;
+  const restaurantName = btn.getAttribute('data-review-restaurant') || 'this review';
+  document.getElementById('deleteRestaurantName').textContent = restaurantName;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  currentDeleteForm = null;
+}
+
+function confirmDeleteReview() {
+  if (currentDeleteForm) {
+    currentDeleteForm.submit();
+  }
+}
+
+function setStar(n){
+  const row = document.getElementById('star-row');
+  if (!row) return;
+  const stars = Array.from(row.querySelectorAll('span'));
+  stars.forEach((s, idx) => {
+    if (idx < n) s.classList.add('lit'); else s.classList.remove('lit');
+  });
+  const overall = document.getElementById('m-overall');
+  if (overall) overall.value = n;
+}
+
+</script>
+<div th:replace="~{UserManagement/fragments/support-contact-modal :: supportContactModal(${user.email}, 'openProfileSupportModal')}"></div>
+</body>
+</html>

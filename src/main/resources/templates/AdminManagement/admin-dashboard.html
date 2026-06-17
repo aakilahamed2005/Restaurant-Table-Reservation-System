@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<!--
+  ADMIN DASHBOARD — Full documentation: ADMIN_MANAGEMENT_EXPLAINED.md
+
+  URL: GET /admin/dashboard | Controller: AdminAuthController.dashboard
+  Model: totalUsers, totalRestaurants, weeklyCounts, weeklyBarHeights, weekDays,
+          pendingRestaurantList, recentActivities, loggedAdmin, ...
+
+  PAGE SECTIONS: sidebar | stat cards (4 KPIs) | bar chart (Mon–Sun) |
+  grid: recent activity + pending approvals table | legacy showSection() tabs (demo)
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DineElite — Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+  <th:block th:replace="AdminManagement/fragments/admin-style :: admin-style"></th:block>
+
+  <style>
+
+
+    /* SECTION TABS */
+    .tab-bar { display: flex; gap: 4px; background: var(--cream); border: 1px solid #E5DFD8; border-radius: 8px; padding: 4px; margin-bottom: 28px; width: fit-content; }
+    .tab { padding: 8px 20px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border: none; background: none; color: var(--muted); transition: all 0.2s; font-family: 'Lato'; }
+    .tab.active { background: var(--charcoal); color: white; }
+
+    /* STAT CARDS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: var(--cream); border: 1px solid #E5DFD8; border-radius: 10px; padding: 20px 22px; position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--terracotta); }
+    .stat-card.gold::before { background: var(--gold); }
+    .stat-card.sage::before { background: var(--sage); }
+    .stat-card.brown::before { background: var(--warm-brown); }
+    .stat-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--charcoal); line-height: 1; }
+    .stat-change { font-size: 0.72rem; color: var(--sage); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .stat-change.down { color: #DC2626; }
+    .stat-icon { position: absolute; bottom: 16px; right: 16px; opacity: 0.08; }
+
+    /* GRID LAYOUT */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    /* CARDS */
+    .card { background: var(--cream); border: 1px solid #E5DFD8; border-radius: 10px; overflow: hidden; }
+    .card-header { padding: 18px 22px 14px; border-bottom: 1px solid #E5DFD8; display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--charcoal); }
+    .card-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .card-body { padding: 18px 22px; }
+    .view-all { font-size: 0.72rem; color: var(--terracotta); font-weight: 700; cursor: pointer; text-decoration: none; letter-spacing: 0.05em; text-transform: uppercase; background: none; border: none; font-family: 'Lato'; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead th { text-align: left; padding: 10px 14px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid #E5DFD8; }
+    tbody td { padding: 12px 14px; border-bottom: 1px solid #F0EBE3; color: var(--charcoal); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #FAF7F2; }
+
+    /* BADGES */
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 99px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+    .badge-green { background: #DCFCE7; color: #16A34A; }
+    .badge-yellow { background: #FEF9C3; color: #CA8A04; }
+    .badge-red { background: #FEE2E2; color: #DC2626; }
+    .badge-blue { background: #DBEAFE; color: #2563EB; }
+    .badge-gray { background: #F3F4F6; color: #6B7280; }
+
+    /* ACTION BTNS */
+    .action-btn { padding: 5px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer; border: none; font-family: 'Lato'; letter-spacing: 0.04em; transition: all 0.15s; }
+    .btn-approve { background: #DCFCE7; color: #16A34A; }
+    .btn-approve:hover { background: #16A34A; color: white; }
+    .btn-reject { background: #FEE2E2; color: #DC2626; }
+    .btn-reject:hover { background: #DC2626; color: white; }
+    .btn-view { background: var(--surface); color: var(--charcoal); border: 1px solid #E5DFD8; }
+    .btn-view:hover { background: var(--charcoal); color: white; }
+    .btn-suspend { background: #FEF3C7; color: #D97706; }
+    .btn-suspend:hover { background: #D97706; color: white; }
+    .btn-delete { background: #FEE2E2; color: #DC2626; }
+    .btn-delete:hover { background: #DC2626; color: white; }
+    .action-group { display: flex; gap: 6px; }
+
+    /* ACTIVITY */
+    .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0EBE3; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .activity-text { font-size: 0.8rem; color: var(--charcoal); line-height: 1.4; }
+    .activity-time { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+    /* QUICK ACTIONS */
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .quick-btn { padding: 14px; border-radius: 8px; border: 1.5px solid #E5DFD8; background: white; cursor: pointer; text-align: left; transition: all 0.2s; font-family: 'Lato'; }
+    .quick-btn:hover { border-color: var(--terracotta); background: #FFF8F5; }
+    .quick-btn-icon { font-size: 1.2rem; margin-bottom: 6px; }
+    .quick-btn-label { font-size: 0.75rem; font-weight: 700; color: var(--charcoal); display: block; }
+    .quick-btn-sub { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+
+    /* SECTION PAGES */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* SEARCH BAR */
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+    .search-input { flex: 1; border: 1.5px solid #E5DFD8; border-radius: 6px; padding: 9px 14px; font-size: 0.83rem; font-family: 'Lato'; color: var(--charcoal); background: var(--cream); max-width: 320px; }
+    .search-input:focus { outline: none; border-color: var(--terracotta); }
+    .filter-select { border: 1.5px solid #E5DFD8; border-radius: 6px; padding: 9px 14px; font-size: 0.83rem; font-family: 'Lato'; color: var(--charcoal); background: var(--cream); cursor: pointer; }
+    .filter-select:focus { outline: none; border-color: var(--terracotta); }
+    .btn-primary { background: var(--terracotta); color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; padding: 9px 18px; border-radius: 4px; border: none; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--warm-brown); }
+
+    /* AVATAR */
+    .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--surface); display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--muted); margin-right: 8px; }
+
+    /* CHART BAR */
+    .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; padding: 0 4px; }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .bar { width: 100%; background: var(--terracotta); border-radius: 3px 3px 0 0; opacity: 0.85; transition: opacity 0.2s; cursor: pointer; }
+    .bar:hover { opacity: 1; }
+    .bar-label { font-size: 0.6rem; color: var(--muted); font-weight: 700; }
+
+    .page-header { margin-bottom: 22px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--charcoal); }
+    .page-sub { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<div th:replace="AdminManagement/fragments/sidebar :: sidebar('dashboard')"></div>
+
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <div>
+
+      <div class="topbar-title"
+           id="topbar-title">
+
+        Dashboard
+
+      </div>
+
+      <div class="topbar-sub"
+           id="topbar-sub">
+
+        Welcome back,
+        <span th:text="${loggedAdmin.adminName}">
+                Admin
+            </span>
+
+        — here's what's happening today
+
+      </div>
+
+    </div>
+
+    <div class="topbar-right">
+      <div th:replace="~{AdminManagement/fragments/notification-bell :: notificationBell}"></div>
+      <a th:href="@{/admin/logout}" class="topbar-btn topbar-signout" title="Sign Out" aria-label="Sign Out">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+
+    <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="section-dashboard" class="section active">
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" th:text="${totalUsers}">0</div>
+          <div class="stat-change">Registered on platform</div>
+          <svg class="stat-icon" width="60" height="60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Restaurants</div>
+          <div class="stat-value" th:text="${totalRestaurants}">0</div>
+          <div class="stat-change"><span th:text="${activeRestaurants}">0</span> active</div>
+          <svg class="stat-icon" width="60" height="60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/></svg>
+        </div>
+        <div class="stat-card sage">
+          <div class="stat-label">Reservations Today</div>
+          <div class="stat-value" th:text="${todayReservations}">0</div>
+          <div class="stat-change"><span th:text="${totalReservations}">0</span> total bookings</div>
+          <svg class="stat-icon" width="60" height="60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <div class="stat-card brown">
+          <div class="stat-label">Pending Approvals</div>
+          <div class="stat-value" th:text="${pendingRestaurants}">0</div>
+          <div class="stat-change" style="color:var(--gold);">Needs attention</div>
+          <svg class="stat-icon" width="60" height="60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <!-- RESERVATIONS CHART -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Reservations This Week</div>
+              <div class="card-sub">Daily booking volume</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="bar-chart">
+              <div class="bar-wrap" th:each="height, stat : ${weeklyBarHeights}">
+                <div class="bar" th:style="'height:' + ${height} + 'px;' + (${stat.index} >= 5 ? ' background:var(--gold);' : '')"></div>
+                <div class="bar-label" th:text="${weekDays[stat.index]}">Mon</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Quick Actions</div>
+          </div>
+          <div class="card-body">
+            <div class="quick-actions">
+              <button class="quick-btn" onclick="window.location.href='/admin/restaurants?tab=pending'">
+                <div class="quick-btn-icon">🏪</div>
+                <span class="quick-btn-label">Approve Restaurants</span>
+                <div class="quick-btn-sub"><span th:text="${pendingRestaurants}">0</span> pending</div>
+              </button>
+              <button class="quick-btn"
+                      onclick="window.location.href='/admin/users'">
+                <div class="quick-btn-icon">👤</div>
+                <span class="quick-btn-label">Manage Users</span>
+                <div class="quick-btn-sub"><span th:text="${totalUsers}">0</span> total</div>
+              </button>
+              <button class="quick-btn" onclick="window.location.href='/admin/feedback'">
+                <div class="quick-btn-icon">⭐</div>
+                <span class="quick-btn-label">Review Feedback</span>
+                <div class="quick-btn-sub"><span th:text="${totalFeedback}">0</span> reviews</div>
+              </button>
+              <button class="quick-btn"
+                      onclick="window.location.href='/admin/manage-admins'">
+                <div class="quick-btn-icon">🔐</div>
+                <span class="quick-btn-label">Admin Accounts</span>
+                <div class="quick-btn-sub">
+                  <span th:text="${totalAdmins}"></span> active
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY + PENDING -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Recent Activity</div>
+              <div class="card-sub">Latest system events</div>
+            </div>
+          </div>
+          <div class="card-body" style="padding-top:8px;">
+            <div th:if="${#lists.isEmpty(recentActivities)}" class="activity-item">
+              <div class="activity-dot" style="background:#6B7280;"></div>
+              <div>
+                <div class="activity-text">No recent activity yet</div>
+                <div class="activity-time">—</div>
+              </div>
+            </div>
+            <div class="activity-item" th:each="activity : ${recentActivities}">
+              <div class="activity-dot" th:style="'background:' + ${activity.dotColor} + ';'"></div>
+              <div>
+                <div class="activity-text" th:utext="${activity.message}"></div>
+                <div class="activity-time" th:text="${activity.timeLabel}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PENDING APPROVALS -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Pending Approvals</div>
+              <div class="card-sub">Restaurants awaiting review</div>
+            </div>
+            <button class="view-all" onclick="window.location.href='/admin/restaurants?tab=pending'">View All</button>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table>
+              <thead><tr><th>Restaurant</th><th>Location</th><th>Action</th></tr></thead>
+              <tbody>
+              <tr th:if="${#lists.isEmpty(pendingRestaurantList)}">
+                <td colspan="3" style="text-align:center;padding:20px;color:var(--muted);">No pending restaurants</td>
+              </tr>
+              <tr th:each="restaurant : ${pendingRestaurantList}">
+                <td><strong th:text="${restaurant.restaurantName}">Restaurant</strong></td>
+                <td th:text="${restaurant.city}">City</td>
+                <td>
+                  <div class="action-group">
+                    <form th:action="@{/admin/restaurants/approve/{id}(id=${restaurant.id})}" method="post" style="display:inline;">
+                      <button type="submit" class="action-btn btn-approve">Approve</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ===== RESTAURANT MANAGEMENT ===== -->
+    <div id="section-restaurants" class="section">
+      <div class="page-header">
+        <div class="page-title">Restaurant Management</div>
+        <div class="page-sub">Approve, manage and monitor all restaurants — Anfas's Component</div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchTab(this,'rest-all')">All Restaurants</button>
+        <button class="tab" onclick="switchTab(this,'rest-pending')">Pending (3)</button>
+      </div>
+
+      <div id="rest-all">
+        <div class="search-bar">
+          <input class="search-input" type="text" placeholder="Search restaurants..."/>
+          <select class="filter-select"><option>All Status</option><option>Active</option><option>Pending</option><option>Suspended</option></select>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Restaurant</th><th>Owner</th><th>Location</th><th>Cuisine</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+            <tr>
+              <td><strong>The Grand Cafe</strong></td>
+              <td>Anfas N.</td>
+              <td>Colombo 07</td>
+              <td>Continental</td>
+              <td>⭐ 4.8</td>
+              <td><span class="badge badge-green">Active</span></td>
+              <td><div class="action-group"><button class="action-btn btn-view">View</button><button class="action-btn btn-suspend">Suspend</button><button class="action-btn btn-delete">Delete</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Spice Garden</strong></td>
+              <td>Bruthapan P.</td>
+              <td>Colombo 03</td>
+              <td>Sri Lankan</td>
+              <td>⭐ 4.5</td>
+              <td><span class="badge badge-yellow">Pending</span></td>
+              <td><div class="action-group"><button class="action-btn btn-approve">Approve</button><button class="action-btn btn-reject">Reject</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Curry House</strong></td>
+              <td>Ravi K.</td>
+              <td>Kandy</td>
+              <td>Indian</td>
+              <td>—</td>
+              <td><span class="badge badge-yellow">Pending</span></td>
+              <td><div class="action-group"><button class="action-btn btn-approve">Approve</button><button class="action-btn btn-reject">Reject</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Ocean Breeze</strong></td>
+              <td>Saman P.</td>
+              <td>Galle</td>
+              <td>Seafood</td>
+              <td>—</td>
+              <td><span class="badge badge-yellow">Pending</span></td>
+              <td><div class="action-group"><button class="action-btn btn-approve">Approve</button><button class="action-btn btn-reject">Reject</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Lotus Palace</strong></td>
+              <td>Ming C.</td>
+              <td>Colombo 02</td>
+              <td>Chinese</td>
+              <td>⭐ 4.2</td>
+              <td><span class="badge badge-red">Suspended</span></td>
+              <td><div class="action-group"><button class="action-btn btn-approve">Activate</button><button class="action-btn btn-delete">Delete</button></div></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="rest-pending" style="display:none;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Pending Restaurant Approvals</div></div>
+          <table>
+            <thead><tr><th>Restaurant</th><th>Owner</th><th>Location</th><th>Submitted</th><th>Actions</th></tr></thead>
+            <tbody>
+            <tr>
+              <td><strong>Spice Garden</strong></td><td>Bruthapan P.</td><td>Colombo 03</td><td>Today</td>
+              <td><div class="action-group"><button class="action-btn btn-approve">Approve</button><button class="action-btn btn-reject">Reject</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Curry House</strong></td><td>Ravi K.</td><td>Kandy</td><td>Yesterday</td>
+              <td><div class="action-group"><button class="action-btn btn-approve">Approve</button><button class="action-btn btn-reject">Reject</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Ocean Breeze</strong></td><td>Saman P.</td><td>Galle</td><td>2 days ago</td>
+              <td><div class="action-group"><button class="action-btn btn-approve">Approve</button><button class="action-btn btn-reject">Reject</button></div></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RESERVATIONS ===== -->
+    <div id="section-reservations" class="section">
+      <div class="page-header">
+        <div class="page-title">Reservation Management</div>
+        <div class="page-sub">View and monitor all reservations across the platform — Rithika's Component</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="Search by customer or restaurant..."/>
+        <select class="filter-select"><option>All Status</option><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select>
+        <input type="date" class="filter-select"/>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Reservation ID</th><th>Customer</th><th>Restaurant</th><th>Date & Time</th><th>Seats</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+          <tr>
+            <td><strong>#1023</strong></td>
+            <td>Jeniviya K.</td>
+            <td>The Grand Cafe</td>
+            <td>May 10 | 7:00 PM</td>
+            <td>4</td>
+            <td><span class="badge badge-green">Confirmed</span></td>
+            <td><button class="action-btn btn-view">View</button></td>
+          </tr>
+          <tr>
+            <td><strong>#1022</strong></td>
+            <td>Rithika S.</td>
+            <td>Spice Garden</td>
+            <td>May 10 | 1:00 PM</td>
+            <td>2</td>
+            <td><span class="badge badge-yellow">Pending</span></td>
+            <td><button class="action-btn btn-view">View</button></td>
+          </tr>
+          <tr>
+            <td><strong>#1021</strong></td>
+            <td>Nivetha K.</td>
+            <td>Lotus Palace</td>
+            <td>May 09 | 8:00 PM</td>
+            <td>6</td>
+            <td><span class="badge badge-gray">Completed</span></td>
+            <td><button class="action-btn btn-view">View</button></td>
+          </tr>
+          <tr>
+            <td><strong>#1020</strong></td>
+            <td>Bruthapan P.</td>
+            <td>Ocean Breeze</td>
+            <td>May 08 | 6:30 PM</td>
+            <td>3</td>
+            <td><span class="badge badge-red">Cancelled</span></td>
+            <td><button class="action-btn btn-view">View</button></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== FEEDBACK ===== -->
+    <div id="section-feedback" class="section">
+      <div class="page-header">
+        <div class="page-title">Feedback Management</div>
+        <div class="page-sub">Monitor and moderate customer reviews — Nivetha's Component</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="Search feedback..."/>
+        <select class="filter-select"><option>All Ratings</option><option>5 Star</option><option>4 Star</option><option>3 Star</option><option>1-2 Star</option></select>
+        <select class="filter-select"><option>All</option><option>Flagged</option></select>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Customer</th><th>Restaurant</th><th>Rating</th><th>Review</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody>
+          <tr>
+            <td><strong>Jeniviya K.</strong></td>
+            <td>The Grand Cafe</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td style="max-width:200px;font-size:0.78rem;">Amazing food and atmosphere, highly recommend!</td>
+            <td>May 08</td>
+            <td><div class="action-group"><button class="action-btn btn-view">View</button><button class="action-btn btn-delete">Delete</button></div></td>
+          </tr>
+          <tr>
+            <td><strong>Rithika S.</strong></td>
+            <td>Spice Garden</td>
+            <td>⭐⭐⭐⭐</td>
+            <td style="max-width:200px;font-size:0.78rem;">Great Sri Lankan food, service was a bit slow.</td>
+            <td>May 07</td>
+            <td><div class="action-group"><button class="action-btn btn-view">View</button><button class="action-btn btn-delete">Delete</button></div></td>
+          </tr>
+          <tr>
+            <td><strong>Nivetha K.</strong></td>
+            <td>Lotus Palace</td>
+            <td>⭐⭐</td>
+            <td style="max-width:200px;font-size:0.78rem;color:#DC2626;">⚑ Flagged — inappropriate language detected</td>
+            <td>May 06</td>
+            <td><div class="action-group"><button class="action-btn btn-view">View</button><button class="action-btn btn-delete">Delete</button></div></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN ACCOUNTS ===== -->
+    <div id="section-admins" class="section">
+      <div class="page-header">
+        <div class="page-title">Admin Accounts</div>
+        <div class="page-sub">Manage system administrators — Aakil's Component</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="Search admins..."/>
+        <button class="btn-primary">+ Create New Admin</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Admin</th><th>Role</th><th>Email</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+          <tr>
+            <td><span class="user-avatar" style="background:var(--terracotta);color:white;">AA</span><strong>Aakil A.</strong></td>
+            <td><span class="badge badge-red">Super Admin</span></td>
+            <td>aakil@dineelite.com</td>
+            <td>Today, 9:00 AM</td>
+            <td><span class="badge badge-green">Active</span></td>
+            <td><div class="action-group"><button class="action-btn btn-view">View</button><button class="action-btn btn-suspend">Edit</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="user-avatar" style="background:var(--warm-brown);color:white;">SM</span><strong>Sara M.</strong></td>
+            <td><span class="badge badge-blue">Sub Admin</span></td>
+            <td>sara@dineelite.com</td>
+            <td>Yesterday</td>
+            <td><span class="badge badge-green">Active</span></td>
+            <td><div class="action-group"><button class="action-btn btn-view">View</button><button class="action-btn btn-suspend">Edit</button><button class="action-btn btn-delete">Delete</button></div></td>
+          </tr>
+          <tr>
+            <td><span class="user-avatar">KP</span><strong>Kamal P.</strong></td>
+            <td><span class="badge badge-blue">Sub Admin</span></td>
+            <td>kamal@dineelite.com</td>
+            <td>3 days ago</td>
+            <td><span class="badge badge-red">Suspended</span></td>
+            <td><div class="action-group"><button class="action-btn btn-view">View</button><button class="action-btn btn-approve">Activate</button><button class="action-btn btn-delete">Delete</button></div></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div id="section-settings" class="section">
+      <div class="page-header">
+        <div class="page-title">System Settings</div>
+        <div class="page-sub">Configure platform-wide settings</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Platform Settings</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <label style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Platform Name</label>
+              <input type="text" value="DineElite" style="width:100%;border:1.5px solid #E5DFD8;border-radius:6px;padding:9px 14px;font-size:0.85rem;font-family:'Lato';color:var(--charcoal);background:white;"/>
+            </div>
+            <div>
+              <label style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Support Email</label>
+              <input type="email" value="support@dineelite.com" style="width:100%;border:1.5px solid #E5DFD8;border-radius:6px;padding:9px 14px;font-size:0.85rem;font-family:'Lato';color:var(--charcoal);background:white;"/>
+            </div>
+            <div>
+              <label style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Max Seats Per Reservation</label>
+              <input type="number" value="20" style="width:100%;border:1.5px solid #E5DFD8;border-radius:6px;padding:9px 14px;font-size:0.85rem;font-family:'Lato';color:var(--charcoal);background:white;"/>
+            </div>
+            <button class="btn-primary" style="width:fit-content;">Save Settings</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">System Info</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EBE3;">
+              <span style="font-size:0.8rem;color:var(--muted);">Version</span>
+              <span style="font-size:0.8rem;font-weight:700;">v1.0.0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EBE3;">
+              <span style="font-size:0.8rem;color:var(--muted);">Total Users</span>
+              <span style="font-size:0.8rem;font-weight:700;">1,284</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EBE3;">
+              <span style="font-size:0.8rem;color:var(--muted);">Active Restaurants</span>
+              <span style="font-size:0.8rem;font-weight:700;">145</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EBE3;">
+              <span style="font-size:0.8rem;color:var(--muted);">Total Reservations</span>
+              <span style="font-size:0.8rem;font-weight:700;">8,432</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;">
+              <span style="font-size:0.8rem;color:var(--muted);">Last Backup</span>
+              <span style="font-size:0.8rem;font-weight:700;">Today 6:00 AM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function showSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+
+    const titles = {
+      dashboard: ['Dashboard', 'Welcome back, Aakil — here\'s what\'s happening today'],
+      users: ['User Management', 'Jeniviya\'s Component — Manage all customers and restaurant owners'],
+      restaurants: ['Restaurant Management', 'Anfas\'s Component — Approve and manage restaurants'],
+      reservations: ['Reservation Management', 'Rithika\'s Component — Monitor all reservations'],
+      feedback: ['Feedback Management', 'Nivetha\'s Component — Moderate customer reviews'],
+      admins: ['Admin Accounts', 'Aakil\'s Component — Manage system administrators'],
+      settings: ['System Settings', 'Configure platform-wide settings']
+    };
+    document.getElementById('topbar-title').textContent = titles[name][0];
+    document.getElementById('topbar-sub').textContent = titles[name][1];
+
+    const navMap = {
+      dashboard: 0,
+      users: 1,
+      restaurants: 2,
+      reservations: 3,
+      feedback: 4,
+      admins: 5,
+      settings: 6
+    };
+
+    document.querySelectorAll('.nav-item')[navMap[name]]?.classList.add('active');
+  }
+
+  function switchTab(el, targetId) {
+    el.closest('.tab-bar').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('rest-all').style.display = 'none';
+    document.getElementById('rest-pending').style.display = 'none';
+    document.getElementById(targetId).style.display = 'block';
+  }
+</script>
+<th:block th:replace="~{AdminManagement/fragments/admin-sidebar-collapse :: collapse}"></th:block>
+</body>
+</html>

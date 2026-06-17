@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  Responsive layout for admin auth pages (login, register, edit-admin).
+  Stacks split panels vertically on narrow viewports; keeps forms readable.
+-->
+<th:block th:fragment="admin-responsive-auth">
+  <style>
+    @media (max-width: 992px) {
+      body {
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .left-panel,
+      .right-panel {
+        width: 100%;
+        min-height: auto;
+      }
+
+      .left-panel {
+        padding: 40px 28px;
+      }
+
+      .right-panel {
+        padding: 40px 24px;
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .left-panel,
+      .right-panel {
+        padding: 28px 18px;
+      }
+
+      .brand {
+        font-size: 1.6rem;
+      }
+
+      .login-box,
+      .form-container {
+        max-width: 100%;
+      }
+    }
+  </style>
+</th:block>
+</body>
+</html>

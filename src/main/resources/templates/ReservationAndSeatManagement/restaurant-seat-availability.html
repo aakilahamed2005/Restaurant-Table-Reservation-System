@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DineElite — Available Times</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+          colors: {
+            cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917',
+            'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853',
+            sage: '#7A8C6E', muted: '#8A7E78'
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            body: ['Lato', 'sans-serif']
+          }
+        }}
+    }
+  </script>
+  <style>
+    body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+
+    .input-field {
+      border: 1.5px solid #E5DFD8; background: white;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      outline: none; border-color: #C4633A;
+      box-shadow: 0 0 0 3px rgba(196,99,58,0.1);
+    }
+
+    .slot-card {
+      background: white; border-radius: 10px;
+      border: 1.5px solid #E5DFD8;
+      padding: 18px 20px;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+      transition: all 0.2s;
+    }
+    .slot-card.available:hover {
+      border-color: #C4633A;
+      box-shadow: 0 4px 20px rgba(196,99,58,0.12);
+      transform: translateY(-1px);
+    }
+    .slot-card.full { opacity: 0.5; background: #fafafa; }
+    .slot-card.low  { border-color: #D4A853; }
+    .slot-card.past { opacity: 0.55; background: #f5f5f5; }
+
+    .status-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .tag-available { background: rgba(122,140,110,0.15); color: #5E7A50; border: 1px solid rgba(122,140,110,0.35); }
+    .tag-low       { background: rgba(212,168,83,0.15); color: #B8923C; border: 1px solid rgba(212,168,83,0.35); }
+    .tag-full      { background: rgba(192,57,43,0.12); color: #C0392B; border: 1px solid rgba(192,57,43,0.25); }
+    .tag-past      { background: rgba(138,126,120,0.15); color: #8A7E78; border: 1px solid rgba(138,126,120,0.3); }
+    .tag-unavailable { background: rgba(138,126,120,0.12); color: #8A7E78; border: 1px solid rgba(138,126,120,0.25); }
+
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green  { background: #7A8C6E; }
+    .dot-orange { background: #D4A853; animation: pulse 1.5s infinite; }
+    .dot-red    { background: #C0392B; }
+    .dot-gray   { background: #8A7E78; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .seat-bar-track { height: 4px; background: #F0EBE3; border-radius: 2px; flex: 1; max-width: 80px; }
+    .seat-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+
+    .btn-book {
+      background: #C4633A; color: white;
+      font-family: 'Lato'; font-weight: 700;
+      font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 10px 20px; border-radius: 4px;
+      border: none; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .btn-book:hover { background: #44312A; transform: translateY(-1px); }
+
+    .btn-outline {
+      background: white; color: #C4633A;
+      font-family: 'Lato'; font-weight: 700;
+      font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 10px 20px; border-radius: 4px;
+      border: 1.5px solid #C4633A; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover { background: rgba(196,99,58,0.06); }
+
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #8A7E78; }
+    .sum-row { display: flex; justify-content: space-between; font-size: 0.875rem; }
+
+    /* Duration pills (compact, for filter bar) */
+    .dur-pill {
+      padding: 6px 14px; border: 1.5px solid #E5DFD8;
+      border-radius: 20px; font-size: 0.75rem;
+      cursor: pointer; background: white;
+      transition: all 0.2s; font-family: 'Lato';
+      white-space: nowrap;
+    }
+    .dur-pill:hover { border-color: #C4633A; color: #C4633A; }
+    .dur-pill.sel   { background: #C4633A; color: white; border-color: #C4633A; }
+
+  </style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- NAV -->
+<nav class="flex items-center justify-between px-8 py-4" style="background:#1C1917">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">
+    Dine<span style="color:#D4A853">Elite</span>
+  </a>
+  <a class="flex items-center gap-2 cursor-pointer" th:href="@{/customer-profile-view}">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#C4633A" th:text="${firstLetter}">J</div>
+    <span class="text-gray-300 text-sm font-body" th:text="${customerFullName}">Jane Doe</span>
+  </a>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="max-w-5xl mx-auto px-6 pt-6 pb-2">
+  <div class="flex items-center gap-2 text-xs font-body text-muted">
+    <a th:href="@{/restaurant-listing}" class="hover:text-terracotta transition-colors">Restaurants</a>
+    <span>›</span>
+    <a th:href="@{/restaurant-view-page/{id}(id=${restaurant.id})}"
+       class="hover:text-terracotta transition-colors"
+       th:text="${restaurant.restaurantName}">Ember &amp; Oak</a>
+    <span>›</span>
+    <a th:href="@{/restaurant-seat-checking/{id}(id=${restaurant.id})}"
+       class="hover:text-terracotta transition-colors">Reserve</a>
+    <span>›</span>
+    <span class="text-charcoal font-bold">Choose Time</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="max-w-5xl mx-auto px-6 py-6 flex flex-col lg:flex-row gap-10">
+
+  <!-- LEFT — slots list -->
+  <div class="flex-1">
+
+    <!-- Update date, seats, and duration inputs -->
+    <div class="bg-white rounded-lg p-5 mb-5">
+      <div class="flex flex-wrap items-center gap-3">
+
+        <input type="date" id="updateFormDate"
+               class="input-field rounded px-3 py-2 text-sm font-body"
+               th:min="${today}" th:value="${seatCheckingForm.getDate()}"/>
+
+        <div class="flex items-center gap-2 border border-gray-200 rounded px-3 py-2 bg-white">
+          <button onclick="changeGuests(-1)" class="text-muted hover:text-terracotta font-bold text-lg leading-none">−</button>
+          <span class="font-body text-sm font-bold text-charcoal px-2">
+            <span id="guestDisplay" th:text="${seatCheckingForm.getNoOfGuests()}">4</span> guests
+          </span>
+          <button onclick="changeGuests(1)" class="text-muted hover:text-terracotta font-bold text-lg leading-none">+</button>
+        </div>
+
+        <!-- Duration filter pills -->
+        <div class="flex gap-2 flex-wrap">
+          <div class="dur-pill"
+               th:classappend="${seatCheckingForm.duration == 60} ? 'sel'"
+               onclick="changeDuration(this,60)">1 hr</div>
+
+          <div class="dur-pill"
+               th:classappend="${seatCheckingForm.duration == 120} ? 'sel'"
+               onclick="changeDuration(this,120)">2 hrs</div>
+
+          <div class="dur-pill"
+               th:classappend="${seatCheckingForm.duration == 180} ? 'sel'"
+               onclick="changeDuration(this,180)">3 hrs</div>
+
+          <div class="dur-pill"
+               th:classappend="${seatCheckingForm.duration == 240} ? 'sel'"
+               onclick="changeDuration(this,240)">4 hrs</div>
+        </div>
+
+        <button onclick="submitUpdateForm(event)"
+                class="btn-book ml-auto" style="padding: 9px 18px;">
+          Update →
+        </button>
+      </div>
+    </div>
+
+
+      <!-- Hidden form that actually submits -->
+      <form id="updateForm" th:object="${seatCheckingForm}" method="POST" th:action="@{/restaurant-seat-availability}" style="display:none;">
+        <input type="hidden" name="restaurantId"      th:value="${seatCheckingForm.restaurantId}"/>
+        <input type="hidden" th:field="*{customerId}">
+        <input type="hidden" id="formDate" name="date"/>
+        <input type="hidden" id="formSeats"  name="noOfGuests"/>
+        <input type="hidden" id="formDuration" name="duration"/>
+      </form>
+
+    <!-- Result header -->
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="font-display text-2xl text-charcoal">Available Times</h2>
+        <p class="text-xs text-muted font-body mt-0.5">
+          <span th:text="${#temporals.format(seatCheckingForm.date,'MMMM d, yyyy')}">June 1, 2026</span>
+          · <span th:text="${seatCheckingForm.getNoOfGuests()}">4</span> guests
+          · <span th:text="${seatCheckingForm.duration / 60}">2</span> hours
+        </p>
+      </div>
+      <div class="flex gap-4 flex-wrap">
+        <div class="legend-item"><div class="status-dot dot-green"></div> Available</div>
+        <div class="legend-item"><div class="status-dot dot-orange"></div> Low seats</div>
+        <div class="legend-item"><div class="status-dot dot-red"></div> Full</div>
+        <div class="legend-item"><div class="status-dot dot-gray"></div> Past</div>
+      </div>
+    </div>
+
+    <!-- Error flash -->
+    <div th:if="${error}"
+         class="mb-4 px-4 py-3 rounded bg-red-50 border border-red-200 text-sm text-red-700 font-body"
+         th:text="${error}">
+    </div>
+
+    <!-- ── Slot cards ─────────────────────────── -->
+    <div class="flex flex-col gap-3">
+
+      <!-- Empty state -->
+      <div th:if="${#lists.isEmpty(slots)}" class="text-center py-16">
+        <p class="font-display text-xl text-charcoal mb-2">No available slots</p>
+        <p class="text-muted text-sm font-body mb-4">Try a different date or fewer guests</p>
+        <a th:href="@{/restaurant-seat-checking/{id}(id=${restaurant.id})}"
+           class="btn-outline">← Change Search</a>
+      </div>
+
+      <div th:each="slot : ${slots}"
+           class="slot-card"
+           th:classappend="${slot.pastSlot} ? ' past' : (!slot.available ? ' full' : (slot.lowSeats ? ' available low' : ' available'))">
+
+        <!-- Status dot -->
+        <div class="status-dot"
+             th:classappend="${slot.pastSlot} ? ' dot-gray' : (!slot.available ? ' dot-red' : (slot.lowSeats ? ' dot-orange' : ' dot-green'))">
+        </div>
+
+
+        <div class="flex-1">
+
+          <div class="flex items-center gap-3 flex-wrap mb-1">
+            <!-- Time -->
+            <p class="font-display text-xl text-charcoal"
+               th:text="${slot.startTime + ' → ' + slot.endTime}">
+            </p>
+            <!-- Status tag -->
+            <span class="status-tag"
+                  th:classappend="${slot.statusTag == 'Available'} ? ' tag-available' : (slot.statusTag == 'Low seats' ? ' tag-low' : (slot.statusTag == 'Past' ? ' tag-past' : (slot.statusTag == 'Full' ? ' tag-full' : ' tag-unavailable')))"
+                  th:text="${slot.statusTag}">
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3 mt-1">
+
+            <!-- Seat bar -->
+            <div class="seat-bar-track">
+              <div class="seat-bar-fill"
+                   th:style="${'width:' + slot.getBarWidth(totalSeats) + '%; background:' + slot.getBarColor()}">
+              </div>
+            </div>
+
+            <span class="text-xs font-body"
+                  th:classappend="${slot.lowSeats} ? 'text-gold font-bold' : 'text-muted'"
+                  th:text="${slot.seatsText}">
+            </span>
+
+          </div>
+        </div>
+
+        <!-- Book Now button — only shown when available -->
+        <form th:if="${slot.available}" th:action="@{/reservation-save}" method="post" th:object="${reservationSlotDTO}">
+          <input type="hidden" name="restaurantId"      th:value="${seatCheckingForm.restaurantId}"/>
+          <input type="hidden" name="customerId"        th:value="${seatCheckingForm.customerId}"/>
+          <input type="hidden" name="date"              th:value="${seatCheckingForm.date}"/>
+          <input type="hidden"  name="noOfGuest"  th:value="${seatCheckingForm.noOfGuests}"/>
+          <input type="hidden" name="startingTime"      th:value="${slot.startTime}"/>
+          <input type="hidden" name="endingTime" th:value="${slot.endTime}">
+          <input type="hidden" name="requestedDuration" th:value="${seatCheckingForm.duration}"/>
+          <button type="submit" class="btn-book">Book Now</button>
+        </form>
+
+        <!-- Unavailable label -->
+        <span th:unless="${slot.available}"
+              class="text-xs font-body text-muted italic">
+          Unavailable
+        </span>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — sticky summary -->
+  <div class="lg:w-80 flex-shrink-0">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden sticky top-10">
+
+      <!-- Restaurant header band -->
+      <div class="h-24 relative flex items-end p-5"
+           style="background: linear-gradient(to bottom right, #44312A, #C4633A, #D4A853)">
+        <div>
+          <p class="font-display text-lg text-white"
+             th:text="${restaurant.restaurantName}">Ember &amp; Oak</p>
+          <p class="text-white text-xs font-body opacity-80"
+             th:text="${restaurant.cuisine}">Modern European</p>
+        </div>
+        <div class="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full"
+             style="background: rgba(0,0,0,0.3)">
+          <span class="text-gold text-xs">★</span>
+          <span class="text-white text-xs font-body font-bold"
+                th:text="${restaurant.overallRating}">4.9</span>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <h3 class="font-display text-lg text-charcoal mb-4">Your Selection</h3>
+
+        <div class="flex flex-col gap-3 text-sm font-body mb-5 pb-5 border-b border-gray-100">
+          <div class="sum-row">
+            <span class="text-muted">Date</span>
+            <span class="font-bold text-charcoal"
+                  th:text="${#temporals.format(seatCheckingForm.date,'EEE, MMM d yyyy')}">June 1, 2026</span>
+          </div>
+          <div class="sum-row">
+            <span class="text-muted">Guests</span>
+            <span class="font-bold text-charcoal"
+                  th:text="${seatCheckingForm.noOfGuests == 1 ? seatCheckingForm.noOfGuests  + ' person' : seatCheckingForm.noOfGuests  + ' people'}">4 people</span>
+          </div>
+          <div class="sum-row">
+            <span class="text-muted">Duration</span>
+            <span class="font-bold text-charcoal"
+                  th:text="${seatCheckingForm.duration / 60 + ' hours'}">2 hours</span>
+          </div>
+          <div class="sum-row">
+            <span class="text-muted">Time</span>
+            <span class="text-muted italic text-xs">Select a slot →</span>
+          </div>
+        </div>
+
+        <div class="rounded-lg p-4 mb-4" style="background:#F0EBE3">
+          <p class="text-xs font-body text-muted text-center leading-relaxed">
+            Click <strong class="text-charcoal">Book Now</strong> next to any slot to confirm
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-2 text-xs font-body text-muted">
+          <div class="flex items-center gap-2">
+            <span style="color:#7A8C6E">✓</span> Cancellation up to 2h before
+          </div>
+          <div class="flex items-center gap-2">
+            <span style="color:#7A8C6E">✓</span> Instant confirmation
+          </div>
+        </div>
+
+        <a th:href="@{/restaurant-seat-checking/{id}(id=${restaurant.id})}"
+           class="block text-center text-xs text-muted font-body mt-5 hover:text-terracotta transition-colors">
+          ← Back to date &amp; guests
+        </a>
+        <a th:href="@{/restaurant-view-page/{id}(id=${restaurant.id})}"
+           class="block text-center text-xs text-muted font-body mt-2 hover:text-terracotta transition-colors">
+          ← Back to restaurant
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+  <script th:inline="javascript">
+    let guests = [[${seatCheckingForm.noOfGuests}]];
+    let duration = [[${seatCheckingForm.duration}]];
+    const maxPartySize = [[${maxPartySize}]];
+  </script>
+
+
+<script>
+  function changeGuests(delta) {
+    guests = Math.max(1, Math.min(maxPartySize, guests + delta));
+    document.getElementById('guestDisplay').textContent = guests;
+  }
+
+  function changeDuration(el, mins) {
+    document.querySelectorAll('.dur-pill').forEach(p => p.classList.remove('sel'));
+    el.classList.add('sel');
+    duration = mins;
+  }
+
+  function submitUpdateForm(e) {
+    e.preventDefault();
+    document.getElementById("formDate").value = document.getElementById("updateFormDate").value;
+    document.getElementById("formSeats").value = guests;
+    document.getElementById("formDuration").value = duration;
+
+    document.getElementById("updateForm").submit();
+  }
+
+
+</script>
+</body>
+</html>

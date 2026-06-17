@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<!--
+  RESTAURANT MANAGEMENT PAGE — See ADMIN_MANAGEMENT_EXPLAINED.md for full documentation.
+
+  URL: GET /admin/restaurants?tab=pending|cuisine&status&keyword
+  Controller: RestaurantManagementController
+
+  SECTIONS IN THIS FILE:
+  1. <style> — sidebar, cards, tables, modals, schedule list (lines ~20–1160)
+  2. Sidebar fragment include — activePage 'restaurants'
+  3. Topbar — title + notification bell + sign out
+  4. Stats cards — total/active/pending/suspended counts
+  5. Tab bar — All | Pending | Suspended (switchTab JavaScript)
+  6. tab-all — filtered restaurant table + View/Suspend actions
+  7. tab-pending — pending list + Review (modal-approve) + Approve/Reject
+  8. tab-suspended — reactivate actions
+  9. modal-view — dynamic profile via openRestaurantView() + /details JSON
+  10. modal-approve — dynamic review via openRestaurantReview()
+  11. modal-suspend / modal-reject — action dialogs
+  12. <script> — fetch details, populate modals, tab switching
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0"/>
+
+  <title>DineElite — Restaurant Management</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet"/>
+
+  <style>
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --cream: #FAF7F2;
+      --surface: #F0EBE3;
+      --charcoal: #1C1917;
+      --warm-brown: #44312A;
+      --terracotta: #C4633A;
+      --gold: #D4A853;
+      --sage: #7A8C6E;
+      --muted: #8A7E78;
+    }
+
+    body {
+      background: #F0EBE3;
+      font-family: 'Lato', sans-serif;
+      color: var(--charcoal);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: linear-gradient(160deg,
+      #1C1917 0%,
+      #2A1F1B 50%,
+      #44312A 100%);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .brand span {
+      color: var(--gold);
+    }
+
+    .badge-text {
+      font-size: 0.7rem;
+      color: #9CA3AF;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+    }
+
+    .nav-section-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #6B7280;
+      padding: 18px 24px 8px;
+      font-weight: 700;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 24px;
+      color: #9CA3AF;
+      text-decoration: none;
+      transition: 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      color: white;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .nav-item.active {
+      color: white;
+      background: rgba(196,99,58,0.15);
+      border-left-color: var(--terracotta);
+    }
+
+    .sidebar-footer {
+      padding: 18px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .admin-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .admin-name {
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .admin-role {
+      color: #9CA3AF;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* MAIN */
+
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* TOPBAR */
+
+    .topbar {
+      background: var(--cream);
+      border-bottom: 1px solid #E5DFD8;
+      padding: 18px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topbar-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+    }
+
+    .topbar-sub {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.85rem;
+    }
+
+    .topbar-btn {
+      border: 1px solid #E5DFD8;
+      background: transparent;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .topbar-signout {
+      color: #ef4444;
+      border-color: #DC2626;
+      background: #FEE2E2;
+    }
+
+    .topbar-signout:hover {
+      background: #DC2626;
+      color: white;
+      border-color: #DC2626;
+    }
+
+    .topbar-signout svg {
+      stroke: #ef4444;
+    }
+
+    .topbar-signout:hover svg {
+      stroke: white;
+    }
+
+    /* CONTENT */
+
+    .content {
+      padding: 32px;
+    }
+
+    .page-header {
+      margin-bottom: 22px;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+    }
+
+    .page-sub {
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* STATS GRID */
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--cream);
+      border: 1px solid #E5DFD8;
+      border-radius: 10px;
+      padding: 20px 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--terracotta);
+    }
+
+    .stat-card.gold::before {
+      background: var(--gold);
+    }
+
+    .stat-card.sage::before {
+      background: var(--sage);
+    }
+
+    .stat-card.brown::before {
+      background: var(--warm-brown);
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--charcoal);
+      line-height: 1;
+    }
+
+    .stat-change {
+      font-size: 0.72rem;
+      color: var(--sage);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-change.down {
+      color: #DC2626;
+    }
+
+    /* TAB BUTTONS */
+
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid #E5DFD8;
+      padding-bottom: 0;
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      font-family: 'Lato';
+    }
+
+    .tab-btn:hover {
+      color: var(--charcoal);
+    }
+
+    .tab-btn.active {
+      color: var(--terracotta);
+      border-bottom-color: var(--terracotta);
+    }
+
+    /* SEARCH & FILTER */
+
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input,
+    .filter-select {
+      border: 1.5px solid #E5DFD8;
+      background: var(--cream);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      font-family: 'Lato', sans-serif;
+      color: var(--charcoal);
+    }
+
+    .filter-select {
+      cursor: pointer;
+      min-width: 150px;
+    }
+
+    .admin-sign-out {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 6px;
+      color: #ef4444;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+
+    .admin-sign-out:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ef4444;
+    }
+
+    .admin-sign-out svg {
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--terracotta);
+      box-shadow: 0 0 0 3px rgba(196, 99, 58, 0.1);
+    }
+
+    /* CARD */
+
+    .card {
+      background: var(--cream);
+      border: 1px solid #E5DFD8;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #E5DFD8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+    }
+
+    .card-sub {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.85rem;
+    }
+
+    /* TABLE */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 16px 20px;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid #E5DFD8;
+    }
+
+    tbody td {
+      padding: 18px 20px;
+      border-bottom: 1px solid #F0EBE3;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background: #FAF7F2;
+    }
+
+    /* RESTAURANT INFO */
+
+    .restaurant-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .restaurant-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--terracotta);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .restaurant-details {
+      flex: 1;
+    }
+
+    .restaurant-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .restaurant-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* BADGES */
+
+    .badge {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+
+    .badge-approved {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+
+    .badge-pending {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .badge-suspended {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .badge-deactivated {
+      background: #E5E7EB;
+      color: #4B5563;
+    }
+
+    /* RATING */
+
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    .stars {
+      color: var(--gold);
+      letter-spacing: 2px;
+    }
+
+    .rating-value {
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* ACTIONS */
+
+    .action-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 7px 14px;
+      border-radius: 5px;
+      border: none;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: 'Lato';
+    }
+
+    .btn-view {
+      background: var(--surface);
+      color: var(--charcoal);
+      border: 1px solid #E5DFD8;
+    }
+
+    .btn-view:hover {
+      background: var(--charcoal);
+      color: white;
+    }
+
+    .btn-approve {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+
+    .btn-approve:hover {
+      background: #16A34A;
+      color: white;
+    }
+
+    .btn-reject {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .btn-reject:hover {
+      background: #DC2626;
+      color: white;
+    }
+
+    .btn-suspend {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .btn-suspend:hover {
+      background: #D97706;
+      color: white;
+    }
+
+    /* EMPTY STATE */
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* PENDING BANNER */
+
+    .pending-banner {
+      background: #FEF9C3;
+      border: 1px solid #FDE68A;
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: #92400E;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    /* MODAL */
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--cream);
+      border-radius: 10px;
+      max-width: 700px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid #E5DFD8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--cream);
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 1.5rem;
+    }
+
+    .modal-close:hover {
+      color: var(--charcoal);
+    }
+
+    .modal-body {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .modal-footer {
+      padding: 18px 28px;
+      border-top: 1px solid #E5DFD8;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      position: sticky;
+      bottom: 0;
+      background: var(--cream);
+    }
+
+    /* INFO GRID */
+
+    .info-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: white;
+      border: 1px solid #E5DFD8;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .info-box .restaurant-logo {
+      width: 56px;
+      height: 56px;
+      font-size: 1.1rem;
+    }
+
+    .schedule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .schedule-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.85rem;
+      padding: 6px 0;
+      border-bottom: 1px solid #F0EBE3;
+    }
+
+    .schedule-row:last-child {
+      border-bottom: none;
+    }
+
+    .schedule-day {
+      color: var(--muted);
+      min-width: 88px;
+    }
+
+    .schedule-hours {
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .schedule-hours.closed {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .schedule-section {
+      grid-column: 1 / -1;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .info-item {
+      background: white;
+      border: 1px solid #E5DFD8;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .info-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .info-value {
+      font-size: 0.9rem;
+      color: var(--charcoal);
+      font-weight: 700;
+    }
+
+    .modal-view-panel {
+      background: white;
+      border-radius: 18px;
+      max-width: 560px;
+      width: 92%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-view-panel .modal-header {
+      background: white;
+    }
+
+    .modal-view-panel .modal-body {
+      padding: 24px 28px;
+      gap: 24px;
+    }
+
+    .modal-view-panel .modal-footer {
+      background: white;
+      border-top: 1px solid #E5DFD8;
+    }
+
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      background: var(--cream);
+      border: 1px solid #E5DFD8;
+      border-radius: 12px;
+    }
+
+    .profile-avatar-lg {
+      width: 72px;
+      height: 72px;
+      min-width: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--terracotta), var(--gold));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .profile-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--charcoal);
+    }
+
+    .profile-detail {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.85rem;
+    }
+
+    .view-description {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      padding: 0 4px;
+    }
+
+    .view-description:empty {
+      display: none;
+    }
+
+    .detail-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E5DFD8;
+    }
+
+    .detail-rows {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 4px;
+      border-bottom: 1px solid #F0EBE3;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+      color: var(--charcoal);
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .btn-cancel {
+      border: none;
+      background: #F3F4F6;
+      padding: 10px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--charcoal);
+    }
+
+    .btn-cancel:hover {
+      background: #E5E7EB;
+    }
+
+    .modal-view-panel .info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      background: white;
+      border: 1px solid #E5DFD8;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .modal-view-panel .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid #F0EBE3;
+      padding: 14px 18px;
+    }
+
+    .modal-view-panel .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .modal-view-panel .info-label {
+      margin-bottom: 0;
+    }
+
+    .modal-view-panel .info-value {
+      text-align: right;
+      font-weight: 400;
+    }
+
+    /* FORM ELEMENTS */
+
+    .form-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 700;
+      display: block;
+    }
+
+    .form-input {
+      width: 100%;
+      border: 1.5px solid #E5DFD8;
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      font-family: 'Lato';
+      color: var(--charcoal);
+      background: white;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--terracotta);
+    }
+
+    /* BUTTONS */
+
+    .btn-primary {
+      background: var(--terracotta);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.78rem;
+      font-family: 'Lato';
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--warm-brown);
+    }
+
+    .btn-secondary {
+      border: 1.5px solid #E5DFD8;
+      background: transparent;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.78rem;
+      font-family: 'Lato';
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface);
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .search-bar {
+        flex-direction: column;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+    }
+
+    .badge-active{
+      background:#DCFCE7;
+      color:#16A34A;
+      padding:6px 12px;
+      border-radius:20px;
+    }
+
+    .badge-pending{
+      background:#FEF3C7;
+      color:#D97706;
+      padding:6px 12px;
+      border-radius:20px;
+    }
+
+    .badge-suspended{
+      background:#FEE2E2;
+      color:#DC2626;
+      padding:6px 12px;
+      border-radius:20px;
+    }
+
+    .action-group{
+      display:flex;
+      gap:8px;
+    }
+
+    .action-btn{
+      border:none;
+      padding:8px 14px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    .btn-approve{
+      background:#DCFCE7;
+      color:#16A34A;
+    }
+
+    .btn-suspend{
+      background:#FEE2E2;
+      color:#DC2626;
+    }
+
+    .btn-view{
+      background:#E5E7EB;
+    }
+
+    .badge-active{
+      background:#DCFCE7;
+      color:#16A34A;
+      padding:6px 12px;
+      border-radius:20px;
+    }
+
+    .badge-pending{
+      background:#FEF3C7;
+      color:#D97706;
+      padding:6px 12px;
+      border-radius:20px;
+    }
+
+    .badge-suspended{
+      background:#FEE2E2;
+      color:#DC2626;
+      padding:6px 12px;
+      border-radius:20px;
+    }
+
+    .action-group{
+      display:flex;
+      gap:8px;
+    }
+
+    .action-btn{
+      border:none;
+      padding:8px 14px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    .btn-view{
+      background:#E5E7EB;
+    }
+
+    .btn-approve{
+      background:#DCFCE7;
+      color:#16A34A;
+    }
+
+    .btn-suspend{
+      background:#FEE2E2;
+      color:#DC2626;
+    }
+
+  </style>
+
+  <th:block th:replace="~{AdminManagement/fragments/admin-responsive :: admin-responsive}"></th:block>
+
+</head>
+
+<body>
+
+<!-- Sidebar: activePage 'restaurants' highlights this nav item -->
+<div th:replace="~{AdminManagement/fragments/sidebar :: sidebar('restaurants')}"></div>
+
+<!-- MAIN: stats, filter form, restaurant table, view/approve/suspend modals -->
+
+<main class="main">
+
+  <!-- TOPBAR -->
+
+  <div class="topbar">
+
+    <div>
+
+      <div class="topbar-title">
+        Restaurant Management
+      </div>
+
+      <div class="topbar-sub">
+        Approve and manage all restaurants
+      </div>
+
+    </div>
+
+    <div th:replace="~{AdminManagement/fragments/admin-topbar-right :: topbarRight}"></div>
+
+  </div>
+
+  <!-- CONTENT -->
+
+  <div class="content">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <div class="page-title">
+        Restaurants
+      </div>
+
+      <div class="page-sub">
+        Manage all registered restaurants and approve new applications
+      </div>
+
+    </div>
+
+    <!-- STATISTICS CARDS -->
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Total Restaurants
+        </div>
+
+        <div class="stat-value"
+             th:text="${totalRestaurants}">
+        </div>
+        <div class="stat-change">
+          ↑ 8% this month
+        </div>
+
+      </div>
+
+      <div class="stat-card gold">
+
+        <div class="stat-label">
+          Active
+        </div>
+
+        <div class="stat-value"
+             th:text="${activeRestaurants}">
+        </div>
+
+        <div class="stat-change">
+          ↑ 5% this month
+        </div>
+
+      </div>
+
+      <div class="stat-card sage" style="cursor:pointer;" onclick="switchTabById('tab-pending')">
+
+        <div class="stat-label">
+          Pending Approval
+        </div>
+
+        <div class="stat-value"
+             th:text="${pendingRestaurants}">
+        </div>
+
+        <div class="stat-change">
+          ● Needs attention
+        </div>
+
+      </div>
+
+      <div class="stat-card brown" style="cursor:pointer;" onclick="switchTabById('tab-suspended')">
+
+        <div class="stat-label">
+          Suspended
+        </div>
+
+        <div class="stat-value"
+             th:text="${suspendedRestaurants}">
+        </div>
+
+        <div class="stat-change down">
+          ● Under review
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB NAVIGATION -->
+
+    <div class="tab-bar">
+
+      <button class="tab-btn active"
+              onclick="switchTab(this, 'tab-all')">
+        All Restaurants
+      </button>
+
+      <button class="tab-btn"
+              onclick="switchTab(this, 'tab-pending')">
+        Pending Approval
+      </button>
+
+      <button class="tab-btn"
+              onclick="switchTab(this, 'tab-suspended')">
+        Suspended
+      </button>
+
+    </div>
+
+    <!-- TAB: ALL RESTAURANTS -->
+
+    <div id="tab-all">
+
+      <form class="admin-filter-form" th:action="@{/admin/restaurants}" method="get">
+
+        <div class="search-bar">
+
+          <input class="search-input"
+                 type="text"
+                 name="keyword"
+                 th:value="${keyword}"
+                 placeholder="Search restaurants by name or location..." />
+
+          <select class="filter-select" name="cuisine" onchange="handleAdminFilterChange(this)">
+
+            <option value="" th:selected="${cuisine == null or cuisine == ''}">
+              All Cuisine Types
+            </option>
+
+            <option th:each="cuisineOption : ${cuisines_list}"
+                    th:value="${cuisineOption}"
+                    th:text="${cuisineOption}"
+                    th:selected="${cuisine == cuisineOption}">
+            </option>
+
+          </select>
+
+          <select class="filter-select"
+                  name="status"
+                  onchange="handleAdminFilterChange(this)">
+
+            <option value="" th:selected="${status == null or status == ''}">
+              All Status
+            </option>
+
+            <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">
+              Active
+            </option>
+
+            <option value="PENDING" th:selected="${status == 'PENDING'}">
+              Pending
+            </option>
+
+            <option value="SUSPENDED" th:selected="${status == 'SUSPENDED'}">
+              Suspended
+            </option>
+
+            <option value="DEACTIVATED" th:selected="${status == 'DEACTIVATED'}">
+              Deactivated
+            </option>
+
+          </select>
+        </div>
+
+      </form>
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+
+            <div class="card-title">
+              All Restaurants
+            </div>
+
+            <div class="card-sub">
+
+              <span th:text="${#lists.size(restaurants)}"></span>
+              total restaurants registered
+            </div>
+
+          </div>
+
+        </div>
+
+        <table>
+
+          <thead>
+
+          <tr>
+
+            <th>Restaurant</th>
+            <th>Owner</th>
+            <th>Location</th>
+            <th>Cuisine</th>
+            <th>Seats</th>
+            <th>Rating</th>
+            <th>Status</th>
+            <th>Actions</th>
+
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <!-- EMPTY STATE -->
+
+          <tr th:if="${#lists.isEmpty(restaurants)}">
+
+            <td colspan="8">
+
+              <div class="empty-state">
+
+                <div class="empty-icon">
+                  🍽️
+                </div>
+
+                <div class="empty-title">
+                  No Restaurants Found
+                </div>
+
+                <div class="empty-text">
+                  No restaurants match your filters.
+                </div>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          <!-- DYNAMIC RESTAURANTS -->
+
+          <tr th:each="restaurant : ${restaurants}">
+
+            <!-- RESTAURANT -->
+
+            <td>
+
+              <div class="restaurant-info">
+
+                <div class="restaurant-logo"
+                     th:text="${restaurant.restaurantName != null and #strings.length(restaurant.restaurantName) > 0 ? ( #strings.length(restaurant.restaurantName) >= 2 ? #strings.substring(restaurant.restaurantName,0,2) : restaurant.restaurantName ) : 'RS'}">
+
+                  RS
+
+                </div>
+
+                <div class="restaurant-details">
+
+                  <div class="restaurant-name"
+                       th:text="${restaurant.restaurantName}">
+
+                    Restaurant Name
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- OWNER -->
+
+            <td th:text="${restaurant.owner.firstName}">
+              Owner
+            </td>
+
+            <!-- LOCATION -->
+
+            <td th:text="${restaurant.city}">
+              Colombo
+            </td>
+
+            <!-- CUISINE -->
+
+            <td th:text="${restaurant.cuisine}">
+              Italian
+            </td>
+
+            <!-- SEATS -->
+            <td>
+
+    <span th:if="${restaurant.seat != null}"
+          th:text="${restaurant.seat.totalSeats}">
+    </span>
+
+              <span th:if="${restaurant.seat == null}">
+
+    </span>
+
+            </td>
+
+            <!-- RATING -->
+
+            <td th:text="${restaurant.overallRating}">
+              4.5
+            </td>
+
+            <!-- STATUS -->
+
+            <td>
+
+    <span th:if="${restaurant.status.toString() == 'ACTIVE'}"
+          class="badge badge-active">
+
+        ACTIVE
+
+    </span>
+
+              <span th:if="${restaurant.status.toString() == 'PENDING'}"
+                    class="badge badge-pending">
+
+        PENDING
+
+    </span>
+
+              <span th:if="${restaurant.status.toString() == 'SUSPENDED'}"
+                    class="badge badge-suspended">
+
+        SUSPENDED
+
+    </span>
+
+              <span th:if="${restaurant.status.toString() == 'DEACTIVATED'}"
+                    class="badge badge-deactivated">
+
+        DEACTIVATED
+
+    </span>
+
+            </td>
+
+            <!-- ACTIONS -->
+
+            <td>
+
+              <div class="action-group">
+
+                <!-- VIEW -->
+
+                <button type="button"
+                        class="action-btn btn-view"
+                        th:attr="data-restaurant-id=${restaurant.id}"
+                        onclick="openRestaurantView(this)">
+
+                  View
+
+                </button>
+
+                <!-- REACTIVATE (deactivated by owner) -->
+
+                <form th:if="${restaurant.status.toString() == 'DEACTIVATED'}"
+                      th:action="@{/admin/restaurants/{id}/reactivate(id=${restaurant.id})}"
+                      method="post">
+
+                  <button type="submit"
+                          class="action-btn btn-approve">
+
+                    Activate
+
+                  </button>
+
+                </form>
+
+                <!-- APPROVE -->
+
+                <form th:if="${restaurant.status.toString() == 'PENDING'}"
+                      th:action="@{/admin/restaurants/approve/{id}(id=${restaurant.id})}"
+                      method="post">
+
+                  <button type="submit"
+                          class="action-btn btn-approve">
+
+                    Approve
+
+                  </button>
+
+                </form>
+
+                <!-- SUSPEND -->
+
+                <form th:if="${restaurant.status.toString() == 'ACTIVE'}"
+                      th:action="@{/admin/restaurants/suspend/{id}(id=${restaurant.id})}"
+                      method="post">
+
+                  <button type="submit"
+                          class="action-btn btn-suspend">
+
+                    Suspend
+
+                  </button>
+
+                </form>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- TAB: PENDING APPROVAL -->
+
+    <div id="tab-pending" style="display: none;">
+
+      <div class="pending-banner">
+        ⚠️ <strong th:text="${pendingRestaurants}">0</strong> restaurants are awaiting your approval. Please review their details carefully.
+      </div>
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+
+            <div class="card-title">
+              Pending Approvals
+            </div>
+
+            <div class="card-sub">
+              Review and approve new restaurant applications
+            </div>
+
+          </div>
+
+        </div>
+
+        <table>
+
+          <thead>
+
+          <tr>
+
+            <th>Restaurant</th>
+            <th>Owner</th>
+            <th>Location</th>
+            <th>Cuisine</th>
+            <th>Seats</th>
+            <th>Submitted</th>
+            <th>Actions</th>
+
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr th:each="restaurant : ${pendingRestaurantList}">
+
+            <!-- RESTAURANT -->
+
+            <td>
+
+              <div class="restaurant-info">
+
+                <div class="restaurant-logo"
+                     th:text="${restaurant.restaurantName != null and #strings.length(restaurant.restaurantName) > 0 ? ( #strings.length(restaurant.restaurantName) >= 2 ? #strings.substring(restaurant.restaurantName,0,2) : restaurant.restaurantName ) : 'RC'}">
+                  RC
+                </div>
+
+                <div class="restaurant-details">
+
+                  <div class="restaurant-name"
+                       th:text="${restaurant.restaurantName}">
+                    Restaurant Name
+                  </div>
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- OWNER -->
+
+            <td th:text="${restaurant.owner.firstName + ' ' + restaurant.owner.lastName}">
+              Owner Name
+            </td>
+
+            <!-- LOCATION -->
+
+            <td th:text="${restaurant.city + (restaurant.streetAddress != null ? ', ' + restaurant.streetAddress : '')}">
+              Colombo
+            </td>
+
+            <!-- CUISINE -->
+
+            <td th:text="${restaurant.cuisine}">
+              Cuisine
+            </td>
+
+            <!-- SEATS -->
+
+            <td th:text="${restaurant.totalSeats}">
+              80
+            </td>
+
+            <!-- SUBMITTED DATE -->
+
+            <td>Pending review</td>
+
+            <!-- ACTIONS -->
+
+            <td>
+
+              <div class="action-group">
+
+                <button type="button"
+                        class="action-btn btn-view"
+                        th:attr="data-restaurant-id=${restaurant.id}"
+                        onclick="openRestaurantReview(this)">
+                  Review
+                </button>
+
+                <form th:action="@{/admin/restaurants/{id}/approve(id=${restaurant.id})}"
+                      method="post"
+                      style="display: inline;">
+
+                  <button type="submit"
+                          class="action-btn btn-approve">
+                    Approve
+                  </button>
+
+                </form>
+
+                <button type="button"
+                        class="action-btn btn-reject"
+                        onclick="openModal('modal-reject')">
+                  Reject
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- TAB: SUSPENDED RESTAURANTS -->
+
+    <div id="tab-suspended" style="display: none;">
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+
+            <div class="card-title">
+              Suspended Restaurants
+            </div>
+
+            <div class="card-sub">
+              Manage and review suspended restaurant accounts
+            </div>
+
+          </div>
+
+        </div>
+
+        <table>
+
+          <thead>
+
+          <tr>
+
+            <th>Restaurant</th>
+            <th>Owner</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Actions</th>
+
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr th:if="${#lists.isEmpty(suspendedRestaurantList)}">
+            <td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">No suspended restaurants</td>
+          </tr>
+
+          <tr th:each="restaurant : ${suspendedRestaurantList}">
+
+            <!-- RESTAURANT -->
+
+            <td>
+
+              <div class="restaurant-info">
+
+                <div class="restaurant-logo"
+                     th:text="${restaurant.restaurantName != null and #strings.length(restaurant.restaurantName) > 0 ? ( #strings.length(restaurant.restaurantName) >= 2 ? #strings.substring(restaurant.restaurantName,0,2) : restaurant.restaurantName ) : 'RS'}">
+                </div>
+
+                <div class="restaurant-details">
+
+                  <div class="restaurant-name"
+                       th:text="${restaurant.restaurantName}">
+                  </div>
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- OWNER -->
+
+            <td th:text="${restaurant.owner != null ? restaurant.owner.firstName + ' ' + restaurant.owner.lastName : '—'}"></td>
+
+            <td th:text="${restaurant.city}"></td>
+
+            <td><span class="badge badge-suspended">SUSPENDED</span></td>
+
+            <td>
+              <div class="action-group">
+                <button type="button"
+                        class="action-btn btn-view"
+                        th:attr="data-restaurant-id=${restaurant.id}"
+                        onclick="openRestaurantView(this)">
+                  View
+                </button>
+                <form th:action="@{/admin/restaurants/{id}/reactivate(id=${restaurant.id})}"
+                      method="post" style="display:inline;">
+                  <button type="submit" class="action-btn btn-approve">Reactivate</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<!-- VIEW MODAL -->
+
+<div class="modal-overlay" id="modal-view">
+
+  <div class="modal modal-view-panel">
+
+    <div class="modal-header">
+
+      <div class="modal-title">
+        Restaurant Profile
+      </div>
+
+      <button type="button" class="modal-close"
+              onclick="closeModal('modal-view')"
+              aria-label="Close">
+        ✕
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="profile-card">
+
+        <div class="profile-avatar-lg" id="view-logo">—</div>
+
+        <div style="flex: 1; min-width: 0;">
+
+          <div class="profile-name" id="view-name">Restaurant</div>
+
+          <div class="profile-detail" id="view-subtitle">—</div>
+
+          <div style="margin-top: 8px;">
+            <span id="view-status-badge" class="badge badge-pending">—</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <p id="view-description" class="view-description"></p>
+
+      <div class="info-grid">
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Owner
+          </div>
+
+          <div class="info-value" id="view-owner">—</div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Total Seats
+          </div>
+
+          <div class="info-value" id="view-seats">—</div>
+
+        </div>
+
+        <div class="info-item schedule-section">
+
+          <div class="info-label">
+            Operating Hours
+          </div>
+
+          <div class="schedule-list" id="view-schedule">
+            <div class="schedule-row">
+              <span class="schedule-day">—</span>
+              <span class="schedule-hours">—</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Phone
+          </div>
+
+          <div class="info-value" id="view-phone">—</div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Rating
+          </div>
+
+          <div class="info-value" id="view-rating">—</div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Total Reservations
+          </div>
+
+          <div class="info-value" id="view-reservations">—</div>
+
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">Owner Email</div>
+          <div class="info-value" id="view-owner-email">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Email</div>
+          <div class="info-value" id="view-email">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Address</div>
+          <div class="info-value" id="view-address">—</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Price Range</div>
+          <div class="info-value" id="view-price">—</div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button type="button" class="btn-cancel"
+              onclick="closeModal('modal-view')">
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- APPROVE MODAL -->
+
+<div class="modal-overlay" id="modal-approve">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <div class="modal-title">
+        Review Restaurant Application
+      </div>
+
+      <button class="modal-close"
+              onclick="closeModal('modal-approve')">
+        ✕
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="pending-banner">
+        📋 Please review all details carefully before approving this restaurant.
+      </div>
+
+      <!-- RESTAURANT INFO -->
+
+      <div class="info-box">
+
+        <div class="restaurant-logo" id="review-logo" style="width: 56px; height: 56px; font-size: 1.2rem;">
+          —
+        </div>
+
+        <div style="flex: 1;">
+
+          <div id="review-name"
+               style="font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700;">
+            —
+          </div>
+
+          <div id="review-subtitle"
+               style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- DETAILS -->
+
+      <div class="info-grid">
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Restaurant Name
+          </div>
+
+          <div class="info-value" id="review-name-detail">
+            —
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Owner
+          </div>
+
+          <div class="info-value" id="review-owner">
+            —
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Location
+          </div>
+
+          <div class="info-value" id="review-location">
+            —
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Cuisine
+          </div>
+
+          <div class="info-value" id="review-cuisine">
+            —
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Total Seats
+          </div>
+
+          <div class="info-value" id="review-seats">
+            —
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-label">
+            Phone
+          </div>
+
+          <div class="info-value" id="review-phone">
+            —
+          </div>
+
+        </div>
+
+        <div class="info-item schedule-section">
+
+          <div class="info-label">
+            Operating Hours
+          </div>
+
+          <div class="schedule-list" id="review-schedule">
+            <div class="schedule-row">
+              <span class="schedule-day">—</span>
+              <span class="schedule-hours">—</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- REJECTION REASON -->
+
+      <div>
+
+        <label class="form-label">
+          Rejection Reason (if rejecting)
+        </label>
+
+        <textarea class="form-input"
+                  rows="3"
+                  placeholder="Enter reason for rejection if you decide to reject..."></textarea>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button class="btn-secondary"
+              onclick="closeModal('modal-approve')">
+        Cancel
+      </button>
+
+      <button type="button"
+              class="action-btn btn-reject"
+              style="padding: 10px 18px;"
+              onclick="closeModal('modal-approve')">
+        Reject
+      </button>
+
+      <form id="review-approve-form"
+            method="post"
+            style="display: inline;">
+        <button type="submit" class="btn-primary">
+          Approve Restaurant
+        </button>
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- SUSPEND MODAL -->
+
+<div class="modal-overlay" id="modal-suspend">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <div class="modal-title">
+        Suspend Restaurant
+      </div>
+
+      <button class="modal-close"
+              onclick="closeModal('modal-suspend')">
+        ✕
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="pending-banner"
+           style="background: #FEE2E2; color: #991B1B; border-color: #FECACA;">
+        ⚠️ Suspending this restaurant will disable all its operations immediately.
+      </div>
+
+      <div class="info-item">
+
+        <div class="info-label">
+          Restaurant
+        </div>
+
+        <div class="info-value">
+          The Grand Cafe
+        </div>
+
+      </div>
+
+      <div>
+
+        <label class="form-label">
+          Suspension Reason
+        </label>
+
+        <textarea class="form-input"
+                  rows="4"
+                  placeholder="Explain the reason for suspending this restaurant..."></textarea>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button class="btn-secondary"
+              onclick="closeModal('modal-suspend')">
+        Cancel
+      </button>
+
+      <button class="action-btn btn-suspend"
+              style="padding: 10px 18px;">
+        Suspend Restaurant
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script th:inline="javascript">
+
+  const activeTabOnLoad = /*[[${activeTab}]]*/ 'tab-all';
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function switchTab(element, tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (element) element.classList.add('active');
+    document.getElementById('tab-all').style.display = 'none';
+    document.getElementById('tab-pending').style.display = 'none';
+    document.getElementById('tab-suspended').style.display = 'none';
+    document.getElementById(tabId).style.display = 'block';
+  }
+
+  function switchTabById(tabId) {
+    const buttons = document.querySelectorAll('.tab-btn');
+    let matched = null;
+    buttons.forEach(btn => {
+      if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+        matched = btn;
+      }
+    });
+    switchTab(matched, tabId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setModalText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value || '—';
+  }
+
+  function renderWeeklySchedule(containerId, weeklySchedule) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!weeklySchedule || weeklySchedule.length === 0) {
+      container.innerHTML = '<div class="schedule-row"><span class="schedule-day">—</span><span class="schedule-hours">—</span></div>';
+      return;
+    }
+
+    weeklySchedule.forEach(row => {
+      const isClosed = row.hours === 'Closed';
+      const item = document.createElement('div');
+      item.className = 'schedule-row';
+      item.innerHTML =
+        '<span class="schedule-day">' + (row.day || '—') + '</span>' +
+        '<span class="schedule-hours' + (isClosed ? ' closed' : '') + '">' + (row.hours || '—') + '</span>';
+      container.appendChild(item);
+    });
+  }
+
+  function loadRestaurantDetails(restaurantId) {
+    return fetch('/admin/restaurants/' + restaurantId + '/details')
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load');
+        return response.json();
+      });
+  }
+
+  function populateViewModal(data) {
+    const initials = (data.name || 'R').substring(0, 2).toUpperCase();
+    setModalText('view-logo', initials);
+    setModalText('view-name', data.name);
+    setModalText('view-subtitle', (data.cuisine || '—') + ' • ' + (data.city || '—'));
+    setModalText('view-description', data.description || '');
+    const statusBadge = document.getElementById('view-status-badge');
+    if (statusBadge) {
+      statusBadge.textContent = data.status || '—';
+      statusBadge.className = 'badge ' + (
+        data.status === 'ACTIVE' ? 'badge-active' :
+        data.status === 'PENDING' ? 'badge-pending' :
+        data.status === 'DEACTIVATED' ? 'badge-deactivated' : 'badge-suspended'
+      );
+    }
+    setModalText('view-owner', data.ownerName);
+    setModalText('view-owner-email', data.ownerEmail);
+    setModalText('view-seats', data.seats);
+    renderWeeklySchedule('view-schedule', data.weeklySchedule);
+    setModalText('view-phone', data.phone);
+    setModalText('view-email', data.email);
+    setModalText('view-rating', '⭐ ' + data.rating);
+    setModalText('view-reservations', data.reservationCount);
+    setModalText('view-address', data.address);
+    setModalText('view-price', data.priceRange);
+  }
+
+  function populateReviewModal(data) {
+    const initials = (data.name || 'R').substring(0, 2).toUpperCase();
+    setModalText('review-logo', initials);
+    setModalText('review-name', data.name);
+    setModalText('review-subtitle', (data.cuisine || '—') + ' • ' + (data.city || '—'));
+    setModalText('review-name-detail', data.name);
+    setModalText('review-owner', data.ownerName);
+    setModalText('review-location', (data.city || '—') + (data.address && data.address !== '—' ? ', ' + data.address : ''));
+    setModalText('review-cuisine', data.cuisine);
+    setModalText('review-seats', data.seats);
+    setModalText('review-phone', data.phone);
+    renderWeeklySchedule('review-schedule', data.weeklySchedule);
+
+    const approveForm = document.getElementById('review-approve-form');
+    if (approveForm && data.id) {
+      approveForm.action = '/admin/restaurants/' + data.id + '/approve';
+    }
+  }
+
+  function openRestaurantView(button) {
+    const restaurantId = button.getAttribute('data-restaurant-id');
+    if (!restaurantId) return;
+
+    loadRestaurantDetails(restaurantId)
+      .then(data => {
+        populateViewModal(data);
+        openModal('modal-view');
+      })
+      .catch(() => alert('Could not load restaurant details. Please try again.'));
+  }
+
+  function openRestaurantReview(button) {
+    const restaurantId = button.getAttribute('data-restaurant-id');
+    if (!restaurantId) return;
+
+    loadRestaurantDetails(restaurantId)
+      .then(data => {
+        populateReviewModal(data);
+        openModal('modal-approve');
+      })
+      .catch(() => alert('Could not load restaurant details. Please try again.'));
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (activeTabOnLoad && activeTabOnLoad !== 'tab-all') {
+      switchTabById(activeTabOnLoad);
+    }
+
+    document.querySelectorAll('.search-input').forEach(input => {
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.closest('form').submit();
+        }
+      });
+    });
+  });
+
+</script>
+
+<th:block th:replace="~{AdminManagement/fragments/admin-filter-script :: admin-filter-script}"></th:block>
+<th:block th:replace="~{AdminManagement/fragments/admin-sidebar-collapse :: collapse}"></th:block>
+
+</body>
+
+</html>
+

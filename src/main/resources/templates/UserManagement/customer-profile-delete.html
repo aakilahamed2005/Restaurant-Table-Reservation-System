@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DineElite — Deactivate Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+  }}
+}
+</script>
+<style>
+  body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .topbar { background: #1C1917; }
+  .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; color: #8A7E78; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+  .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
+  .sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 13px; }
+  .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
+  .input-field:focus { outline: none; border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+  .btn-danger { background: #ef4444; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s; }
+  .btn-danger:hover { background: #dc2626; }
+  .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #C4633A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display'; font-size: 2rem; color: white; }
+  .consequence-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid #F0EBE3; }
+  .consequence-item:last-child { border-bottom: none; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,25,23,0.75); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP NAV -->
+<nav class="topbar flex items-center justify-between px-8 py-4">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="flex items-center gap-6">
+    <a th:href="@{/restaurant-listing}" class="nav-link text-sm text-gray-300 font-body cursor-pointer">Explore</a>
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+      <span class="text-gray-300 text-sm font-body" th:text="${userFullName}">Jane Doe</span>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-10 flex gap-8">
+  <div th:replace="~{UserManagement/fragments/customer-profile-sidebar :: customerSidebar('delete', ${userFullName}, ${firstLetter})}"></div>
+
+  <!-- MAIN -->
+  <main class="flex-1 max-w-2xl">
+    <!-- Warning Banner -->
+    <div class="bg-red-50 border border-red-200 rounded-lg p-5 mb-6 flex gap-4">
+      <div class="text-red-500 text-2xl flex-shrink-0">⚠</div>
+      <div>
+          <p class="font-body font-bold text-red-700 text-sm mb-1">This action is permanent and cannot be undone</p>
+            <p class="font-body text-xs text-red-600 leading-relaxed">Deactivating your account will disable access to DineElite and keep your account inactive until an admin reactivates it for you.</p>
+      </div>
+    </div>
+
+    <!-- What will be deactivated -->
+    <div class="bg-white rounded-lg p-8 mb-6">
+      <div class="w-10 h-0.5 bg-red-400 mb-3"></div>
+      <h2 class="font-display text-2xl text-charcoal mb-2">Deactivate Account</h2>
+      <p class="text-muted text-sm font-body mb-6">We're sorry to see you go, <span th:text="${user.firstName}">Jane</span>. Here's what will be permanently deactivated:</p>
+
+      <div>
+        <div class="consequence-item">
+          <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 flex-shrink-0 text-sm">👤</div>
+          <div>
+            <p class="font-body text-sm font-bold text-charcoal">Personal Information</p>
+            <p class="text-xs text-muted font-body mt-0.5">Name, email, phone number, city, and all dining preferences</p>
+          </div>
+        </div>
+        <div class="consequence-item">
+          <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 flex-shrink-0 text-sm">📅</div>
+          <div>
+            <p class="font-body text-sm font-bold text-charcoal">Booking History</p>
+            <p class="text-xs text-muted font-body mt-0.5">All 24 past and upcoming reservations and their records</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Confirm deletion -->
+    <div class="bg-white rounded-lg p-8">
+      <h3 class="font-display text-xl text-charcoal mb-2">Confirm Your Identity</h3>
+      <p class="text-sm text-muted font-body mb-5">Enter your password and type <strong class="text-charcoal">DEACTIVATE</strong> to confirm account deactivation.</p>
+      <div th:if="${error}">
+        <div class="bg-red-100 border border-red-500 rounded-lg p-2 mb-6 text-red-500" th:text="${error}"></div>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div>
+          <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2" for="pwField">Your Password</label>
+          <input type="password" id="pwField" placeholder="Enter your current password" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" aria-label="Your Password"/>
+        </div>
+        <div>
+          <label for="confirmField" class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">Confirm Deactivation</label>
+          <p class="text-xs text-muted font-body mb-2">Type the word below to confirm that you understand this account must be reactivated by an admin.</p>
+          <input type="text" id="confirmField" placeholder="DEACTIVATE" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" aria-label="Confirm Deactivation"/>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="deleteFormSubmit()" class="btn-danger px-7 py-3 rounded-sm disabled:opacity-40">Deactivate My Account</button>
+          <a th:href="@{/customer-profile-view}" class="px-7 py-3 rounded-sm border border-gray-200 text-sm font-body text-muted hover:bg-surface transition-colors">Keep My Account</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+<form th:action="@{/customer-delete-account}" method="POST" th:object="${deleteForm}" id="deleteForm">
+  <input type="hidden" th:field="*{password}" id="password">
+  <input type="hidden" th:field="*{checkingString}" id="checking_string">
+</form>
+
+
+<script>
+  function deleteFormSubmit(){
+    let submitted_password = document.getElementById('pwField').value;
+    let submitted_confirmField = document.getElementById('confirmField').value;
+
+    document.getElementById('password').value = submitted_password;
+    document.getElementById('checking_string').value = submitted_confirmField;
+
+    document.getElementById("deleteForm").submit();
+  }
+
+</script>
+<div th:replace="~{UserManagement/fragments/support-contact-modal :: supportContactModal(${user.email}, 'openProfileSupportModal')}"></div>
+</body>
+</html>

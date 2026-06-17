@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<!--
+  Admin Management — User Management page
+  Lists all customer and owner accounts with search/filter, activate/deactivate actions.
+  Data: users, keyword, role, status (from UserManagementController).
+  Layout: shared sidebar fragment + main content area with filter form and user table.
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0"/>
+
+    <title>DineElite — User Management</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+          rel="stylesheet"/>
+
+    <style>
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --cream: #FAF7F2;
+            --surface: #F0EBE3;
+            --charcoal: #1C1917;
+            --warm-brown: #44312A;
+            --terracotta: #C4633A;
+            --gold: #D4A853;
+            --sage: #7A8C6E;
+            --muted: #8A7E78;
+        }
+
+        body {
+            background: #F0EBE3;
+            font-family: 'Lato', sans-serif;
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(160deg,
+            #1C1917 0%,
+            #2A1F1B 50%,
+            #44312A 100%);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .brand span {
+            color: var(--gold);
+        }
+
+        .badge-text {
+            font-size: 0.7rem;
+            color: #9CA3AF;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-section-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #6B7280;
+            padding: 18px 24px 8px;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            color: #9CA3AF;
+            text-decoration: none;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: rgba(196,99,58,0.15);
+            border-left-color: var(--terracotta);
+        }
+
+        .sidebar-footer {
+            padding: 18px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--terracotta);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .admin-name {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .admin-role {
+            color: #9CA3AF;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+        }
+
+        /* TOPBAR */
+
+        .topbar {
+            background: var(--cream);
+            border-bottom: 1px solid #E5DFD8;
+            padding: 18px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+        }
+
+        .topbar-sub {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        .topbar-btn {
+            border: 1px solid #E5DFD8;
+            background: transparent;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .topbar-signout {
+            color: #ef4444;
+            border-color: #DC2626;
+            background: #FEE2E2;
+        }
+
+        .topbar-signout:hover {
+            background: #DC2626;
+            color: white;
+            border-color: #DC2626;
+        }
+
+        .topbar-signout svg {
+            stroke: #ef4444;
+        }
+
+        .topbar-signout:hover svg {
+            stroke: white;
+        }
+
+        /* CONTENT */
+
+        .content {
+            padding: 32px;
+        }
+
+        .page-header {
+            margin-bottom: 22px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+        }
+
+        .page-sub {
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* SEARCH */
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .search-input,
+        .filter-select {
+            border: 1.5px solid #E5DFD8;
+            background: var(--cream);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.85rem;
+            color: var(--charcoal);
+        }
+
+        .filter-select {
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .search-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--terracotta);
+        }
+
+        .admin-sign-out {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: #ef4444;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            letter-spacing: 0;
+            text-transform: none;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+
+        .admin-sign-out:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ef4444;
+        }
+
+        .admin-sign-out svg {
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 350px;
+        }
+
+        /* CARD */
+
+        .card {
+            background: var(--cream);
+            border: 1px solid #E5DFD8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E5DFD8;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+        }
+
+        .card-sub {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* TABLE */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 16px 20px;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid #E5DFD8;
+        }
+
+        tbody td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #F0EBE3;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #FAF7F2;
+        }
+
+        /* USER */
+
+        .user-avatar-small {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--surface);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--muted);
+            margin-right: 10px;
+        }
+
+        /* BADGES */
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-blue {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+
+        .badge-yellow {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .badge-green {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .badge-red {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* ACTIONS */
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 7px 14px;
+            border-radius: 5px;
+            border: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-view {
+            background: var(--surface);
+            color: var(--charcoal);
+        }
+
+        .btn-suspend {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .btn-approve {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .btn-delete {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+    </style>
+
+    <th:block th:replace="~{AdminManagement/fragments/admin-responsive :: admin-responsive}"></th:block>
+
+</head>
+
+<body>
+
+<!-- Left navigation: dashboard, users, restaurants, reservations, feedback, admin accounts -->
+<div th:replace="~{AdminManagement/fragments/sidebar :: sidebar('users')}"></div>
+
+<!-- MAIN: page header, filters, and user table -->
+
+<main class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div>
+
+            <div class="topbar-title">
+                User Management
+            </div>
+
+            <div class="topbar-sub">
+                Manage all customers and restaurant owners
+            </div>
+
+        </div>
+
+        <div th:replace="~{AdminManagement/fragments/admin-topbar-right :: topbarRight}"></div>
+
+    </div>
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+        <!-- HEADER -->
+
+        <div class="page-header">
+
+            <div class="page-title">
+                Users
+            </div>
+
+            <div class="page-sub">
+                Manage all registered users
+            </div>
+
+        </div>
+        <form class="admin-filter-form" th:action="@{/admin/users}" method="get">
+
+            <div class="search-bar">
+
+                <!-- SEARCH -->
+
+                <input class="search-input"
+                       type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Search users by name or email..." />
+
+                <!-- ROLE -->
+
+                <select class="filter-select" name="role" onchange="handleAdminFilterChange(this)">
+                    <option value="" th:selected="${role == null or role == ''}">All Roles</option>
+                    <option value="CUSTOMER" th:selected="${role == 'CUSTOMER'}">Customer</option>
+                    <option value="OWNER" th:selected="${role == 'OWNER'}">Owner</option>
+                </select>
+
+                <!-- STATUS -->
+
+                <select class="filter-select" name="status" onchange="handleAdminFilterChange(this)">
+                    <option value="" th:selected="${status == null or status == ''}">All Status</option>
+                    <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Active</option>
+                    <option value="DEACTIVATED" th:selected="${status == 'DEACTIVATED'}">Deactivated</option>
+                </select>
+
+
+
+            </div>
+
+        </form>
+        <!-- TABLE -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <div class="card-title">
+                        All Users
+                    </div>
+
+                    <div class="card-sub">
+
+                        <span th:text="${#lists.size(users)}"></span>
+                        total users registered
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr th:each="user : ${users}">
+
+                    <!-- USER -->
+
+                    <td>
+
+                        <span class="user-avatar-small"
+                              th:text="${#strings.substring(user.firstName,0,1)}">
+                        </span>
+
+                        <strong th:text="${user.firstName + ' ' + user.lastName}">
+                        </strong>
+
+                        <br>
+
+                        <span style="font-size:0.72rem;
+                                     color:var(--muted);
+                                     padding-left:45px;"
+                              th:text="${user.email}">
+                        </span>
+
+                    </td>
+
+                    <!-- ROLE -->
+
+                    <td>
+
+                        <span class="badge"
+
+                              th:classappend="${user.role.name() == 'CUSTOMER'}
+                              ? ' badge-blue'
+                              : ' badge-yellow'"
+
+                              th:text="${user.role}">
+                        </span>
+
+                    </td>
+
+                    <!-- PHONE -->
+
+                    <td th:text="${user.phoneNumber}">
+                    </td>
+
+                    <!-- DATE -->
+
+                    <td th:text="${#temporals.format(user.createdAt,'MMM dd, yyyy')}">
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+
+
+                        <span class="badge badge-green"
+                              th:if="${user.status == null or user.status.name() == 'ACTIVE'}">Active</span>
+                        <span class="badge badge-red"
+                              th:if="${user.status != null and user.status.name() == 'DEACTIVATED'}">Deactivated</span>
+                        <span class="badge badge-yellow"
+                              th:if="${user.status != null and user.status.name() == 'SUSPENDED'}">Suspended</span>
+
+
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        <div class="action-group">
+
+                            <!-- DEACTIVATE -->
+
+                            <form th:if="${user.status == null or user.status.name() == 'ACTIVE'}"
+                                  th:action="@{/admin/deactivate-user/{id}(id=${user.id})}"
+                                  method="post">
+
+                                <button type="submit"
+                                        class="action-btn btn-suspend">
+
+                                    Deactivate
+
+                                </button>
+
+                            </form>
+
+                            <!-- ACTIVATE -->
+
+                            <form th:if="${user.status != null and user.status.name() == 'DEACTIVATED'}"
+                                  th:action="@{/admin/activate-user/{id}(id=${user.id})}"
+                                  method="post">
+
+                                <button type="submit"
+                                        class="action-btn btn-approve">
+
+                                    Activate
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+
+
+</main>
+
+<th:block th:replace="~{AdminManagement/fragments/admin-filter-script :: admin-filter-script}"></th:block>
+<th:block th:replace="~{AdminManagement/fragments/admin-sidebar-collapse :: collapse}"></th:block>
+
+</body>
+</html>

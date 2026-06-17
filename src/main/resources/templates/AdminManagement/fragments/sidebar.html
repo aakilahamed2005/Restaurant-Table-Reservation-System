@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!-- Thymeleaf fragment file: reusable left sidebar for all admin pages -->
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Fragment name: sidebar. Parameter activePage = which nav link is highlighted -->
+<div th:fragment="sidebar(activePage)">
+
+    <aside class="sidebar">
+        <!-- LOGO AREA: brand name + "ADMIN PORTAL" subtitle -->
+        <div class="sidebar-logo">
+            <div class="brand brand-full">Dine<span>Elite</span></div> <!-- Full logo when sidebar expanded -->
+            <div class="brand-mini">DE</div> <!-- Short logo when sidebar collapsed -->
+            <div class="badge-text">ADMIN PORTAL</div>
+        </div>
+
+        <!-- MAIN NAVIGATION LINKS -->
+        <nav class="sidebar-nav">
+
+            <div class="nav-section-title"><span class="nav-text">Overview</span></div>
+
+            <!-- Dashboard home: activePage must be 'dashboard' on dashboard template -->
+            <a href="/admin/dashboard"
+               th:class="${activePage == 'dashboard'} ? 'nav-item active' : 'nav-item'">
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-section-title"><span class="nav-text">Management</span></div>
+
+            <!-- Customer + owner user list -->
+            <a href="/admin/users"
+               th:class="${activePage == 'users'} ? 'nav-item active' : 'nav-item'">
+                <span class="nav-text">Users</span>
+            </a>
+
+            <!-- Approve/suspend restaurants -->
+            <a href="/admin/restaurants"
+               th:class="${activePage == 'restaurants'} ? 'nav-item active' : 'nav-item'">
+                <span class="nav-text">Restaurants</span>
+            </a>
+
+            <!-- All platform reservations -->
+            <a href="/admin/reservations"
+               th:class="${activePage == 'reservations'} ? 'nav-item active' : 'nav-item'">
+                <span class="nav-text">Reservations</span>
+            </a>
+
+            <!-- Customer reviews / feedback moderation -->
+            <a href="/admin/feedback"
+               th:class="${activePage == 'feedback'} ? 'nav-item active' : 'nav-item'">
+                <span class="nav-text">Feedbacks</span>
+            </a>
+
+            <div class="nav-section-title"><span class="nav-text">System</span></div>
+
+            <!-- Create/edit admin staff (super admin features) -->
+            <a href="/admin/manage-admins"
+               th:class="${activePage == 'admins'} ? 'nav-item active' : 'nav-item'">
+                <span class="nav-text">Admin Accounts</span>
+            </a>
+
+        </nav>
+
+        <!-- FOOTER: logged-in admin name + role from session attribute loggedAdmin -->
+        <div class="sidebar-footer">
+            <div class="admin-info">
+                <!-- First letter of admin name in circle avatar -->
+                <div class="admin-avatar"
+                     th:text="${loggedAdmin != null ? #strings.toUpperCase(#strings.substring(loggedAdmin.adminName, 0, 1)) : 'A'}">
+                    A
+                </div>
+                <div>
+                    <div class="admin-name"
+                         th:text="${loggedAdmin != null ? loggedAdmin.adminName : 'Admin'}">
+                        Admin
+                    </div>
+                    <div class="admin-role"
+                         th:text="${loggedAdmin != null and loggedAdmin.role != null ? loggedAdmin.role : 'ADMIN'}">
+                        ADMIN
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!--
+  Standalone create-admin form (legacy/alternate UI). Submits to admin create endpoint.
+  Split layout similar to admin-login; uses admin-responsive-auth for narrow screens.
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Create Admin | DineElite</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            background:#FAF7F2;
+            font-family:'Lato',sans-serif;
+            min-height:100vh;
+            display:flex;
+        }
+
+        /* LEFT PANEL */
+
+        .left-panel{
+            width:45%;
+            background:linear-gradient(160deg,#1C1917 0%,#44312A 60%,#C4633A 100%);
+            color:white;
+            padding:60px;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+        }
+
+        .brand{
+            font-size:34px;
+            font-family:'Playfair Display',serif;
+            font-weight:700;
+        }
+
+        .brand span{
+            color:#D4A853;
+        }
+
+        .left-content{
+            margin-top:100px;
+        }
+
+        .left-content h1{
+            font-size:58px;
+            line-height:1.2;
+            margin-bottom:20px;
+            font-family:'Playfair Display',serif;
+        }
+
+        .left-content p{
+            color:#ddd;
+            line-height:1.8;
+            max-width:420px;
+            font-size:16px;
+        }
+
+        /* RIGHT PANEL */
+
+        .right-panel{
+            width:55%;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:40px;
+        }
+
+        .register-card{
+            width:100%;
+            max-width:500px;
+            background:white;
+            padding:50px;
+            border-radius:16px;
+            box-shadow:0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .register-card h2{
+            font-size:42px;
+            margin-bottom:10px;
+            color:#1C1917;
+            font-family:'Playfair Display',serif;
+        }
+
+        .subtitle{
+            color:#8A7E78;
+            margin-bottom:35px;
+        }
+
+        .form-group{
+            margin-bottom:22px;
+        }
+
+        label{
+            display:block;
+            margin-bottom:10px;
+            font-size:12px;
+            font-weight:700;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            color:#44312A;
+        }
+
+        input,
+        select{
+            width:100%;
+            padding:15px;
+            border:1px solid #ddd;
+            border-radius:8px;
+            font-size:15px;
+            transition:0.3s;
+            background:white;
+        }
+
+        input:focus,
+        select:focus{
+            outline:none;
+            border-color:#C4633A;
+            box-shadow:0 0 0 4px rgba(196,99,58,0.1);
+        }
+
+        .register-btn{
+            width:100%;
+            padding:16px;
+            border:none;
+            background:#C4633A;
+            color:white;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:14px;
+            font-weight:700;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            margin-top:10px;
+            transition:0.3s;
+        }
+
+        .register-btn:hover{
+            background:#44312A;
+            transform:translateY(-2px);
+        }
+
+        .bottom-text{
+            margin-top:25px;
+            text-align:center;
+            color:#8A7E78;
+            font-size:14px;
+        }
+
+        .bottom-text a{
+            color:#C4633A;
+            text-decoration:none;
+            font-weight:700;
+        }
+
+    </style>
+
+    <th:block th:replace="~{AdminManagement/fragments/admin-responsive-auth :: admin-responsive-auth}"></th:block>
+
+</head>
+
+<body>
+
+<!-- LEFT PANEL -->
+
+<div class="left-panel">
+
+    <div class="brand">
+        Dine<span>Elite</span>
+    </div>
+
+    <div class="left-content">
+
+        <h1>Create<br>Admin Accounts</h1>
+
+        <p>
+            Add and manage administrators securely across the DineElite platform.
+            Each admin account is protected using encrypted password authentication.
+        </p>
+
+    </div>
+
+</div>
+
+<!-- RIGHT PANEL -->
+
+<div class="right-panel">
+
+    <div class="register-card">
+
+        <h2>Create Admin</h2>
+
+        <p class="subtitle">
+            Register a new administrator account
+        </p>
+
+        <form method="post" action="/admin/register">
+
+            <div class="form-group">
+
+                <label>Admin Name</label>
+
+                <input
+                        type="text"
+                        name="adminName"
+                        placeholder="Enter admin name"
+                        required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Email Address</label>
+
+                <input
+                        type="email"
+                        name="email"
+                        placeholder="admin@dineelite.com"
+                        required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Password</label>
+
+                <input
+                        type="password"
+                        name="password"
+                        placeholder="Enter secure password"
+                        required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Admin Role</label>
+
+                <select name="role">
+
+                    <option value="ADMIN">ADMIN</option>
+
+                    <option value="SUPER_ADMIN">
+                        SUPER ADMIN
+                    </option>
+
+                </select>
+
+            </div>
+
+            <button type="submit" class="register-btn">
+                Create Admin
+            </button>
+
+            <div th:if="${error}" style="
+    background:#FEE2E2;
+    color:#DC2626;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:20px;
+">
+                <p th:text="${error}"></p>
+            </div>
+
+        </form>
+
+        <div class="bottom-text">
+            Back to
+            <a href="/admin/login">
+                Admin Login
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

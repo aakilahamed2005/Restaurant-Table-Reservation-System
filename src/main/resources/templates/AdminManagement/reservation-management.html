@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<!--
+  Admin reservations: daily / monthly / yearly view toggles, date and time filters.
+  Model: reservations, view, effectiveDate, keyword, status. Cancel via POST per row.
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0"/>
+
+    <title>DineElite — Reservation Management</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+          rel="stylesheet"/>
+
+    <style>
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --cream: #FAF7F2;
+            --surface: #F0EBE3;
+            --charcoal: #1C1917;
+            --warm-brown: #44312A;
+            --terracotta: #C4633A;
+            --gold: #D4A853;
+            --sage: #7A8C6E;
+            --muted: #8A7E78;
+        }
+
+        body {
+            background: #F0EBE3;
+            font-family: 'Lato', sans-serif;
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(160deg,
+            #1C1917 0%,
+            #2A1F1B 50%,
+            #44312A 100%);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .brand span {
+            color: var(--gold);
+        }
+
+        .badge-text {
+            font-size: 0.7rem;
+            color: #9CA3AF;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-section-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #6B7280;
+            padding: 18px 24px 8px;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            color: #9CA3AF;
+            text-decoration: none;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: rgba(196,99,58,0.15);
+            border-left-color: var(--terracotta);
+        }
+
+        .sidebar-footer {
+            padding: 18px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--terracotta);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .admin-name {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .admin-role {
+            color: #9CA3AF;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+        }
+
+        /* TOPBAR */
+
+        .topbar {
+            background: var(--cream);
+            border-bottom: 1px solid #E5DFD8;
+            padding: 18px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+        }
+
+        .topbar-sub {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        .topbar-btn {
+            border: 1px solid #E5DFD8;
+            background: transparent;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .topbar-signout {
+            color: #ef4444;
+            border-color: #DC2626;
+            background: #FEE2E2;
+        }
+
+        .topbar-signout:hover {
+            background: #DC2626;
+            color: white;
+            border-color: #DC2626;
+        }
+
+        .topbar-signout svg {
+            stroke: #ef4444;
+        }
+
+        .topbar-signout:hover svg {
+            stroke: white;
+        }
+
+        /* CONTENT */
+
+        .content {
+            padding: 32px;
+        }
+
+        .page-header {
+            margin-bottom: 22px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+        }
+
+        .page-sub {
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* STATS GRID */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--cream);
+            border: 1px solid #E5DFD8;
+            border-radius: 10px;
+            padding: 20px 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--terracotta);
+        }
+
+        .stat-card.gold::before {
+            background: var(--gold);
+        }
+
+        .stat-card.sage::before {
+            background: var(--sage);
+        }
+
+        .stat-card.brown::before {
+            background: var(--warm-brown);
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--charcoal);
+            line-height: 1;
+        }
+
+        .stat-change {
+            font-size: 0.72rem;
+            color: var(--sage);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-change.down {
+            color: #DC2626;
+        }
+
+        /* VIEW TABS */
+
+        .view-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid #E5DFD8;
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--muted);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-family: 'Lato';
+        }
+
+        .tab-btn:hover {
+            color: var(--charcoal);
+        }
+
+        .tab-btn.active {
+            color: var(--terracotta);
+            border-bottom-color: var(--terracotta);
+        }
+
+        /* SEARCH & FILTER */
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input,
+        .filter-select,
+        .date-input {
+            border: 1.5px solid #E5DFD8;
+            background: var(--cream);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            font-family: 'Lato', sans-serif;
+            color: var(--charcoal);
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .admin-sign-out {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: #ef4444;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            letter-spacing: 0;
+            text-transform: none;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+
+        .admin-sign-out:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ef4444;
+        }
+
+        .admin-sign-out svg {
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .date-input {
+            flex: 0 1 150px;
+        }
+
+        .search-input:focus,
+        .filter-select:focus,
+        .date-input:focus {
+            outline: none;
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 3px rgba(196, 99, 58, 0.1);
+        }
+
+        /* CARD */
+
+        .card {
+            background: var(--cream);
+            border: 1px solid #E5DFD8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E5DFD8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+        }
+
+        .card-sub {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* TABLE */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 16px 20px;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid #E5DFD8;
+        }
+
+        tbody td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #F0EBE3;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #FAF7F2;
+        }
+
+        /* BADGES */
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .badge-confirmed {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .badge-pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .badge-cancelled {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .badge-completed {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+
+        /* ACTIONS */
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-btn {
+            padding: 7px 14px;
+            border-radius: 5px;
+            border: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: 'Lato';
+        }
+
+        .btn-view {
+            background: var(--surface);
+            color: var(--charcoal);
+            border: 1px solid #E5DFD8;
+        }
+
+        .btn-view:hover {
+            background: var(--charcoal);
+            color: white;
+        }
+
+        .btn-confirm {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .btn-confirm:hover {
+            background: #16A34A;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .btn-cancel:hover {
+            background: #DC2626;
+            color: white;
+        }
+
+        /* EMPTY STATE */
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* MODAL STYLES */
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--cream);
+            border-radius: 10px;
+            padding: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--charcoal);
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--muted);
+        }
+
+        .modal-close:hover {
+            color: var(--charcoal);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .detail-value {
+            font-size: 0.95rem;
+            color: var(--charcoal);
+        }
+
+        .detail-full {
+            grid-column: 1 / -1;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border: 1.5px solid #E5DFD8;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Lato';
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface);
+        }
+
+        .btn-primary-modal {
+            padding: 10px 20px;
+            border: none;
+            background: var(--terracotta);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Lato';
+            transition: all 0.2s;
+        }
+
+        .btn-primary-modal:hover {
+            background: var(--warm-brown);
+        }
+
+        /* NOTES SECTION */
+
+        .notes-section {
+            background: #FFF8F5;
+            border-left: 3px solid var(--terracotta);
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .notes-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .notes-text {
+            font-size: 0.9rem;
+            color: var(--charcoal);
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .notes-empty {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* GUEST COUNT INDICATOR */
+
+        .guest-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #FFF8F5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--terracotta);
+            font-weight: 700;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-input,
+            .date-input {
+                width: 100%;
+            }
+        }
+
+    </style>
+
+    <th:block th:replace="~{AdminManagement/fragments/admin-responsive :: admin-responsive}"></th:block>
+
+</head>
+
+<body>
+
+<div th:replace="~{AdminManagement/fragments/sidebar :: sidebar('reservations')}"></div>
+
+<!-- MAIN: view tabs (daily/monthly/yearly), filters, reservation table with reference column -->
+
+<main class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div>
+
+            <div class="topbar-title">
+                Reservation Management
+            </div>
+
+            <div class="topbar-sub">
+                Monitor and manage all reservations
+            </div>
+
+        </div>
+
+        <div th:replace="~{AdminManagement/fragments/admin-topbar-right :: topbarRight}"></div>
+
+    </div>
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+        <!-- HEADER -->
+
+        <div class="page-header">
+
+            <div class="page-title">
+                Reservations
+            </div>
+
+            <div class="page-sub">
+                Manage all restaurant reservations and bookings
+            </div>
+
+        </div>
+
+        <!-- STATISTICS CARDS -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Reservations
+                </div>
+
+                <div class="stat-value"
+                     th:text="${totalReservations} ?: '0'">
+                    234
+                </div>
+
+                <div class="stat-change">
+                    ↑ 12% this month
+                </div>
+
+            </div>
+
+            <div class="stat-card gold">
+
+                <div class="stat-label">
+                    Confirmed
+                </div>
+
+                <div class="stat-value"
+                     th:text="${confirmedReservations} ?: '0'">
+                    156
+                </div>
+
+                <div class="stat-change">
+                    67% completion rate
+                </div>
+
+            </div>
+
+            <div class="stat-card sage">
+
+                <div class="stat-label">
+                    Today's Reservations
+                </div>
+
+                <div class="stat-value"
+                     th:text="${todayReservations} ?: '0'">
+                    45
+                </div>
+
+                <div class="stat-change">
+                    Awaiting confirmation
+                </div>
+
+            </div>
+
+            <div class="stat-card brown">
+
+                <div class="stat-label">
+                    Cancelled
+                </div>
+
+                <div class="stat-value"
+                     th:text="${cancelledReservations} ?: '0'">
+                    33
+                </div>
+
+                <div class="stat-change down">
+                    14% cancellation rate
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- VIEW TABS -->
+
+        <div class="view-tabs">
+
+            <button type="button"
+                    class="tab-btn"
+                    th:classappend="${view == 'daily'} ? ' active' : ''"
+                    onclick="switchView('daily', this)">
+                Daily
+            </button>
+
+            <button type="button"
+                    class="tab-btn"
+                    th:classappend="${view == 'monthly'} ? ' active' : ''"
+                    onclick="switchView('monthly', this)">
+                Monthly
+            </button>
+
+        </div>
+
+        <!-- SEARCH & FILTER -->
+
+        <form class="admin-filter-form" th:action="@{/admin/reservations}" method="get">
+
+            <input type="hidden" name="view" id="viewFilter" th:value="${view != null ? view : 'daily'}"/>
+
+            <div class="search-bar">
+
+                <input class="search-input"
+                       type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Search by customer name, phone, or restaurant..." />
+
+                <input class="date-input"
+                       th:if="${view == 'monthly'}"
+                       type="month"
+                       name="date"
+                       id="dateFilter"
+                       th:value="${date}"
+                       onchange="handleAdminFilterChange(this)" />
+
+                <input class="date-input"
+                      th:unless="${view == 'monthly'}"
+                       type="date"
+                       name="date"
+                       id="dateFilter"
+                       th:value="${date}"
+                       onchange="handleAdminFilterChange(this)" />
+
+                <select class="filter-select" name="status" onchange="handleAdminFilterChange(this)">
+
+                    <option value="" th:selected="${status == null or status == ''}">
+                        All Status
+                    </option>
+
+                    <option value="CONFIRMED" th:selected="${status == 'CONFIRMED'}">
+                        Confirmed
+                    </option>
+
+                    <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">
+                        Cancelled
+                    </option>
+
+                </select>
+
+                <select class="filter-select" name="timeFilter" onchange="handleAdminFilterChange(this)">
+
+                    <option value="" th:selected="${timeFilter == null or timeFilter == ''}">
+                        All Times
+                    </option>
+
+                    <option value="breakfast" th:selected="${timeFilter == 'breakfast'}">
+                        Breakfast (6am - 11am)
+                    </option>
+
+                    <option value="lunch" th:selected="${timeFilter == 'lunch'}">
+                        Lunch (11am - 5pm)
+                    </option>
+
+                    <option value="dinner" th:selected="${timeFilter == 'dinner'}">
+                        Dinner (5pm - 11pm)
+                    </option>
+
+                </select>
+
+            </div>
+
+        </form>
+
+        <!-- RESERVATIONS TABLE -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <div class="card-title">
+                        All Reservations
+                    </div>
+
+                    <div class="card-sub">
+
+                        <span th:text="${#lists.size(reservations)}"></span>
+                        total reservations found
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>Reference</th>
+                    <th>Customer</th>
+                    <th>Restaurant</th>
+                    <th>Date & Time</th>
+                    <th>Guests</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <!-- EMPTY STATE -->
+
+                <tr th:if="${#lists.isEmpty(reservations)}">
+
+                    <td colspan="7">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                📅
+                            </div>
+
+                            <div class="empty-title">
+                                No Reservations Found
+                            </div>
+
+                            <div class="empty-text">
+                                No reservations match your search criteria. Try adjusting your filters or date range.
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                <!-- RESERVATION ROWS -->
+
+                <tr th:each="reservation : ${reservations}">
+
+                    <!-- REFERENCE -->
+
+                    <td>
+                        <strong th:text="${reservation.reservationCode != null ? reservation.reservationCode : '—'}">—</strong>
+                    </td>
+
+                    <!-- CUSTOMER -->
+
+                    <td>
+
+                        <strong th:text="${reservation.customer.firstName + ' ' + reservation.customer.lastName}">
+                        </strong>
+
+                        <br>
+
+                        <span style="font-size:0.72rem;
+             color:var(--muted);"
+                              th:text="${reservation.customer.phoneNumber}">
+</span>
+
+                    </td>
+
+                    <!-- RESTAURANT -->
+
+                    <td th:text="${reservation.restaurant.restaurantName}">
+                    </td>
+                    <!-- DATE & TIME -->
+
+                    <td>
+
+                        <strong th:text="${#temporals.format(reservation.date,'MMM dd, yyyy')}">
+                        </strong>
+
+                        <br>
+
+                        <span style="font-size:0.72rem;
+             color:var(--muted);"
+                              th:text="${reservation.startingTime}">
+</span>
+
+                    </td>
+
+                    <!-- GUESTS -->
+
+                    <td>
+
+                        <span th:text="${reservation.noOfSeats}"></span>
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                            <span class="badge"
+                                  th:classappend="${reservation.status.name() == 'CONFIRMED'}
+      ? ' badge-confirmed'
+      : ' badge-cancelled'"
+
+                                  th:text="${reservation.status}">
+</span>
+
+                    </td>
+
+                    <!-- ACTIONS -->
+
+                    <td>
+
+                        <div class="action-group">
+
+                            <button type="button"
+                                    class="action-btn btn-view"
+                                    onclick="openReservationModal(this.closest('tr'))"
+                                    data-reservation-id="#">
+                                View
+                            </button>
+
+                            <form th:if="${reservation.status.name() != 'CANCELLED'}"
+                                  th:action="@{/admin/reservations/{id}/cancel(id=${reservation.id})}"
+                                  method="post"
+                                  style="margin: 0;"
+                                  onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+
+
+
+                                <button type="submit"
+                                        class="action-btn btn-cancel">
+                                    Cancel
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- RESERVATION DETAIL MODAL -->
+
+<div id="reservationModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="modal-close" onclick="closeReservationModal()">&times;</span>
+
+        <div class="modal-header">
+            Reservation Details
+        </div>
+
+        <!-- DETAIL GRID -->
+
+        <div class="detail-grid">
+
+            <!-- REFERENCE -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Reference
+                </div>
+
+                <div class="detail-value"
+                     id="modalReference">
+                    RES-000-000-000000
+                </div>
+
+            </div>
+
+            <!-- CUSTOMER INFO -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Customer Name
+                </div>
+
+                <div class="detail-value"
+                     id="modalCustomerName">
+                    John Doe
+                </div>
+
+            </div>
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Phone Number
+                </div>
+
+                <div class="detail-value"
+                     id="modalPhoneNumber">
+                    +1 (555) 123-4567
+                </div>
+
+            </div>
+
+            <!-- EMAIL -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Email Address
+                </div>
+
+                <div class="detail-value"
+                     id="modalEmail">
+                    john@example.com
+                </div>
+
+            </div>
+
+            <!-- RESTAURANT -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Restaurant
+                </div>
+
+                <div class="detail-value"
+                     id="modalRestaurant">
+                    The Italian Place
+                </div>
+
+            </div>
+
+            <!-- DATE & TIME -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Reservation Date
+                </div>
+
+                <div class="detail-value"
+                     id="modalDate">
+                    Jan 15, 2025
+                </div>
+
+            </div>
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Reservation Time
+                </div>
+
+                <div class="detail-value"
+                     id="modalTime">
+                    7:30 PM
+                </div>
+
+            </div>
+
+            <!-- GUESTS -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Number of Guests
+                </div>
+
+                <div class="detail-value"
+                     id="modalGuests">
+                    4 guests
+                </div>
+
+            </div>
+
+            <!-- STATUS -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Current Status
+                </div>
+
+                <div class="detail-value">
+
+                    <span class="badge badge-confirmed"
+                          id="modalStatus">
+                        Confirmed
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- BOOKING DATE -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Booking Made On
+                </div>
+
+                <div class="detail-value"
+                     id="modalBookingDate">
+                    Jan 10, 2025
+                </div>
+
+            </div>
+
+            <!-- SPECIAL REQUESTS -->
+
+            <div class="detail-item detail-full">
+
+                <div class="detail-label">
+                    Special Requests
+                </div>
+
+                <div class="detail-value"
+                     id="modalSpecialRequests">
+                    <span style="color: var(--muted); font-style: italic;">No special requests</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- NOTES SECTION -->
+
+        <div class="notes-section">
+
+            <div class="notes-label">
+                Admin Notes
+            </div>
+
+            <div class="notes-text"
+                 id="modalNotes">
+                <span class="notes-empty">No notes added yet</span>
+            </div>
+
+        </div>
+
+        <!-- ACTIONS -->
+
+        <div class="modal-actions">
+
+            <button class="btn-secondary"
+                    onclick="closeReservationModal()">
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    function formatLocalDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+    }
+
+    function defaultDateValueForView(view) {
+        const today = new Date();
+        if (view === 'monthly') {
+            return today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+        }
+        return formatLocalDate(today);
+    }
+
+    // Switch between daily and monthly views (resets date to current period for that view)
+    function switchView(view, element) {
+        document.querySelectorAll('.tab-btn').forEach(function (btn) {
+            btn.classList.remove('active');
+        });
+        element.classList.add('active');
+
+        const viewInput = document.getElementById('viewFilter');
+        if (viewInput) {
+            viewInput.value = view;
+        }
+
+        const dateInput = document.getElementById('dateFilter');
+        if (dateInput) {
+            dateInput.value = defaultDateValueForView(view);
+        }
+
+        const form = document.querySelector('form.admin-filter-form');
+        if (form) {
+            submitAdminFilterForm(form);
+        }
+    }
+    function openReservationModal(row) {
+
+        const cells = row.querySelectorAll('td');
+
+        const reference =
+            cells[0]?.querySelector('strong')?.textContent.trim() || '—';
+
+        // CUSTOMER
+
+        const customerName =
+            cells[1].querySelector('strong')?.textContent || '';
+
+        const phoneNumber =
+            cells[1].querySelector('span')?.textContent || '';
+
+        // RESTAURANT
+
+        const restaurantName =
+            cells[2]?.textContent.trim() || '';
+
+        // DATE & TIME
+
+        const date =
+            cells[3].querySelector('strong')?.textContent || '';
+
+        const time =
+            cells[3].querySelector('span')?.textContent || '';
+
+        // GUESTS
+
+        const guests =
+            cells[4]?.textContent.trim() || '';
+
+        // STATUS
+
+        const statusBadgeElement =
+            cells[5].querySelector('.badge');
+
+        const status =
+            statusBadgeElement
+                ? statusBadgeElement.textContent.trim()
+                : 'Unknown';
+
+        // UPDATE MODAL
+
+        document.getElementById('modalReference').textContent =
+            reference;
+
+        document.getElementById('modalCustomerName').textContent =
+            customerName;
+
+        document.getElementById('modalPhoneNumber').textContent =
+            phoneNumber;
+
+        document.getElementById('modalRestaurant').textContent =
+            restaurantName;
+
+        document.getElementById('modalDate').textContent =
+            date;
+
+        document.getElementById('modalTime').textContent =
+            time;
+
+        document.getElementById('modalGuests').textContent =
+            guests;
+
+        // STATUS BADGE
+
+        const modalStatus =
+            document.getElementById('modalStatus');
+
+        modalStatus.textContent = status;
+
+        modalStatus.className = 'badge';
+
+        if(status === 'CONFIRMED') {
+
+            modalStatus.classList.add('badge-confirmed');
+
+        }
+        else {
+
+            modalStatus.classList.add('badge-cancelled');
+
+        }
+
+        // SHOW MODAL
+
+        document.getElementById('reservationModal')
+            .classList.add('active');
+    }
+
+    function closeReservationModal() {
+
+        document.getElementById('reservationModal').classList.remove('active');
+
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+
+        const modal = document.getElementById('reservationModal');
+
+        if (event.target == modal) {
+
+            modal.classList.remove('active');
+
+        }
+
+    }
+
+    // Submit search form on Enter key
+    document.querySelectorAll('.search-input').forEach(input => {
+
+        input.addEventListener('keypress', function(e) {
+
+            if (e.key === 'Enter') {
+
+                e.preventDefault();
+                this.closest('form').submit();
+
+            }
+
+        });
+
+    });
+
+    // Set today's date on page load
+    window.addEventListener('DOMContentLoaded', function() {
+
+        const dateInput = document.getElementById('dateFilter');
+        const today = new Date();
+        dateInput.value = today.toISOString().split('T')[0];
+
+    });
+
+</script>
+
+<th:block th:replace="~{AdminManagement/fragments/admin-filter-script :: admin-filter-script}"></th:block>
+<th:block th:replace="~{AdminManagement/fragments/admin-sidebar-collapse :: collapse}"></th:block>
+
+</body>
+
+</html>

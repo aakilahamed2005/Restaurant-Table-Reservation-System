@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>DineElite — Make a Reservation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                    colors: {
+                        cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917',
+                        'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853',
+                        sage: '#7A8C6E', muted: '#8A7E78'
+                    },
+                    fontFamily: {
+                        display: ['"Playfair Display"', 'serif'],
+                        body: ['Lato', 'sans-serif'],
+                        accent: ['"Cormorant Garamond"', 'serif']
+                    }
+                }}
+        }
+    </script>
+    <style>
+        body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+        .topbar { background: #1C1917; }
+
+        .input-field {
+            border: 1.5px solid #E5DFD8;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: white;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #C4633A;
+            box-shadow: 0 0 0 3px rgba(196,99,58,0.1);
+        }
+
+        .btn-primary {
+            background: #C4633A; color: white;
+            font-family: 'Lato'; letter-spacing: 0.08em;
+            text-transform: uppercase; font-size: 0.75rem;
+            font-weight: 700; transition: background 0.2s;
+        }
+        .btn-primary:hover { background: #44312A; }
+
+        /* Duration pills */
+        .duration-pill {
+            flex: 1;
+            padding: 14px 10px;
+            border: 1.5px solid #E5DFD8;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.2s;
+            text-align: center;
+            font-family: 'Lato';
+        }
+        .duration-pill:hover { border-color: #C4633A; background: rgba(196,99,58,0.04); }
+        .duration-pill.sel {
+            background: #C4633A; color: white;
+            border-color: #C4633A;
+        }
+        .duration-pill.sel .pill-sub { color: rgba(255,255,255,0.75); }
+
+        .pill-main { font-size: 0.9rem; font-weight: 700; display: block; }
+        .pill-sub  { font-size: 0.7rem; color: #8A7E78; display: block; margin-top: 2px; }
+
+        /* Seat selector */
+        .seat-btn {
+            width: 38px; height: 38px;
+            border: 1.5px solid #E5DFD8;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; background: white;
+            font-size: 1.1rem; font-weight: 300;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .seat-btn:hover { border-color: #C4633A; color: #C4633A; }
+
+        .fade-in { animation: fadeUp 0.5s ease both; }
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(16px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        /* Summary detail rows */
+        .sum-row { display: flex; justify-content: space-between; font-size: 0.875rem; }
+
+        /* Tooltip */
+        .info-tip {
+            position: relative;
+        }
+        .info-tip .tip-box {
+            display: none; position: absolute; bottom: 130%;
+            left: 50%; transform: translateX(-50%);
+            background: #1C1917; color: white;
+            font-size: 0.7rem; padding: 6px 10px;
+            border-radius: 5px; white-space: nowrap;
+            font-family: 'Lato';
+        }
+        .info-tip:hover .tip-box { display: block; }
+
+        .occasion-chip {
+            padding: 8px 10px;
+            border: 1.5px solid #E5DFD8;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            background: white;
+            transition: all 0.2s;
+            text-align: center;
+            font-family: 'Lato';
+            user-select: none;
+        }
+        .occasion-chip:hover { border-color: #C4633A; background: rgba(196,99,58,0.04); }
+        .occasion-chip.sel   { border-color: #C4633A; background: rgba(196,99,58,0.08); color: #C4633A; font-weight: 700; }
+    </style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- NAV -->
+<nav class="topbar flex items-center justify-between px-8 py-4">
+    <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">
+        Dine<span style="color:#D4A853">Elite</span>
+    </a>
+
+    <a class="flex items-center gap-2 cursor-pointer" th:href="@{/customer-profile-view}">
+        <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+        <span class="text-gray-300 text-sm font-body" th:text="${customerFullName}">Jane Doe</span>
+    </a>
+
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="max-w-5xl mx-auto px-6 pt-6 pb-2">
+    <div class="flex items-center gap-2 text-xs font-body text-muted">
+        <a th:href="@{/restaurant-listing}" class="hover:text-terracotta transition-colors">Restaurants</a>
+        <span>›</span>
+        <a th:href="@{/restaurant-view-page/{id}(id=${restaurant.id})}"
+           class="hover:text-terracotta transition-colors"
+           th:text="${restaurant.restaurantName}">Ember &amp; Oak</a>
+        <span>›</span>
+        <span class="text-charcoal font-bold">Reserve</span>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="max-w-5xl mx-auto px-6 py-6 flex flex-col lg:flex-row gap-10 fade-in">
+
+    <!-- ══════════════════════════════════════════
+         LEFT — booking form
+    ══════════════════════════════════════════ -->
+    <div class="flex-1">
+
+        <!-- Restaurant mini-header -->
+        <div class="bg-white rounded-lg p-5 mb-6 flex items-center gap-4 border-l-4" style="border-color:#C4633A;">
+            <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-warm-brown to-terracotta flex-shrink-0 flex items-center justify-center text-white text-xl font-display"
+            th:text="${restaurantNameFirstLetter}">
+                E
+            </div>
+            <div>
+                <p class="font-display text-lg text-charcoal" th:text="${restaurant.restaurantName}">Ember &amp; Oak</p>
+                <p class="text-xs text-muted font-body" th:text="${restaurant.cuisine + ' · ' + restaurant.city}">Modern European · Downtown</p>
+            </div>
+        </div>
+
+        <!-- ── STEP 1: Date ───────────────────────── -->
+        <div class="bg-white rounded-lg p-7 mb-5">
+            <h2 class="font-display text-2xl text-charcoal mb-1">When would you like to visit?</h2>
+            <p class="text-xs text-muted font-body mb-5">Choose your preferred date and time for dining</p>
+
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">Date</label>
+            <input type="date" id="dateInput"
+                   class="input-field w-full rounded px-4 py-3 font-body text-sm"
+                   th:min="${today}" th:value="${today}"
+                   onchange="updateSummary()"/>
+
+            <!-- Quick date shortcuts -->
+            <div class="flex gap-2 mt-3">
+                <button onclick="setDate(0)"
+                        class="text-xs px-3 py-1.5 border border-gray-200 rounded-full font-body hover:border-terracotta hover:text-terracotta transition-colors">
+                    Today
+                </button>
+                <button onclick="setDate(1)"
+                        class="text-xs px-3 py-1.5 border border-gray-200 rounded-full font-body hover:border-terracotta hover:text-terracotta transition-colors">
+                    Tomorrow
+                </button>
+                <button onclick="setDate(7)"
+                        class="text-xs px-3 py-1.5 border border-gray-200 rounded-full font-body hover:border-terracotta hover:text-terracotta transition-colors">
+                    Next week
+                </button>
+            </div>
+        </div>
+
+        <!-- ── STEP 2: Party size ────────────────── -->
+        <div class="bg-white rounded-lg p-7 mb-5">
+            <h2 class="font-display text-2xl text-charcoal mb-1">How many guests?</h2>
+            <p class="text-xs text-muted font-body mb-5">
+                Maximum party size for online booking:
+                <span class="font-bold text-charcoal" th:text="${maxPartySize}">10</span> guests
+                · Restaurant capacity:
+                <span class="font-bold text-charcoal" th:text="${totalSeats}">60</span> seats
+            </p>
+
+            <div class="flex items-center gap-5">
+                <button class="seat-btn" onclick="changeSeats(-1)">−</button>
+                <div class="text-center">
+                    <span id="seatCount" class="font-display text-4xl text-charcoal">2</span>
+                    <span class="font-body text-muted text-sm ml-1">guests</span>
+                </div>
+                <button class="seat-btn" onclick="changeSeats(1)">+</button>
+            </div>
+
+            <input type="hidden" id="seatsInput" name="seats" value="2"/>
+
+
+        </div>
+
+        <!-- ── STEP 3: Duration ──────────────────── -->
+        <div class="bg-white rounded-lg p-7 mb-5">
+            <h2 class="font-display text-2xl text-charcoal mb-1">How long will you stay?</h2>
+            <p class="text-xs text-muted font-body mb-5">Your table will be held for the selected duration</p>
+
+            <div class="flex gap-3">
+                <div class="duration-pill" onclick="selectDuration(this, 60)">
+                    <span class="pill-main">1 Hour</span>
+                    <span class="pill-sub">Quick dining</span>
+                </div>
+                <div class="duration-pill sel" onclick="selectDuration(this, 120)">
+                    <span class="pill-main">2 Hours</span>
+                    <span class="pill-sub">Recommended</span>
+                </div>
+                <div class="duration-pill" onclick="selectDuration(this, 180)">
+                    <span class="pill-main">3 Hours</span>
+                    <span class="pill-sub">Leisurely</span>
+                </div>
+                <div class="duration-pill" onclick="selectDuration(this, 240)">
+                    <span class="pill-main">4 Hours</span>
+                    <span class="pill-sub">Special event</span>
+                </div>
+            </div>
+
+            <input type="hidden" id="durationInput" name="duration" value="120"/>
+        </div>
+
+        <!-- ── STEP 4: Special requests ─────────── -->
+
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         RIGHT — sticky summary
+    ══════════════════════════════════════════ -->
+    <div class="lg:w-80 flex-shrink-0">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden sticky top-10">
+
+            <!-- Restaurant header band -->
+            <div class="h-24 bg-gradient-to-br from-warm-brown via-terracotta to-gold relative flex items-end p-5">
+                <div>
+                    <p class="font-display text-lg text-white" th:text="${restaurant.restaurantName}">Ember &amp; Oak</p>
+                    <p class="text-white text-xs font-body opacity-80" th:text="${restaurant.cuisine}">Modern European · Downtown</p>
+                </div>
+                <div class="absolute top-3 right-3 flex items-center gap-1 bg-black bg-opacity-30 px-2 py-1 rounded-full">
+                    <span class="text-gold text-xs">★</span>
+                    <span class="text-white text-xs font-body font-bold" th:text="${restaurant.overallRating}">4.9</span>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <h3 class="font-display text-lg text-charcoal mb-4">Your Selection</h3>
+
+                <div class="flex flex-col gap-3 text-sm font-body mb-5 pb-5 border-b border-gray-100">
+                    <div class="sum-row">
+                        <span class="text-muted">Date</span>
+                        <span class="font-bold text-charcoal" id="sumDate">—</span>
+                    </div>
+                    <div class="sum-row">
+                        <span class="text-muted">Guests</span>
+                        <span class="font-bold text-charcoal" id="sumGuests">2 people</span>
+                    </div>
+                    <div class="sum-row">
+                        <span class="text-muted">Duration</span>
+                        <span class="font-bold text-charcoal" id="sumDuration">2 hours</span>
+                    </div>
+                </div>
+
+                <!-- Policy snippet -->
+                <div class="flex flex-col gap-2 mb-5 text-xs font-body text-muted">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sage">✓</span> Free cancellation up to 2h before
+                    </div>
+                </div>
+
+                <button onclick="submitForm(event)"
+                        class="btn-primary w-full py-4 rounded-sm text-center block">
+                    See Available Times →
+                </button>
+
+                <a th:href="@{/restaurant-view-page/{id}(id=${restaurant.id})}"
+                   class="block text-center text-xs text-muted font-body mt-3 hover:text-terracotta transition-colors">
+                    ← Back to restaurant
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form that actually submits -->
+<form id="bookingForm" th:object="${seatCheckingForm}" method="POST" th:action="@{/restaurant-seat-availability}" style="display:none;">
+    <input type="hidden" name="restaurantId"      th:value="${restaurant.id}"/>
+    <input type="hidden" th:field="*{customerId}">
+    <input type="hidden" id="formDate"            name="date"/>
+    <input type="hidden" id="formSeats"           name="noOfGuests"/>
+    <input type="hidden" id="formDuration"        name="duration"/>
+</form>
+
+<script th:inline="javascript">
+    let seats    = 2;
+    let duration = 120;
+    const maxPartySize = /*[[${maxPartySize}]]*/ 10;
+</script>
+<script>
+
+    // ===============================
+    // INIT
+    // ===============================
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // set min date = today
+        const todayStr  = new Date().toISOString().split("T")[0];
+        const dateInput = document.getElementById("dateInput");
+        dateInput.min   = todayStr;
+
+        if (seats > maxPartySize) {
+            seats = maxPartySize;
+            document.getElementById("seatCount").textContent = seats;
+            document.getElementById("seatsInput").value = seats;
+            document.getElementById("sumGuests").textContent =
+                seats + (seats === 1 ? " person" : " people");
+        }
+
+        updateSummary();
+    });
+
+
+    // ===============================
+    // DATE SHORTCUTS
+    // ===============================
+    function setDate(daysAhead) {
+        const d = new Date();
+        d.setDate(d.getDate() + daysAhead);
+        document.getElementById("dateInput").value = d.toISOString().split("T")[0];
+        updateSummary();
+    }
+
+
+    // ===============================
+    // SEATS
+    // ===============================
+    function changeSeats(delta) {
+        seats = Math.max(1, Math.min(maxPartySize, seats + delta));
+
+        document.getElementById("seatCount").textContent = seats;
+        document.getElementById("seatsInput").value      = seats;
+
+        document.getElementById("sumGuests").textContent =
+            seats + (seats === 1 ? " person" : " people");
+    }
+
+
+    // ===============================
+    // DURATION
+    // ===============================
+    function selectDuration(el, mins) {
+        document.querySelectorAll(".duration-pill").forEach(p => p.classList.remove("sel"));
+
+        el.classList.add("sel");
+        duration = mins;
+
+        document.getElementById("durationInput").value = mins;
+
+        document.getElementById("sumDuration").textContent =
+            (mins / 60) + (mins === 60 ? " hour" : " hours");
+    }
+
+
+
+    // ===============================
+    // SUMMARY UPDATE
+    // ===============================
+    function updateSummary() {
+        const raw = document.getElementById("dateInput").value;
+        if (raw) {
+            const d = new Date(raw + "T00:00:00");
+            document.getElementById("sumDate").textContent =
+                d.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month:   "long",
+                    day:     "numeric",
+                    year:    "numeric"
+                });
+        }
+    }
+
+
+    // ===============================
+    // SUBMIT FORM
+    // ===============================
+    function submitForm(e) {
+        e.preventDefault();
+
+        document.getElementById("formDate").value         = document.getElementById("dateInput").value;
+        document.getElementById("formSeats").value        = seats;
+        document.getElementById("formDuration").value     = duration;
+
+        document.getElementById("bookingForm").submit();
+    }
+</script>
+</body>
+</html>

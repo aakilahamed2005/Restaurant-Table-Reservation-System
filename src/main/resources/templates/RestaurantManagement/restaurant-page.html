@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="|${restaurant.restaurantName}  - DineElite|">Ember &amp; Oak — DineElite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+        }}
+    }
+  </script>
+  <style>
+    body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
+    .topbar { background: rgba(28,25,23,0.96); backdrop-filter: blur(8px); }
+    .hero-gradient { background: linear-gradient(180deg, rgba(28,25,23,0) 0%, rgba(28,25,23,0.8) 100%); }
+    .tab-btn { padding: 12px 20px; font-family: 'Lato'; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 2px solid transparent; transition: all 0.2s; color: #8A7E78; cursor: pointer; }
+    .tab-btn.active { border-bottom-color: #C4633A; color: #C4633A; }
+    .tab-btn:hover { color: #1C1917; }
+    .time-slot { padding: 8px 16px; border: 1.5px solid #E5DFD8; border-radius: 4px; font-family: 'Lato'; font-size: 0.8rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
+    .time-slot:hover, .time-slot.selected { background: #C4633A; color: white; border-color: #C4633A; }
+    .time-slot.unavailable { background: #F0EBE3; color: #C9C0BB; border-color: #E5DFD8; cursor: not-allowed; }
+    .star { color: #D4A853; }
+    .menu-item { border-bottom: 1px solid #F0EBE3; }
+    .menu-item:last-child { border-bottom: none; }
+    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s; }
+    .btn-primary:hover { background: #44312A; }
+    .photo-grid {
+      display: grid;
+      gap: 4px;
+      height: 24rem;
+      width: 100%;
+    }
+    .photo-grid .photo-cell {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+      min-width: 0;
+    }
+    .photo-grid .photo-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-grid.count-1 {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+    }
+    .photo-grid.count-2 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+    }
+    .photo-grid.count-3 {
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    .photo-grid.count-3 .photo-cell:first-child {
+      grid-row: span 2;
+    }
+    .photo-grid.count-4 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    .photo-grid.count-5 {
+      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    .photo-grid.count-5 .photo-cell:first-child {
+      grid-row: span 2;
+    }
+  </style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4" style="background: rgba(28,25,23,0.96); backdrop-filter: blur(8px);">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight cursor-pointer">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="hidden md:flex items-center gap-8">
+    <a th:href="@{/restaurant-listing}" class="nav-link text-sm text-gray-300 font-body cursor-pointer">Explore</a>
+
+    <!--Displays login and register options if customer is not logged in-->
+    <div th:if="${user == null}">
+      <a th:href="@{/sign-in}" class="nav-link text-sm text-gray-300 font-body cursor-pointer mr-4">Sign In</a>
+      <a th:href="@{/customer-register}" class="btn-primary px-5 py-2 rounded-sm cursor-pointer">Join Free</a>
+    </div>
+
+    <!-- Displays user info and logout option if customer is logged in -->
+    <div th:if="${user != null && user.role.name() == 'CUSTOMER'}">
+      <a th:href="@{/customer-profile-view}" class="flex items-center gap-2 cursor-pointer">
+        <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+        <span class="text-gray-300 text-sm font-body cursor-pointer" th:text="|${user.firstName} ${user.lastName}|">Jane Doe</span>
+      </a>
+    </div>
+
+    <div th:if="${user != null && user.role.name() == 'OWNER'}">
+      <a th:href="@{/owner-profile-view}" class="flex items-center gap-2 cursor-pointer">
+        <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+        <span  class="text-gray-300 text-sm font-body cursor-pointer" th:text="|${user.firstName} ${user.lastName}|">Jane Doe</span>
+        <span class="text-red-300 text-sm font-body cursor-pointer" >(Restaurant Owner Account)</span>
+      </a>
+    </div>
+  </div>
+</nav>
+<!-- FIX 1: Removed the stray </div> that was here after </nav> -->
+
+<!-- HERO PHOTO GRID -->
+<div class="pt-16">
+  <div th:if="${not #lists.isEmpty(restaurantImages)}"
+       class="photo-grid px-0"
+       th:classappend="${' count-' + (#lists.size(restaurantImages) > 5 ? 5 : #lists.size(restaurantImages))}">
+    <div th:each="img, stat : ${restaurantImages}"
+         th:if="${stat.index < 5}"
+         class="photo-cell bg-charcoal">
+      <img th:src="@{'/uploads/' + ${img.filePath}}" alt="Restaurant photo"/>
+      <div th:if="${stat.index == 4 and #lists.size(restaurantImages) > 5}"
+           class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-sm font-body font-bold">
+        <span th:text="'+' + (${#lists.size(restaurantImages)} - 5) + ' photos'">+more</span>
+      </div>
+    </div>
+  </div>
+  <div th:if="${#lists.isEmpty(restaurantImages)}" class="h-96 bg-gradient-to-br from-warm-brown via-terracotta to-gold flex items-center justify-center">
+    <span class="text-white font-display text-2xl opacity-80" th:text="${restaurant.restaurantName}">Restaurant</span>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="max-w-6xl mx-auto px-6 py-10 flex flex-col lg:flex-row gap-10">
+
+  <!-- LEFT: Details -->
+  <div class="flex-1">
+
+    <!-- Restaurant Header -->
+    <div class="mb-6">
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 class="font-display text-4xl text-charcoal mb-2" th:text="${restaurant.restaurantName}"></h1>
+          <div class="flex items-center gap-4 flex-wrap">
+            <span class="star" th:if="${restaurant.overallRating == 5.0}">★★★★★</span>
+            <span class="star" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E5DFD8; font-size:0.75rem;">★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E5DFD8; font-size:0.75rem;">★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E5DFD8; font-size:0.75rem;">★★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E5DFD8; font-size:0.75rem;">★★★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating == 0.0}">No Ratings</span>
+            <strong th:text="${restaurant.overallRating}">4.9</strong>
+            <span class="text-muted" th:text="'(' + ${reviews != null ? reviews.size() : 0} + ' reviews)'">(248 reviews)</span>
+            <span class="text-muted text-sm font-body">•</span>
+            <span class="text-sm font-body text-muted" th:text="${restaurant.cuisine}"></span>
+            <span class="text-muted text-sm font-body">•</span>
+            <span class="text-sm font-body text-muted" th:text="${restaurant.priceRange}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 flex gap-0 mb-8">
+      <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
+      <button class="tab-btn" onclick="switchTab('reviews', this)">Reviews</button>
+      <button class="tab-btn" onclick="switchTab('photos', this)">Photos</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="tab-overview">
+      <p class="font-body text-sm leading-relaxed text-charcoal mb-6" th:text="${restaurant.description}"></p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- Hours Card -->
+        <div class="bg-surface p-5 rounded">
+          <h3 class="font-display text-lg text-charcoal mb-4">Hours</h3>
+          <div class="flex flex-col gap-2 text-sm font-body">
+            <div th:each="item : ${schedules}">
+              <div class="flex justify-between" th:if="${!item.isClosed()}">
+                <span class="text-muted" th:text="${item.getDay()}"></span>
+                <span class="font-bold" th:text="|${item.getOpenTime()}  -  ${item.getCloseTime()}|"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- FIX 2: Hours card was never closed — added the missing </div> above -->
+
+        <!-- Contact & Location Card -->
+        <div class="bg-surface p-5 rounded">
+          <h3 class="font-display text-lg text-charcoal mb-4">Contact &amp; Location</h3>
+          <div class="flex flex-col gap-2 text-sm font-body text-muted">
+            <div>
+              <span class="font-bold text-charcoal">Address: </span>
+              <span th:text="${restaurant.streetAddress != null && !#strings.isEmpty(restaurant.streetAddress) ? restaurant.streetAddress : 'Not provided'}"></span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal">City / Province: </span>
+              <span th:text="${(restaurant.city != null && !#strings.isEmpty(restaurant.city)) ? restaurant.city : '—'}"></span>
+              <span th:if="${restaurant.province != null}" th:text="${' / ' + restaurant.province}"></span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal">Phone: </span>
+              <span th:if="${restaurant.phoneNumber != null && !#strings.isEmpty(restaurant.phoneNumber)}">
+                <a th:href="@{'tel:' + ${restaurant.phoneNumber}}" th:text="${restaurant.phoneNumber}" class="text-charcoal"></a>
+              </span>
+              <span th:if="${restaurant.phoneNumber == null || #strings.isEmpty(restaurant.phoneNumber)}">Not provided</span>
+            </div>
+            <div>
+              <span class="font-bold text-charcoal">Email: </span>
+              <span th:if="${restaurant.email != null && !#strings.isEmpty(restaurant.email)}">
+                <a th:href="@{'mailto:' + ${restaurant.email}}" th:text="${restaurant.email}" class="text-charcoal"></a>
+              </span>
+              <span th:if="${restaurant.email == null || #strings.isEmpty(restaurant.email)}">Not provided</span>
+            </div>
+            <div th:if="${restaurant.website != null && !#strings.isEmpty(restaurant.website)}">
+              <span class="font-bold text-charcoal">Website: </span>
+              <a th:href="${restaurant.website}" th:text="${restaurant.website}" target="_blank" rel="noopener noreferrer" class="text-charcoal"></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Reviews Tab (hidden) -->
+    <div id="tab-reviews" class="hidden">
+      <div class="flex flex-col gap-6">
+
+        <div th:each="review : ${reviews}" class="bg-surface p-5 rounded">
+          <div class="flex items-center gap-3 mb-3">
+            <!-- First Letter Avatar -->
+            <div class="w-9 h-9 rounded-full bg-terracotta text-white flex items-center justify-center text-sm font-bold"
+                 th:text="${review.customer.firstName.substring(0,1)}">
+            </div>
+            <!-- Customer Name -->
+            <div>
+              <p class="font-body text-sm font-bold text-charcoal"
+                 th:text="${review.customer.firstName + ' ' + review.customer.lastName}">
+              </p>
+              <p class="text-xs text-muted font-body">Recent Review</p>
+            </div>
+            <!-- Stars -->
+            <div class="ml-auto star text-sm"
+                 th:text="${'★'.repeat(review.overall_rating)}">
+            </div>
+          </div>
+          <!-- Review Text -->
+          <p class="text-sm font-body text-charcoal leading-relaxed"
+             th:text="${review.review}">
+          </p>
+        </div>
+
+        <!-- Give Review Button -->
+        <a th:if="${user != null && user.role.name() == 'CUSTOMER'}" th:href="@{/restaurant-feedback/{id}(id=${restaurant.id})}"
+           class="btn-primary block w-full rounded-sm text-center mt-5 px-3 py-3">
+          Give your review
+        </a>
+
+      </div>
+    </div>
+    <!-- FIX 4: The "Give Review" button was outside the flex column div — moved it inside -->
+
+    <!-- Photos Tab (hidden) -->
+    <div id="tab-photos" class="hidden">
+      <div th:if="${not #lists.isEmpty(restaurantImages)}" class="grid grid-cols-3 gap-3">
+        <div th:each="img : ${restaurantImages}" class="aspect-square rounded overflow-hidden">
+          <img th:src="@{'/uploads/' + ${img.filePath}}" alt="Restaurant photo" class="w-full h-full object-cover"/>
+        </div>
+      </div>
+      <div th:if="${#lists.isEmpty(restaurantImages)}" class="text-center text-sm text-muted">
+        <p>No photos available for this restaurant.</p>
+      </div>
+    </div>
+
+  </div>
+  <!-- END LEFT -->
+
+  <!-- RIGHT: Booking Widget -->
+  <div class="lg:w-80 flex-shrink-0">
+    <div class="bg-white rounded-lg p-6 shadow-lg sticky top-24" th:if="${user != null && user.getRole().name() == 'CUSTOMER'}">
+      <h3 class="font-display text-xl text-charcoal mb-1">Make a Reservation</h3>
+      <p class="text-xs text-muted font-body mb-5">Instant confirmation</p>
+      <a th:href="@{/restaurant-seat-checking/{id}(id=${restaurant.id})}"
+         class="btn-primary block w-full rounded-sm text-center mt-5 px-3 py-3">
+        Reserve Table
+      </a>
+    </div>
+  </div>
+  <!-- END RIGHT -->
+
+  <div class="lg:w-80 flex-shrink-0 " th:if="${user == null}">
+    <div class="bg-white rounded-lg p-6 shadow-lg sticky top-24">
+      <h3 class="font-display text-xl text-charcoal mb-1">Make a Reservation</h3>
+      <p class="text-xs text-muted font-body mb-5">Instant confirmation</p>
+      <a th:href="@{/customer-login}"
+         class="btn-primary block w-full rounded-sm text-center mt-5 px-3 py-3">
+        Reserve Table
+      </a>
+    </div>
+  </div>
+
+</div>
+<!-- END MAIN CONTENT -->
+
+<script>
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+
+    ['overview','reviews','photos'].forEach(t => {
+      document.getElementById('tab-'+t).classList.add('hidden');
+    });
+
+    document.getElementById('tab-'+tab).classList.remove('hidden');
+  }
+</script>
+</body>
+</html>

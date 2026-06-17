@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<!--
+  Admin feedback list: search by customer/restaurant name, filter by star rating.
+  Delete opens confirmation modal; POST /admin/delete-feedback/{id}.
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0"/>
+
+    <title>DineElite — Feedback Management</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+          rel="stylesheet"/>
+
+    <style>
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --cream: #FAF7F2;
+            --surface: #F0EBE3;
+            --charcoal: #1C1917;
+            --warm-brown: #44312A;
+            --terracotta: #C4633A;
+            --gold: #D4A853;
+            --sage: #7A8C6E;
+            --muted: #8A7E78;
+        }
+
+        body {
+            background: #F0EBE3;
+            font-family: 'Lato', sans-serif;
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(160deg,
+            #1C1917 0%,
+            #2A1F1B 50%,
+            #44312A 100%);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .brand span {
+            color: var(--gold);
+        }
+
+        .badge-text {
+            font-size: 0.7rem;
+            color: #9CA3AF;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-section-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #6B7280;
+            padding: 18px 24px 8px;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            color: #9CA3AF;
+            text-decoration: none;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: rgba(196,99,58,0.15);
+            border-left-color: var(--terracotta);
+        }
+
+        .sidebar-footer {
+            padding: 18px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--terracotta);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .admin-name {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .admin-role {
+            color: #9CA3AF;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+        }
+
+        /* TOPBAR */
+
+        .topbar {
+            background: var(--cream);
+            border-bottom: 1px solid #E5DFD8;
+            padding: 18px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+        }
+
+        .topbar-sub {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        .topbar-btn {
+            border: 1px solid #E5DFD8;
+            background: transparent;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .topbar-signout {
+            color: #ef4444;
+            border-color: #DC2626;
+            background: #FEE2E2;
+        }
+
+        .topbar-signout:hover {
+            background: #DC2626;
+            color: white;
+            border-color: #DC2626;
+        }
+
+        .topbar-signout svg {
+            stroke: #ef4444;
+        }
+
+        .topbar-signout:hover svg {
+            stroke: white;
+        }
+
+        /* CONTENT */
+
+        .content {
+            padding: 32px;
+        }
+
+        .page-header {
+            margin-bottom: 22px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+        }
+
+        .page-sub {
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* SEARCH & FILTER */
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .search-input,
+        .filter-select {
+            border: 1.5px solid #E5DFD8;
+            background: var(--cream);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .admin-sign-out {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: #ef4444;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            letter-spacing: 0;
+            text-transform: none;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+
+        .admin-sign-out:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ef4444;
+        }
+
+        .admin-sign-out svg {
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 350px;
+        }
+
+        .search-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--terracotta);
+        }
+
+        /* CARD */
+
+        .card {
+            background: var(--cream);
+            border: 1px solid #E5DFD8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E5DFD8;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+        }
+
+        .card-sub {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* TABLE */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 16px 20px;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid #E5DFD8;
+        }
+
+        tbody td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #F0EBE3;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #FAF7F2;
+        }
+
+        /* BADGES */
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .badge-excellent {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .badge-good {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+
+        .badge-average {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .badge-poor {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* ACTIONS */
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-btn {
+            padding: 7px 14px;
+            border-radius: 5px;
+            border: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-view {
+            background: var(--surface);
+            color: var(--charcoal);
+            border: 1px solid #E5DFD8;
+        }
+
+        .btn-view:hover {
+            background: var(--charcoal);
+            color: white;
+        }
+
+        .btn-delete {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .btn-delete:hover {
+            background: #DC2626;
+            color: white;
+        }
+
+        /* RATING DISPLAY */
+
+        .rating-stars {
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .feedback-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: var(--charcoal);
+            max-width: 280px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .feedback-text:hover {
+            color: var(--terracotta);
+        }
+
+        .feedback-text.expanded {
+            display: block;
+            -webkit-line-clamp: unset;
+            overflow: visible;
+            max-height: none;
+            white-space: pre-wrap;
+        }
+
+        .feedback-text-hint {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--muted);
+            margin-top: 4px;
+            letter-spacing: 0.04em;
+        }
+
+        .feedback-text.truncated + .feedback-text-hint,
+        .feedback-text.expanded + .feedback-text-hint {
+            display: block;
+        }
+
+        /* EMPTY STATE */
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* MODAL STYLES */
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--cream);
+            border-radius: 10px;
+            padding: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--charcoal);
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--muted);
+        }
+
+        .modal-close:hover {
+            color: var(--charcoal);
+        }
+
+        .feedback-detail {
+            margin-bottom: 20px;
+        }
+
+        .feedback-detail-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .feedback-detail-value {
+            font-size: 0.95rem;
+            color: var(--charcoal);
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border: 1.5px solid #E5DFD8;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface);
+        }
+
+        /* DELETE CONFIRMATION */
+
+        .delete-confirmation {
+            text-align: center;
+        }
+
+        .delete-warning {
+            font-size: 1rem;
+            margin: 20px 0;
+            color: var(--charcoal);
+        }
+
+        .delete-confirmation .modal-actions {
+            justify-content: center;
+        }
+
+    </style>
+
+    <th:block th:replace="~{AdminManagement/fragments/admin-responsive :: admin-responsive}"></th:block>
+
+</head>
+
+<body>
+
+<div th:replace="~{AdminManagement/fragments/sidebar :: sidebar('feedback')}"></div>
+
+<!-- MAIN: filters and feedback table with view/delete actions -->
+
+<main class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div>
+
+            <div class="topbar-title">
+                Feedback Management
+            </div>
+
+            <div class="topbar-sub">
+                Monitor and manage customer feedback
+            </div>
+
+        </div>
+
+        <div th:replace="~{AdminManagement/fragments/admin-topbar-right :: topbarRight}"></div>
+
+    </div>
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+        <!-- HEADER -->
+
+        <div class="page-header">
+
+            <div class="page-title">
+                Feedback Management
+            </div>
+
+            <div class="page-sub">
+                View and manage all customer feedback
+            </div>
+
+        </div>
+
+        <!-- SEARCH & FILTER -->
+
+        <form class="admin-filter-form" th:action="@{/admin/feedback}" method="get">
+
+            <div class="search-bar">
+
+                <input class="search-input"
+                       type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Search feedback by user name or restaurant..." />
+
+                <select class="filter-select" name="rating" onchange="handleAdminFilterChange(this)">
+
+                    <option value="" th:selected="${rating == null or rating == ''}">
+                        All Ratings
+                    </option>
+
+                    <option value="5" th:selected="${rating == '5'}">
+                        ⭐⭐⭐⭐⭐ (5 Stars)
+                    </option>
+
+                    <option value="4" th:selected="${rating == '4'}">
+                        ⭐⭐⭐⭐ (4 Stars)
+                    </option>
+
+                    <option value="3" th:selected="${rating == '3'}">
+                        ⭐⭐⭐ (3 Stars)
+                    </option>
+
+                    <option value="2" th:selected="${rating == '2'}">
+                        ⭐⭐ (2 Stars)
+                    </option>
+
+                    <option value="1" th:selected="${rating == '1'}">
+                        ⭐ (1 Star)
+                    </option>
+
+                </select>
+
+
+
+
+
+
+            </div>
+
+        </form>
+
+        <!-- TABLE -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <div class="card-title">
+                        All Feedback
+                    </div>
+
+                    <div class="card-sub">
+
+                        <span th:text="${#lists.size(feedbacks)}"></span>
+                        total feedback submitted
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>Customer</th>
+                    <th>Restaurant</th>
+                    <th>Rating</th>
+                    <th>Feedback</th>
+                    <th>Date Submitted</th>
+                    <th>Actions</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <!-- EMPTY STATE -->
+
+                <tr th:if="${#lists.isEmpty(feedbacks)}">
+
+                    <td colspan="5">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                💬
+                            </div>
+
+                            <div class="empty-title">
+                                No Feedback Yet
+                            </div>
+
+                            <div class="empty-text">
+                                No feedback has been submitted. Feedback will appear here once customers start leaving reviews.
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                <!-- FEEDBACK ROWS -->
+
+                <tr th:each="feedback : ${feedbacks}">
+
+                    <!-- CUSTOMER -->
+
+                    <td>
+
+                        <strong th:text="${feedback.customer.firstName + ' ' + feedback.customer.lastName}">
+                        </strong>
+
+                        <br>
+
+                        <span style="font-size:0.72rem;
+             color:var(--muted);"
+                              th:text="${feedback.customer.email}">
+</span>
+                    </td>
+
+                    <!-- RESTAURANT -->
+
+                    <td th:text="${feedback.restaurant.restaurantName}">
+                    </td>
+
+                    <!-- RATING -->
+
+                    <td>
+
+                        <div>
+
+                            <div class="rating-stars"
+                                 th:text="${'★'.repeat(feedback.overall_rating) + '☆'.repeat(5 - feedback.overall_rating)}">
+                            </div>
+
+                            <span style="font-size:0.75rem; color:var(--muted);"
+                                  th:text="${feedback.overall_rating + ' out of 5'}">
+</span>
+
+                        </div>
+
+                    </td>
+
+                    <td class="feedback-text-cell">
+                        <div class="feedback-text"
+                             th:text="${feedback.review}"
+                             tabindex="0"
+                             role="button"
+                             title="Click to expand or collapse"
+                             onclick="toggleFeedbackText(this)"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFeedbackText(this);}">
+                        </div>
+                        <span class="feedback-text-hint">Click to read more</span>
+                    </td>
+
+                    <!-- DATE -->
+
+                    <td th:text="${#temporals.format(feedback.createdAt,'MMM dd, yyyy')}">
+                    </td>
+
+                    <!-- ACTIONS -->
+
+                    <td>
+
+                        <div class="action-group">
+
+                            <form th:action="@{/admin/delete-feedback/{id}(id=${feedback.id})}"
+                                  method="post"
+                                  style="margin: 0;"
+                                  onsubmit="return confirm('Are you sure you want to delete this feedback?');">
+
+
+                                <button type="submit"
+                                        class="action-btn btn-delete">
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- FEEDBACK DETAIL MODAL -->
+
+<div id="feedbackModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="modal-close" onclick="closeFeedbackModal()">&times;</span>
+
+        <div class="modal-header">
+            Feedback Details
+        </div>
+
+        <!-- CUSTOMER INFO -->
+
+        <div class="feedback-detail">
+
+            <div class="feedback-detail-label">
+                Customer Name
+            </div>
+
+            <div class="feedback-detail-value"
+                 id="modalCustomerName">
+                John Doe
+            </div>
+
+        </div>
+
+        <div class="feedback-detail">
+
+            <div class="feedback-detail-label">
+                Customer Email
+            </div>
+
+            <div class="feedback-detail-value"
+                 id="modalCustomerEmail">
+                john@example.com
+            </div>
+
+        </div>
+
+        <!-- RESTAURANT INFO -->
+
+        <div class="feedback-detail">
+
+            <div class="feedback-detail-label">
+                Restaurant Name
+            </div>
+
+            <div class="feedback-detail-value"
+                 id="modalRestaurantName">
+                The Italian Place
+            </div>
+
+        </div>
+
+        <!-- RATING -->
+
+        <div class="feedback-detail">
+
+            <div class="feedback-detail-label">
+                Rating
+            </div>
+
+            <div class="feedback-detail-value">
+
+                <div class="rating-stars"
+                     id="modalRating"
+                     style="font-size: 1.2rem;">
+                    ★★★★☆
+                </div>
+
+                <span id="modalRatingText"
+                      style="font-size:0.85rem; color:var(--muted);">
+                    4 out of 5
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- STATUS -->
+
+        <div class="feedback-detail">
+
+            <div class="feedback-detail-label">
+                Status
+            </div>
+
+            <div class="feedback-detail-value">
+
+                <span class="badge badge-excellent"
+                      id="modalStatus">
+                    Approved
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- DATE -->
+
+        <div class="feedback-detail">
+
+            <div class="feedback-detail-label">
+                Submitted Date
+            </div>
+
+            <div class="feedback-detail-value"
+                 id="modalDate">
+                Jan 15, 2025
+            </div>
+
+        </div>
+
+        <!-- FEEDBACK COMMENT -->
+
+        <div class="feedback-detail">
+
+            <div class="feedback-detail-label">
+                Feedback Comment
+            </div>
+
+            <div class="feedback-detail-value feedback-text"
+                 id="modalComment">
+                The service was exceptional and the food was absolutely delicious. I'll definitely come back again!
+            </div>
+
+        </div>
+
+        <!-- ACTIONS -->
+
+        <div class="modal-actions">
+
+            <button class="btn-secondary"
+                    onclick="closeFeedbackModal()">
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function openFeedbackModal(row) {
+
+        const cells = row.querySelectorAll('td');
+
+        // CUSTOMER
+
+        const customerName =
+            cells[0].querySelector('strong')?.textContent || '';
+
+        const customerEmail =
+            cells[0].querySelector('span')?.textContent || '';
+
+        // RESTAURANT
+
+        const restaurantName =
+            cells[1]?.textContent.trim() || '';
+
+        // RATING
+
+        const rating =
+            cells[2]?.textContent.trim() || '';
+
+        // REVIEW
+
+        const review =
+            cells[3]?.textContent.trim() || '';
+
+        // DATE
+
+        const date =
+            cells[4]?.textContent.trim() || '';
+
+        // UPDATE MODAL
+
+        document.getElementById('modalCustomerName').textContent =
+            customerName;
+
+        document.getElementById('modalCustomerEmail').textContent =
+            customerEmail;
+
+        document.getElementById('modalRestaurant').textContent =
+            restaurantName;
+
+        document.getElementById('modalRating').textContent =
+            rating;
+
+        document.getElementById('modalReview').textContent =
+            review;
+
+        document.getElementById('modalDate').textContent =
+            date;
+
+        // SHOW MODAL
+
+        document.getElementById('feedbackModal')
+            .classList.add('active');
+    }
+
+    function closeFeedbackModal() {
+
+        document.getElementById('feedbackModal').classList.remove('active');
+
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+
+        const modal = document.getElementById('feedbackModal');
+
+        if (event.target == modal) {
+
+            modal.classList.remove('active');
+
+        }
+
+    }
+
+    function toggleFeedbackText(element) {
+        element.classList.toggle('expanded');
+        const hint = element.nextElementSibling;
+        if (hint && hint.classList.contains('feedback-text-hint')) {
+            hint.textContent = element.classList.contains('expanded')
+                ? 'Click to collapse'
+                : 'Click to read more';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.feedback-text').forEach(function(el) {
+            if (el.scrollHeight > el.clientHeight + 2) {
+                el.classList.add('truncated');
+            } else {
+                const hint = el.nextElementSibling;
+                if (hint && hint.classList.contains('feedback-text-hint')) {
+                    hint.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Submit search form on button click
+    document.querySelectorAll('.search-input').forEach(input => {
+
+        input.addEventListener('keypress', function(e) {
+
+            if (e.key === 'Enter') {
+
+                e.preventDefault();
+                this.closest('form').submit();
+
+            }
+
+        });
+
+    });
+
+</script>
+
+<th:block th:replace="~{AdminManagement/fragments/admin-filter-script :: admin-filter-script}"></th:block>
+<th:block th:replace="~{AdminManagement/fragments/admin-sidebar-collapse :: collapse}"></th:block>
+
+</body>
+
+</html>

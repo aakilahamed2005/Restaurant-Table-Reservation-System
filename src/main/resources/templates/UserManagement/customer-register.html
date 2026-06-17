@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DineElite — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+  }}
+}
+</script>
+<style>
+  body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .left-panel { background: linear-gradient(160deg, #7A8C6E 0%, #44312A 60%, #1C1917 100%); }
+  .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
+  .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
+  .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; }
+  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+  .fade-in { animation: fadeUp 0.6s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+  .step-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .perk-item { display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.8); font-family: 'Lato'; font-size: 0.875rem; }
+  .perk-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(212,168,83,0.2); display: flex; align-items: center; justify-content: center; color: #D4A853; font-size: 1rem; flex-shrink: 0; }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen flex">
+
+<!-- LEFT PANEL -->
+<div class="left-panel hidden lg:flex flex-col justify-between w-5/12 p-16 text-white">
+  <a th:href="@{/}" class="font-display text-2xl tracking-tight cursor-pointer">Dine<span style="color:#D4A853">Elite</span></a>
+  <div>
+    <p class="font-accent italic text-gold text-xl mb-4">Join the community</p>
+    <h2 class="font-display text-4xl leading-tight mb-8">Discover.<br/>Reserve.<br/>Savor.</h2>
+    <div class="flex flex-col gap-5">
+      <div class="perk-item"><div class="perk-icon">🔖</div><span>Instant booking confirmations</span></div>
+      <div class="perk-item"><div class="perk-icon">📋</div><span>Full booking history & management</span></div>
+    </div>
+  </div>
+  <p class="text-gray-500 text-xs font-body">Join 98,000+ food lovers on DineElite</p>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="flex-1 flex items-start justify-center px-6 py-12 overflow-y-auto">
+  <div class="w-full max-w-lg fade-in">
+    <div class="lg:hidden mb-8 text-center">
+      <a th:href="@{/}" class="font-display text-3xl text-charcoal">Dine<span style="color:#D4A853">Elite</span></a>
+    </div>
+
+    <div class="mb-8">
+      <h1 class="font-display text-3xl text-charcoal mb-2">Create Your Account</h1>
+    </div>
+
+    <!-- Form Starts here -->
+    <form class="flex flex-col gap-5" method="post" th:action="@{/customer-register}" th:object="${registerDto}" autocomplete="off">
+      <!-- Show error message if login fails -->
+      <div th:if="${error}" class="text-red-600 text-sm bg-red-100 p-3 rounded">
+          <p th:text="${error}"></p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">First Name</label>
+          <input type="text" placeholder="Jane" th:field="*{firstName}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+          <p th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Last Name</label>
+          <input type="text" placeholder="Doe" th:field="*{lastName}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+          <p th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+      </div>
+
+
+      <div>
+        <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Email Address</label>
+        <input type="email" placeholder="you@example.com" th:field="*{email}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+        <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-xs mt-1"></p>
+      </div>
+      <div>
+        <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Phone Number</label>
+        <input type="tel" placeholder="+94123456789" th:field="*{phoneNumber}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+        <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="text-red-500 text-xs mt-1"></p>
+      </div>
+      <div>
+        <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Password</label>
+        <input type="password" placeholder="Minimum 8 characters" th:field="*{password}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+        <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-red-500 text-xs mt-1"></p>
+      </div>
+
+
+
+      <button type="submit" class="btn-primary w-full py-4 rounded-sm mt-2">Create My Account</button>
+    </form>
+
+    <!-- Form Ends here -->
+
+    <p class="text-center text-sm text-muted font-body mt-6">
+      Already have an account? <a th:href="@{/sign-in}" class="text-terracotta font-bold hover:text-warm-brown transition-colors cursor-pointer">Sign In</a>
+    </p>
+
+    <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+      <p class="text-xs text-muted font-body mb-1">Are you a restaurant owner?</p>
+      <a th:href="@{/owner-register}" class="text-xs text-terracotta font-bold hover:underline cursor-pointer">Register as DineElite Partner →</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

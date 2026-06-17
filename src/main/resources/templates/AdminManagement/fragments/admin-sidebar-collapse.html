@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!--
+  Collapsible admin sidebar: narrow rail by default; expands on hover.
+  Sets body.admin-sidebar-collapsed and adjusts .main margin-left via script at page bottom.
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="collapse">
+  <style>
+    .sidebar {
+      transition: width 0.25s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 14px !important;
+    }
+
+    .sidebar.collapsed .sidebar-logo,
+    .sidebar.collapsed .sidebar-nav,
+    .sidebar.collapsed .sidebar-footer {
+      display: none !important;
+    }
+
+    .main {
+      transition: margin-left 0.25s ease;
+    }
+
+    body.admin-sidebar-collapsed .main {
+      margin-left: 14px !important;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var sidebar = document.querySelector('.sidebar');
+      if (!sidebar) return;
+
+      function setCollapsed(collapsed) {
+        if (collapsed) {
+          sidebar.classList.add('collapsed');
+          document.body.classList.add('admin-sidebar-collapsed');
+        } else {
+          sidebar.classList.remove('collapsed');
+          document.body.classList.remove('admin-sidebar-collapsed');
+        }
+      }
+
+      sidebar.addEventListener('mouseenter', function () {
+        setCollapsed(false);
+      });
+
+      sidebar.addEventListener('mouseleave', function () {
+        setCollapsed(true);
+      });
+
+      setCollapsed(true);
+    });
+  </script>
+</th:block>
+</body>
+</html>

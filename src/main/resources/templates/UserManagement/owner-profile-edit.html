@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DineElite — Owner - Edit Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+        }}
+    }
+  </script>
+  <style>
+    body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+    .topbar { background: #1C1917; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; color: #8A7E78; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+    .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
+    .sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 13px; }
+    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #8A7E78; padding: 8px 16px 4px; }
+    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; }
+    .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+    .btn-ghost { background: transparent; border: 1.5px solid #E5DFD8; color: #8A7E78; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; }
+    .btn-ghost:hover { border-color: #8A7E78; color: #1C1917; }
+    .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
+    .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
+    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #44312A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display'; font-size: 2rem; color: white; }
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1C1917; color: white; padding: 14px 24px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; display: flex; align-items: center; gap: 8px; transition: transform 0.3s ease; z-index: 50; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    select.input-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238A7E78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 36px; }
+  </style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP NAV -->
+<nav class="topbar flex items-center justify-between px-8 py-4">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="flex items-center gap-6">
+    <a th:href="@{/restaurant-listing}" class="text-gray-300 text-sm font-body hover:text-gold transition-colors">Explore</a>
+    <div class="flex items-center gap-2 cursor-pointer">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#44312A;" th:text="${firstLetter}">J</div>
+      <span class="text-gray-300 text-sm font-body" th:text="${userFullName}">John Doe</span>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-10 flex gap-8">
+
+  <div th:replace="~{UserManagement/fragments/owner-profile-sidebar :: ownerSidebar('edit', ${userFullName}, ${firstLetter})}"></div>
+
+  <!-- MAIN -->
+  <main class="flex-1">
+
+    <!-- Personal Info Card -->
+    <div class="bg-white rounded-lg p-8 mb-6">
+      <div class="mb-6">
+        <div class="w-10 h-0.5 bg-gold mb-3"></div>
+        <h2 class="font-display text-2xl text-charcoal">Edit Profile</h2>
+        <p class="text-muted text-sm font-body mt-1">Update your personal information</p>
+      </div>
+
+      <div th:if="${error}" class="text-red-600 text-sm bg-red-100 p-3 rounded mb-4">
+        <p th:text="${error}"></p>
+      </div>
+
+      <form th:action="@{/owner-profile-edit}" method="post" th:object="${updateDto}" autocomplete="off">
+        <div class="grid md:grid-cols-2 gap-5 mb-6">
+          <div>
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">First Name</label>
+            <input type="text" th:field="*{firstName}" th:value="${updateDto.firstName}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+            <p th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">Last Name</label>
+            <input type="text" th:field="*{lastName}" th:value="${updateDto.lastName}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+            <p th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">Email Address</label>
+            <input type="email" th:field="*{email}" th:value="${updateDto.email}" readonly class="input-field w-full rounded px-4 py-3 font-body text-sm bg-gray-100 cursor-not-allowed"/>
+            <p class="text-xs text-gray-500 mt-1">Email cannot be changed after registration.</p>
+            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">Phone Number</label>
+            <input type="tel"
+                   th:field="*{phoneNumber}"
+                   th:value="${updateDto.phoneNumber}"
+                   placeholder="+94123456789"
+                   pattern="^\+94\d{9}$|^0\d{9}$"
+                   class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal"
+                   required/>
+            <p class="text-xs text-gray-500 mt-1">Use +94 followed by 9 digits, or 0 followed by 9 digits.</p>
+            <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+        </div>
+
+        <div class="flex gap-3 pt-4 border-t border-gray-100">
+          <button type="submit" class="btn-primary px-7 py-3 rounded-sm">Save Changes</button>
+          <a th:href="@{/profile-view}" class="px-7 py-3 rounded-sm border border-gray-200 text-sm font-body text-muted hover:bg-surface transition-colors">Cancel</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="bg-white rounded-lg p-8">
+      <h2 class="font-display text-xl text-charcoal mb-5">Change Password</h2>
+      <div th:if="${error}" class="text-red-600 text-sm bg-red-100 p-3 rounded">
+        <p th:text="${error}"></p>
+      </div>
+      <form th:action="@{/change-password}" method="post" th:object="${passwordChangeDto}" autocomplete="off" id="changePasswordForm">
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">
+              Current Password
+            </label>
+            <input type="password"
+                   id="currentPassword"
+                   th:field="*{currentPassword}"
+                   placeholder="••••••••••"
+                   class="input-field w-full rounded px-4 py-3 font-body text-sm"
+                   required/>
+
+            <p th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">
+              New Password
+            </label>
+            <input type="password"
+                   id="newPassword"
+                   th:field="*{newPassword}"
+                   placeholder="Minimum 8 characters"
+                   minlength="8"
+                   class="input-field w-full rounded px-4 py-3 font-body text-sm"
+                   required/>
+            <p id="newError" class="text-red-500 text-xs mt-1 hidden"></p>
+            <p th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">
+              Confirm New Password
+            </label>
+            <input type="password"
+                   id="confirmPassword"
+                   name="confirmPassword"
+                   placeholder="Repeat new password"
+                   class="input-field w-full rounded px-4 py-3 font-body text-sm"
+                   required/>
+
+            <p id="confirmError" class="text-red-500 text-xs mt-1 hidden"></p>
+          </div>
+        </div>
+        <button type="submit" class="mt-5 btn-primary px-7 py-3 rounded-sm">Update Password</button>
+      </form>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const changePasswordForm = document.getElementById("changePasswordForm");
+
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener("submit", function (e) {
+
+      const current = document.getElementById("currentPassword").value;
+      const newPass = document.getElementById("newPassword").value;
+      const confirm = document.getElementById("confirmPassword").value;
+
+      let valid = true;
+
+      // reset errors
+      document.getElementById("newError").classList.add("hidden");
+      document.getElementById("newError").innerText = "";
+      document.getElementById("confirmError").classList.add("hidden");
+      document.getElementById("confirmError").innerText = "";
+
+      // 1. new password must be at least 8 characters
+      if (newPass.length > 0 && newPass.length < 8) {
+        const err = document.getElementById("newError");
+        err.innerText = "Password must be at least 8 characters long";
+        err.classList.remove("hidden");
+        valid = false;
+      }
+
+      // 2. new password same as current password
+      if (current === newPass && newPass !== "") {
+        const err = document.getElementById("newError");
+        err.innerText = "New password cannot be same as current password";
+        err.classList.remove("hidden");
+        valid = false;
+      }
+
+      // 3. confirm password mismatch
+      if (newPass !== confirm) {
+        const err = document.getElementById("confirmError");
+        err.innerText = "Passwords do not match";
+        err.classList.remove("hidden");
+        valid = false;
+      }
+
+      // optional: empty check
+      if (!current || !newPass || !confirm) {
+        valid = false;
+      }
+
+      if (!valid) {
+        e.preventDefault(); // stop form submit
+      }
+    });
+  }
+</script>
+<div th:replace="~{UserManagement/fragments/support-contact-modal :: supportContactModal(${user.email}, 'openProfileSupportModal')}"></div>
+</body>
+</html>

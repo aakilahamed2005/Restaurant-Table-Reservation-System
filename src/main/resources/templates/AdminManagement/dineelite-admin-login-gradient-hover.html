@@ -1,0 +1,491 @@
+<!-- Optional login panel styles (gradient hover variant); embed in login page if used. -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  .ar {
+    min-height: 560px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .ac {
+    width: 100%;
+    max-width: 400px;
+    background: #0F0E0D;
+    border-radius: 20px;
+    border: 0.5px solid #2A2520;
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .cursor-glow {
+    pointer-events: none;
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,99,58,0.13) 0%, rgba(212,168,83,0.06) 40%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s;
+    opacity: 0;
+    z-index: 0;
+  }
+
+  .ah {
+    background: #0A0908;
+    padding: 1.75rem 1.75rem 1.5rem;
+    border-bottom: 0.5px solid #1E1A16;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .ah-glow {
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(196,99,58,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 21px;
+    color: #F5F0E8;
+    letter-spacing: -0.3px;
+  }
+
+  .brand span { color: #D4A853; }
+  .sub { font-size: 11.5px; color: #4A4540; margin-top: 2px; }
+
+  .abadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(196,99,58,0.1);
+    border: 0.5px solid rgba(196,99,58,0.25);
+    color: #C4633A;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 5px;
+    margin-top: 14px;
+  }
+
+  .bdot {
+    width: 5px; height: 5px;
+    background: #C4633A;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+  .ab { padding: 1.5rem 1.75rem; position: relative; z-index: 1; }
+
+  .role-row { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+
+  .rb {
+    flex: 1;
+    padding: 7px 4px;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    background: #141210;
+    border: 0.5px solid #252019;
+    border-radius: 8px;
+    color: #5A5550;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.4;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rb::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(196,99,58,0.15), rgba(212,168,83,0.1));
+    opacity: 0;
+    transition: opacity 0.25s;
+    border-radius: 8px;
+  }
+
+  .rb:hover::before { opacity: 1; }
+  .rb:hover { border-color: #3A2A18; color: #9A8A70; }
+  .rb.active { background: #1E1812; color: #D4A853; border-color: #3A2E1A; }
+  .rb.active::before { opacity: 1; }
+
+  .wbar {
+    background: rgba(212,168,83,0.06);
+    border: 0.5px solid rgba(212,168,83,0.14);
+    border-radius: 7px;
+    padding: 7px 11px;
+    font-size: 11.5px;
+    color: #7A6830;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+
+  .fg { margin-bottom: 1.1rem; }
+
+  .fl {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A4540;
+    margin-bottom: 5px;
+  }
+
+  .iw { position: relative; }
+
+  .ii {
+    position: absolute;
+    left: 11px; top: 50%;
+    transform: translateY(-50%);
+    color: #3A3530;
+    font-size: 15px;
+    pointer-events: none;
+    transition: color 0.2s;
+    z-index: 1;
+  }
+
+  .fi {
+    width: 100%;
+    padding: 9px 11px 9px 35px;
+    font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    background: #141210;
+    border: 0.5px solid #252019;
+    border-radius: 8px;
+    color: #D0C8BC;
+    box-sizing: border-box;
+    outline: none;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+
+  .fi:hover {
+    border-color: #3A2820;
+    background: #161310;
+  }
+
+  .fi:focus {
+    border-color: #C4633A;
+    box-shadow: 0 0 0 3px rgba(196,99,58,0.1);
+    background: #161310;
+  }
+
+  .iw:hover .ii { color: #5A4A38; }
+  .fi:focus + .ii, .iw:focus-within .ii { color: #C4633A; }
+
+  .fi::placeholder { color: #302A25; }
+
+  .divrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 1.1rem;
+  }
+
+  .dl { flex: 1; height: 0.5px; background: #1E1A16; }
+  .dt { font-size: 10px; color: #3A3530; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+
+  .mrow { display: flex; gap: 6px; margin-bottom: 1.4rem; }
+
+  .mb {
+    flex: 1;
+    height: 42px;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    background: #141210;
+    border: 0.5px solid #252019;
+    border-radius: 8px;
+    color: #D0C8BC;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
+  }
+
+  .mb:hover { border-color: #3A2820; background: #161310; transform: translateY(-1px); }
+  .mb:focus {
+    border-color: #C4633A;
+    box-shadow: 0 0 0 3px rgba(196,99,58,0.1);
+    background: #161310;
+    transform: translateY(-1px);
+  }
+
+  .bsign {
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(135deg, #C4633A 0%, #9A3A20 100%);
+    color: #FAF5EE;
+    border: none;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, background-size 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    position: relative;
+    overflow: hidden;
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+  }
+
+  .bsign::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(212,168,83,0.25) 0%, rgba(196,99,58,0) 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .bsign:hover::before { opacity: 1; }
+  .bsign:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(196,99,58,0.3), 0 2px 8px rgba(196,99,58,0.2);
+    background-position: 100% 50%;
+  }
+
+  .bsign:active { transform: translateY(0); box-shadow: none; }
+  .bsign:disabled { opacity: 0.55; transform: none; cursor: default; box-shadow: none; }
+
+  .frow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.75rem;
+    border-top: 0.5px solid #1E1A16;
+    background: #0A0908;
+    position: relative;
+    z-index: 1;
+  }
+
+  .fl2, .fl3 { font-size: 11.5px; color: #3A3530; display: flex; align-items: center; gap: 5px; }
+
+  .forgot {
+    font-size: 11.5px;
+    color: #5A5046;
+    text-decoration: none;
+    display: block;
+    text-align: right;
+    margin-top: 5px;
+    margin-bottom: 1.1rem;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .forgot::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 0.5px;
+    background: linear-gradient(90deg, transparent, #C4633A, transparent);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+
+  .forgot:hover { color: #C4633A; }
+  .forgot:hover::after { transform: scaleX(1); }
+  @media (max-width: 480px) {
+    .ar {
+      padding: 1rem 0.75rem;
+      min-height: auto;
+    }
+
+    .ac {
+      max-width: 100%;
+      border-radius: 14px;
+    }
+
+    .ah {
+      padding: 1.25rem 1.25rem 1rem;
+    }
+
+    .mrow {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+
+<div class="ar">
+  <div class="ac" id="card">
+    <div class="cursor-glow" id="glow"></div>
+
+    <div class="ah">
+      <div class="ah-glow"></div>
+      <div class="brand">Dine<span>Elite</span></div>
+      <div class="sub">System Administration</div>
+      <div class="abadge">
+        <span class="bdot"></span>
+        Admin Access
+      </div>
+    </div>
+
+    <div class="ab">
+      <div class="role-row">
+        <button class="rb active" onclick="setRole(this)">
+          <i class="ti ti-shield-check" style="font-size:13px;" aria-hidden="true"></i><br>Super Admin
+        </button>
+        <button class="rb" onclick="setRole(this)">
+          <i class="ti ti-adjustments" style="font-size:13px;" aria-hidden="true"></i><br>Operations
+        </button>
+        <button class="rb" onclick="setRole(this)">
+          <i class="ti ti-headset" style="font-size:13px;" aria-hidden="true"></i><br>Support
+        </button>
+      </div>
+
+      <div class="wbar">
+        <i class="ti ti-lock" style="font-size:13px; flex-shrink:0;" aria-hidden="true"></i>
+        <span>Restricted area. All access is logged.</span>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Admin Email</label>
+        <div class="iw">
+          <i class="ti ti-mail ii" aria-hidden="true"></i>
+          <input class="fi" type="email" placeholder="admin@dineelite.com" />
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Password</label>
+        <div class="iw">
+          <i class="ti ti-lock ii" aria-hidden="true"></i>
+          <input class="fi" type="password" placeholder="••••••••••••" id="pw-input" />
+          <i class="ti ti-eye" id="eye-tog" aria-hidden="true"
+            style="position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:15px;color:#3A3530;cursor:pointer;transition:color 0.2s;"
+            onclick="togglePw()" onmouseenter="this.style.color='#C4633A'" onmouseleave="this.style.color='#3A3530'"></i>
+        </div>
+      </div>
+
+      <a href="#" class="forgot">Forgot password?</a>
+
+      <div class="divrow">
+        <div class="dl"></div>
+        <span class="dt">2-step verification</span>
+        <div class="dl"></div>
+      </div>
+
+      <div class="mrow">
+        <input class="mb" type="text" maxlength="1" inputmode="numeric" oninput="mf(this,0)" />
+        <input class="mb" type="text" maxlength="1" inputmode="numeric" oninput="mf(this,1)" />
+        <input class="mb" type="text" maxlength="1" inputmode="numeric" oninput="mf(this,2)" />
+        <input class="mb" type="text" maxlength="1" inputmode="numeric" oninput="mf(this,3)" />
+        <input class="mb" type="text" maxlength="1" inputmode="numeric" oninput="mf(this,4)" />
+        <input class="mb" type="text" maxlength="1" inputmode="numeric" oninput="mf(this,5)" />
+      </div>
+
+      <button class="bsign" id="sbtn" onclick="handleSignIn(this)">
+        <i class="ti ti-lock-open" style="font-size:15px;" aria-hidden="true"></i>
+        <span id="btn-text">Sign in to Dashboard</span>
+      </button>
+    </div>
+
+    <div class="frow">
+      <div class="fl2">
+        <i class="ti ti-shield" style="font-size:12px;" aria-hidden="true"></i>
+        DineElite v2.4.1
+      </div>
+      <div class="fl3">
+        <i class="ti ti-certificate" style="font-size:12px;" aria-hidden="true"></i>
+        SOC 2 Compliant
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+
+<script>
+  const card = document.getElementById('card');
+  const glow = document.getElementById('glow');
+  let glowActive = false;
+
+  card.addEventListener('mouseenter', () => {
+    glow.style.opacity = '1';
+    glowActive = true;
+  });
+
+  card.addEventListener('mouseleave', () => {
+    glow.style.opacity = '0';
+    glowActive = false;
+    card.style.borderColor = '#2A2520';
+  });
+
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    glow.style.left = x + 'px';
+    glow.style.top = y + 'px';
+
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const dx = (x - cx) / cx;
+    const dy = (y - cy) / cy;
+
+    const edgeDist = Math.max(
+      Math.abs(x / rect.width - 0.5),
+      Math.abs(y / rect.height - 0.5)
+    );
+    const edgeAlpha = Math.max(0, (edgeDist - 0.3) / 0.2);
+    const r = Math.round(42 + edgeAlpha * 30);
+    const g = Math.round(37 + edgeAlpha * 10);
+    const b = Math.round(32 + edgeAlpha * 8);
+    card.style.borderColor = `rgb(${r},${g},${b})`;
+  });
+
+  function setRole(btn) {
+    document.querySelectorAll('.rb').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function togglePw() {
+    const inp = document.getElementById('pw-input');
+    const eye = document.getElementById('eye-tog');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    eye.className = inp.type === 'password' ? 'ti ti-eye' : 'ti ti-eye-off';
+    Object.assign(eye.style, {
+      position:'absolute', right:'11px', top:'50%',
+      transform:'translateY(-50%)', fontSize:'15px',
+      color:'#3A3530', cursor:'pointer', transition:'color 0.2s'
+    });
+  }
+
+  const mbs = document.querySelectorAll('.mb');
+  function mf(el, idx) {
+    if (el.value.length === 1 && idx < 5) mbs[idx + 1].focus();
+  }
+
+  function handleSignIn(btn) {
+    const txt = document.getElementById('btn-text');
+    txt.textContent = 'Authenticating…';
+    btn.disabled = true;
+    setTimeout(() => {
+      txt.textContent = 'Sign in to Dashboard';
+      btn.disabled = false;
+    }, 1800);
+  }
+</script>

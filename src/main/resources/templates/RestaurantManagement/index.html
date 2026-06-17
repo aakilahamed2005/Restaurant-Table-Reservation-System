@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DineElite — Your Time Your Table</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917',
+        'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853',
+        sage: '#7A8C6E', muted: '#8A7E78'
+      },
+      fontFamily: {
+        display: ['"Playfair Display"', 'serif'],
+        body: ['Lato', 'sans-serif'],
+        accent: ['"Cormorant Garamond"', 'serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .hero-bg {
+    background: linear-gradient(135deg, #1C1917 0%, #44312A 50%, #C4633A22 100%);
+  }
+  .fade-in { animation: fadeUp 0.8s ease both; }
+  .fade-in-delay-1 { animation: fadeUp 0.8s ease 0.2s both; }
+  .fade-in-delay-2 { animation: fadeUp 0.8s ease 0.4s both; }
+  .fade-in-delay-3 { animation: fadeUp 0.8s ease 0.6s both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(28,25,23,0.12); }
+  .divider { width: 48px; height: 2px; background: #D4A853; }
+  .btn-primary {
+    background: #C4633A; color: white; font-family: 'Lato', sans-serif;
+    letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+  .btn-outline {
+    border: 1.5px solid #FAF7F2; color: #FAF7F2;
+    font-family: 'Lato', sans-serif; letter-spacing: 0.08em;
+    text-transform: uppercase; font-size: 0.75rem; font-weight: 700;
+    transition: all 0.2s ease;
+  }
+  .btn-outline:hover { background: #FAF7F2; color: #1C1917; }
+  .nav-link { transition: color 0.2s; }
+  .nav-link:hover { color: #D4A853; }
+  .search-box { background: white; border-radius: 4px; box-shadow: 0 8px 32px rgba(28,25,23,0.2); }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4" style="background: rgba(28,25,23,0.96); backdrop-filter: blur(8px);">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight cursor-pointer">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="hidden md:flex items-center gap-8">
+    <a th:href="@{/restaurant-listing}" class="nav-link text-sm text-gray-300 font-body cursor-pointer">Explore</a>
+
+    <!--Displays login and register options if customer is not logged in-->
+    <div th:if="${user == null}">
+      <a th:href="@{/sign-in}" class="nav-link text-sm text-gray-300 font-body cursor-pointer mr-4">Sign In</a>
+      <a th:href="@{/customer-register}" class="btn-primary px-5 py-2 rounded-sm cursor-pointer">Join Free</a>
+    </div>
+
+    <!-- Displays user info and logout option if customer is logged in -->
+    <div th:if="${user != null && user.role.name() == 'CUSTOMER'}">
+      <a th:href="@{/customer-profile-view}" class="flex items-center gap-2 cursor-pointer">
+        <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+        <span class="text-gray-300 text-sm font-body cursor-pointer" th:text="|${user.firstName} ${user.lastName}|">Jane Doe</span>
+      </a>
+    </div>
+
+    <div th:if="${user != null && user.role.name() == 'OWNER'}">
+      <a th:href="@{/owner-profile-view}" class="flex items-center gap-2 cursor-pointer">
+        <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+        <span  class="text-gray-300 text-sm font-body cursor-pointer" th:text="|${user.firstName} ${user.lastName}|">Jane Doe</span>
+        <span class="text-red-300 text-sm font-body cursor-pointer" >(Restaurant Owner Account)</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-bg min-h-screen flex flex-col items-center justify-center px-6 pt-20">
+  <div class="text-center max-w-3xl mx-auto">
+    <p class="fade-in font-accent italic text-gold text-xl mb-4">Your Time Your Table</p>
+    <h1 class="fade-in-delay-1 font-display text-white leading-tight mb-6" style="font-size: clamp(2.8rem,6vw,5rem);">
+      Reserve the Finest<br/><em>Dining Experiences</em>
+    </h1>
+    <p class="fade-in-delay-2 text-gray-300 font-body font-medium text-lg mb-12 max-w-xl mx-auto leading-relaxed">
+      Discover and book tables at the world's best restaurants — effortlessly.
+    </p>
+  </div>
+</section>
+
+
+<!-- STATS -->
+<section class="bg-charcoal py-12 px-6">
+  <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-8 text-center">
+    <div><p class="font-display text-4xl text-gold font-semibold" th:text="${totalRestaurants}">0</p><p class="text-gray-400 text-sm font-body mt-1">Restaurants</p></div>
+    <div><p class="font-display text-4xl text-gold font-semibold" th:text="${totalUsers}">0</p><p class="text-gray-400 text-sm font-body mt-1">Happy Diners</p></div>
+    <div><p class="font-display text-4xl text-gold font-semibold" th:text="${averageRating}">0</p><p class="text-gray-400 text-sm font-body mt-1">Avg Rating</p></div>
+  </div>
+</section>
+
+<!-- FEATURED RESTAURANTS -->
+<section class="py-24 px-6 bg-cream">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-end justify-between mb-4">
+      <div>
+        <div class="divider mb-4"></div>
+        <h2 class="font-display text-4xl text-charcoal">Featured Restaurants</h2>
+      </div>
+      <a th:href="@{/restaurant-listing}" class="text-terracotta text-sm font-body font-bold tracking-wide uppercase hover:text-warm-brown transition-colors">View All →</a>
+    </div>
+    <p class="text-muted font-accent italic text-lg mb-12">Handpicked for extraordinary dining</p>
+
+
+        <div class="grid md:grid-cols-3 gap-8">
+
+            <div th:each="r : ${restaurants}"
+                 class="card-hover bg-white rounded overflow-hidden cursor-pointer">
+
+                <div class="h-52 bg-gradient-to-br from-warm-brown to-terracotta flex items-end p-5 relative"
+                     th:style="${primaryImagePaths[r.id] != null} ? 'background-image:url(/uploads/' + ${primaryImagePaths[r.id]} + '); background-size:cover; background-position:center;' : ''">
+      <span class="bg-gold text-charcoal text-xs font-body font-bold px-3 py-1 rounded-sm relative z-10" th:text="${r.cuisine}">
+        Cuisine
+      </span>
+                </div>
+
+                <div class="p-6">
+
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-display text-xl text-charcoal" th:text="${r.restaurantName}">Restaurant Name</h3>
+
+                        <span class="text-sage text-sm font-body">★ <span th:text="${r.overallRating}">4.5</span></span>
+                    </div>
+
+                    <p class="text-muted text-sm font-body mb-4" th:text="${r.cuisine + ' · ' + r.city}">Cuisine · City</p>
+
+                    <p class="text-muted text-sm font-body mb-2" th:text="${r.shortDescription}">Short description here</p>
+
+
+                    <div class="flex justify-between items-center">
+
+        <span class="text-xs text-muted" th:text="${r.priceRange == 'BUDGET' ? '$' : (r.priceRange == 'MODERATE' ? '$$' : (r.priceRange == 'UPSCALE' ? '$$$' : '$$$$'))}">$$</span>
+
+                        <a th:href="@{/restaurant-view-page/{id}(id=${r.id})}" class="btn-primary px-4 py-2 rounded-sm text-xs">View & Reserve</a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-24 px-6 bg-surface">
+  <div class="max-w-4xl mx-auto text-center">
+    <div class="divider mx-auto mb-4"></div>
+    <h2 class="font-display text-4xl text-charcoal mb-2">How It Works</h2>
+    <p class="font-accent italic text-muted text-lg mb-16">Three steps to your perfect evening</p>
+    <div class="grid md:grid-cols-3 gap-12">
+      <div>
+        <div class="w-14 h-14 rounded-full bg-terracotta text-white flex items-center justify-center font-display text-2xl mx-auto mb-6">1</div>
+        <h3 class="font-display text-xl text-charcoal mb-3">Discover</h3>
+        <p class="text-muted font-body text-sm leading-relaxed">Browse curated restaurants by cuisine, occasion, or neighborhood.</p>
+      </div>
+      <div>
+        <div class="w-14 h-14 rounded-full bg-gold text-charcoal flex items-center justify-center font-display text-2xl mx-auto mb-6">2</div>
+        <h3 class="font-display text-xl text-charcoal mb-3">Reserve</h3>
+        <p class="text-muted font-body text-sm leading-relaxed">Choose your date, time, and party size — instant confirmation.</p>
+      </div>
+      <div>
+        <div class="w-14 h-14 rounded-full bg-sage text-white flex items-center justify-center font-display text-2xl mx-auto mb-6">3</div>
+        <h3 class="font-display text-xl text-charcoal mb-3">Dine</h3>
+        <p class="text-muted font-body text-sm leading-relaxed">Arrive, be seated, and enjoy a remarkable dining experience.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-24 px-6 bg-warm-brown text-center">
+  <p class="font-accent italic text-gold text-xl mb-3">Ready to dine?</p>
+  <h2 class="font-display text-white text-4xl mb-6">Start Your Journey Today</h2>
+  <p class="text-gray-400 font-body mb-10 max-w-md mx-auto">Join thousands of food lovers who discover and book the best restaurants with DineElite.</p>
+  <div class="flex justify-center gap-4 flex-wrap">
+    <a th:href="@{/customer-register}" th:if="${user == null}" class="btn-primary px-8 py-4 rounded-sm cursor-pointer">Create Free Account</a>
+    <a th:href="@{/restaurant-listing}" class="btn-outline px-8 py-4 rounded-sm cursor-pointer">Explore Restaurants</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-charcoal py-12 px-6">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-8">
+    <div>
+      <p class="font-display text-2xl text-white mb-2 cursor-pointer">Dine<span style="color:#D4A853">Elite</span></p>
+      <p class="text-gray-500 text-sm font-body max-w-xs">The world's finest restaurant reservation platform.</p>
+    </div>
+    <div class="flex gap-16">
+      <div th:if="${user == null}">
+        <p class="text-gray-400 text-xs font-body font-bold uppercase tracking-widest mb-4">Account</p>
+        <div class="flex flex-col gap-2" >
+          <a th:href="@{/sign-in}" class="text-gray-500 text-sm hover:text-gold transition-colors cursor-pointer">Sign In</a>
+          <a th:href="@{/customer-register}" class="text-gray-500 text-sm hover:text-gold transition-colors cursor-pointer">Register as Customer</a>
+          <a th:href="@{/owner-register}" class="text-gray-500 text-sm hover:text-gold transition-colors cursor-pointer">Register as Partner</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto mt-12 pt-6 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-3">
+    <p class="text-gray-600 text-xs font-body">© 2026 DineElite. All rights reserved.</p>
+    <a th:if="${showGuestLinks}"
+       th:href="@{/admin/login}"
+       class="text-gray-500 text-xs font-body hover:text-gold transition-colors">
+      Admin Login
+    </a>
+  </div>
+</footer>
+<div th:replace="~{chat-bot :: chatBot}"></div>
+
+</body>
+</html>

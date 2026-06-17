@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DineElite — My Bookings</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917',
+      'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853',
+      sage: '#7A8C6E', muted: '#8A7E78'
+    },
+    fontFamily: {
+      display: ['"Playfair Display"', 'serif'],
+      body: ['Lato', 'sans-serif'],
+      accent: ['"Cormorant Garamond"', 'serif']
+    }
+  }}
+}
+
+  function switchTab(tabName, clickedButton) {
+    // hide all tab sections
+    document.querySelectorAll(".tab-section").forEach(section => {
+      section.classList.remove("visible");
+    });
+
+    // show selected tab section
+    document.getElementById("tab-" + tabName).classList.add("visible");
+
+    // remove active class from all buttons
+    document.querySelectorAll(".tab-btn").forEach(button => {
+      button.classList.remove("active");
+    });
+
+
+
+    // add active class to clicked button
+    clickedButton.classList.add("active");
+  }
+
+</script>
+<style>
+  body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .topbar { background: #1C1917; }
+
+  .sidebar-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 6px;
+    font-family: 'Lato', sans-serif; font-size: 0.875rem;
+    color: #8A7E78; transition: all 0.2s; cursor: pointer;
+    text-decoration: none; width: 100%;
+  }
+  .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
+  .sidebar-link.active {
+    background: #FAF7F2; border-left: 3px solid #C4633A;
+    color: #C4633A; font-weight: 700; padding-left: 13px;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    animation: modalSlideIn 0.3s ease-out;
+  }
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .modal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(196, 99, 58, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: #1C1917;
+    margin: 0;
+  }
+
+  .modal-body {
+    margin-bottom: 24px;
+  }
+
+  .modal-details {
+    background: #F0EBE3;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .modal-detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(196, 99, 58, 0.1);
+  }
+
+  .modal-detail-item:last-child {
+    border-bottom: none;
+  }
+
+  .modal-detail-label {
+    color: #8A7E78;
+    font-weight: 500;
+  }
+
+  .modal-detail-value {
+    color: #1C1917;
+    font-weight: 600;
+  }
+
+  .modal-message {
+    color: #8A7E78;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 12px;
+  }
+
+  .modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .modal-btn-cancel {
+    background: #E5DFD8;
+    color: #1C1917;
+  }
+
+  .modal-btn-cancel:hover {
+    background: #D5D0CB;
+  }
+
+  .modal-btn-confirm {
+    background: #C4633A;
+    color: white;
+  }
+
+  .modal-btn-confirm:hover {
+    background: #b0572f;
+  }
+
+  .avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #C4633A, #D4A853);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 2rem; color: white;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 10px; border-radius: 999px;
+    font-size: 0.7rem; font-family: 'Lato', sans-serif; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .badge-upcoming  { background: rgba(122,140,110,0.15); color: #7A8C6E; border: 1px solid #7A8C6E; }
+  .badge-completed { background: rgba(212,168,83,0.15);  color: #B8923C; border: 1px solid #D4A853; }
+  .badge-cancelled { background: rgba(196,99,58,0.1);    color: #C4633A; border: 1px solid #C4633A; }
+  .badge-refunded  { background: rgba(122,140,110,0.15); color: #7A8C6E; border: 1px solid #7A8C6E; }
+  .badge-norefund  { background: rgba(239,68,68,0.08);   color: #dc2626; border: 1px solid #fca5a5; }
+
+  .card-hover { transition: box-shadow 0.2s; }
+  .card-hover:hover { box-shadow: 0 8px 24px rgba(28,25,23,0.1); }
+
+  .btn-primary {
+    background: #C4633A; color: white; font-family: 'Lato', sans-serif;
+    letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem;
+    font-weight: 700; transition: background 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+
+  .btn-danger {
+    background: #ef4444; color: white; font-family: 'Lato', sans-serif;
+    letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem;
+    font-weight: 700; transition: background 0.2s, transform 0.2s;
+  }
+  .btn-danger:hover { background: #dc2626; transform: translateY(-1px); }
+
+  .tab-btn {
+    padding: 8px 18px; border-radius: 999px;
+    font-family: 'Lato', sans-serif; font-size: 0.8rem; font-weight: 700;
+    transition: all 0.2s; cursor: pointer; border: 1.5px solid transparent;
+    background: none;
+  }
+  .tab-btn.active { background: #1C1917; color: white; }
+  .tab-btn:not(.active) { background: white; color: #8A7E78; border-color: #E5DFD8; }
+  .tab-btn:not(.active):hover { border-color: #C4633A; color: #C4633A; }
+
+  .reason-tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; background: #F0EBE3;
+    border-radius: 4px; font-size: 0.7rem;
+    font-family: 'Lato', sans-serif; color: #8A7E78;
+  }
+  .star       { color: #D4A853; }
+
+  .tab-section { display: none; }
+  .tab-section.visible { display: block; animation: fadeUp 0.22s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP NAV -->
+<nav class="topbar flex items-center justify-between px-8 py-4">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="flex items-center gap-6">
+    <a th:href="@{/restaurant-listing}" class="text-gray-300 text-sm font-body hover:text-gold transition-colors">
+      Explore
+    </a>
+    <div class="flex items-center gap-2 cursor-pointer">
+      <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+      <span class="text-gray-300 text-sm font-body" th:text="${customerFullName}">Jane Doe</span>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-10 flex gap-8">
+  <div th:replace="~{UserManagement/fragments/customer-profile-sidebar :: customerSidebar('bookings', ${customerFullName}, ${firstLetter})}"></div>
+
+   <!-- MAIN -->
+   <main class="flex-1">
+     <!-- Header -->
+     <div class="mb-8">
+       <div class="w-12 h-0.5 bg-gold mb-4"></div>
+       <h1 class="font-display text-4xl text-charcoal mb-2">My Bookings</h1>
+       <p class="font-accent italic text-muted text-lg">Your culinary journey, documented</p>
+     </div>
+
+     <!-- Success Message -->
+     <th:block th:if="${successMessage}">
+       <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+         <span style="font-size: 1.5rem;">✓</span>
+         <p class="text-green-800 font-body" th:text="${successMessage}"></p>
+       </div>
+     </th:block>
+
+     <!-- Error Message -->
+     <th:block th:if="${errorMessage}">
+       <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+         <span style="font-size: 1.5rem;">✕</span>
+         <p class="text-red-800 font-body" th:text="${errorMessage}"></p>
+       </div>
+     </th:block>
+
+     <!-- Tabs -->
+    <div class="flex gap-3 mb-8 flex-wrap">
+      <button class="tab-btn active" onclick="switchTab('all', this)">
+        All Bookings (<span th:text="${allCount}">0</span>)
+      </button>
+
+      <button class="tab-btn" onclick="switchTab('upcoming', this)">
+        Upcoming (<span th:text="${upcomingCount}">0</span>)
+      </button>
+
+      <button class="tab-btn" onclick="switchTab('completed', this)">
+        Completed (<span th:text="${completedCount}">0</span>)
+      </button>
+
+      <button class="tab-btn" onclick="switchTab('cancellations', this)">
+        Cancellations (<span th:text="${cancelledCount}">0</span>)
+      </button>
+    </div>
+
+    <div>
+      <!-- TAB: ALL -->
+      <div id="tab-all" class="tab-section visible">
+        <h2 class="font-display text-xl text-charcoal mb-4">All Reservations</h2>
+
+        <div th:if="${#lists.isEmpty(reservations)}" class="bg-white rounded-lg p-6 text-center text-muted">
+          No bookings found.
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <div th:each="res : ${reservations}"
+               class="card-hover bg-white rounded-lg p-6 flex flex-col md:flex-row gap-5 items-start md:items-center">
+
+            <div class="w-14 h-14 rounded flex-shrink-0 flex items-center justify-center text-white font-display text-lg"
+                 style="background:linear-gradient(135deg,#7A8C6E,#1C1917)"
+                 th:text="${res.restaurant.restaurantName.substring(0,1)}">
+            </div>
+
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-1 flex-wrap">
+                <h3 class="font-display text-lg text-charcoal"
+                    th:text="${res.restaurant.restaurantName}">
+                </h3>
+
+                <span th:if="${res.status.name() == 'CANCELLED'}" class="badge badge-cancelled">Cancelled</span>
+                <span th:if="${res.status.name() == 'CONFIRMED' and res.date.isBefore(today)}" class="badge badge-completed">Completed</span>
+                <span th:if="${res.status.name() == 'CONFIRMED' and !res.date.isBefore(today)}" class="badge badge-upcoming">Confirmed</span>
+              </div>
+
+              <p class="text-muted text-sm font-body mb-2"
+                 th:text="${res.restaurant.cuisine + ' · ' + res.restaurant.city}">
+              </p>
+
+              <div class="flex flex-wrap gap-4 text-xs text-muted font-body">
+                <span>📅 <strong class="text-charcoal" th:text="${res.date}"></strong></span>
+                <span>⏰ <strong class="text-charcoal" th:text="${res.startingTime + ' - ' + res.endingTime}"></strong></span>
+                <span>👥 <strong class="text-charcoal" th:text="${res.noOfSeats + ' Guests'}"></strong></span>
+                <span>🔖 <strong class="text-charcoal" th:text="${res.reservationCode}"></strong></span>
+              </div>
+
+              <div th:if="${res.cancellationReason != null and !#strings.isEmpty(res.cancellationReason)}"
+                   class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-body">
+                <strong class="block text-charcoal mb-1">Cancellation note</strong>
+                <span th:text="${res.cancellationReason}"></span>
+              </div>
+            </div>
+
+            <div class="flex gap-2 flex-shrink-0 flex-wrap">
+               <button type="button"
+                       th:if="${res.status.name() == 'CONFIRMED' and !res.date.isBefore(today)}"
+                       class="btn-danger px-4 py-2 rounded-sm cancel-btn"
+                       th:data-res-id="${res.id}"
+                       th:data-restaurant="${res.restaurant.restaurantName}"
+                       th:data-date="${res.date}"
+                       th:data-time="${res.startingTime}"
+                       th:data-guests="${res.noOfSeats}">
+                 Cancel
+               </button>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: UPCOMING -->
+      <div id="tab-upcoming" class="tab-section">
+        <h2 class="font-display text-xl text-charcoal mb-4">Upcoming Reservations</h2>
+
+        <div th:if="${#lists.isEmpty(upcomingReservations)}" class="bg-white rounded-lg p-6 text-center text-muted">
+          No upcoming bookings.
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <div th:each="res : ${upcomingReservations}"
+               class="card-hover bg-white rounded-lg p-6 flex flex-col md:flex-row gap-5 items-start md:items-center">
+
+            <div class="w-14 h-14 rounded flex-shrink-0 flex items-center justify-center text-white font-display text-lg"
+                 style="background:linear-gradient(135deg,#7A8C6E,#1C1917)"
+                 th:text="${res.restaurant.restaurantName.substring(0,1)}">
+            </div>
+
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-1 flex-wrap">
+                <h3 class="font-display text-lg text-charcoal" th:text="${res.restaurant.restaurantName}"></h3>
+                <span class="badge badge-upcoming">Confirmed</span>
+              </div>
+
+              <p class="text-muted text-sm font-body mb-2" th:text="${res.restaurant.cuisine + ' · ' + res.restaurant.city}"></p>
+
+              <div class="flex flex-wrap gap-4 text-xs text-muted font-body">
+                <span>📅 <strong class="text-charcoal" th:text="${res.date}"></strong></span>
+                <span>⏰ <strong class="text-charcoal" th:text="${res.startingTime + ' - ' + res.endingTime}"></strong></span>
+                <span>👥 <strong class="text-charcoal" th:text="${res.noOfSeats + ' Guests'}"></strong></span>
+                <span>🔖 <strong class="text-charcoal" th:text="${res.reservationCode}"></strong></span>
+              </div>
+
+              <div th:if="${res.cancellationReason != null and !#strings.isEmpty(res.cancellationReason)}"
+                   class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-body">
+                <strong class="block text-charcoal mb-1">Cancellation note</strong>
+                <span th:text="${res.cancellationReason}"></span>
+              </div>
+            </div>
+
+            <div class="flex gap-2 flex-shrink-0 flex-wrap">
+               <button type="button"
+                       th:if="${res.status.name() == 'CONFIRMED'}"
+                       class="btn-danger px-4 py-2 rounded-sm cancel-btn"
+                       th:data-res-id="${res.id}"
+                       th:data-restaurant="${res.restaurant.restaurantName}"
+                       th:data-date="${res.date}"
+                       th:data-time="${res.startingTime}"
+                       th:data-guests="${res.noOfSeats}">
+                 Cancel
+               </button>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: COMPLETED -->
+      <div id="tab-completed" class="tab-section">
+        <h2 class="font-display text-xl text-charcoal mb-4">Completed Reservations</h2>
+
+        <div th:if="${#lists.isEmpty(completedReservations)}" class="bg-white rounded-lg p-6 text-center text-muted">
+          No completed bookings.
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <div th:each="res : ${completedReservations}"
+               class="card-hover bg-white rounded-lg p-6 flex flex-col md:flex-row gap-5 items-start md:items-center">
+
+            <div class="w-14 h-14 rounded flex-shrink-0 flex items-center justify-center text-white font-display text-lg"
+                 style="background:linear-gradient(135deg,#44312A,#C4633A)"
+                 th:text="${res.restaurant.restaurantName.substring(0,1)}">
+            </div>
+
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-1 flex-wrap">
+                <h3 class="font-display text-lg text-charcoal" th:text="${res.restaurant.restaurantName}"></h3>
+                <span class="badge badge-completed">Completed</span>
+              </div>
+
+              <p class="text-muted text-sm font-body mb-2" th:text="${res.restaurant.cuisine + ' · ' + res.restaurant.city}"></p>
+
+              <div class="flex flex-wrap gap-4 text-xs text-muted font-body">
+                <span>📅 <strong class="text-charcoal" th:text="${res.date}"></strong></span>
+                <span>⏰ <strong class="text-charcoal" th:text="${res.startingTime + ' - ' + res.endingTime}"></strong></span>
+                <span>👥 <strong class="text-charcoal" th:text="${res.noOfSeats + ' Guests'}"></strong></span>
+                <span>🔖 <strong class="text-charcoal" th:text="${res.reservationCode}"></strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: CANCELLATIONS -->
+      <div id="tab-cancellations" class="tab-section">
+        <h2 class="font-display text-xl text-charcoal mb-4">Cancelled Reservations</h2>
+
+        <div th:if="${#lists.isEmpty(cancelledReservations)}" class="bg-white rounded-lg p-6 text-center text-muted">
+          No cancelled bookings.
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <div th:each="res : ${cancelledReservations}"
+               class="card-hover bg-white rounded-lg p-6 flex flex-col md:flex-row gap-5 items-start md:items-center">
+
+            <div class="w-14 h-14 rounded bg-gray-200 flex-shrink-0 flex items-center justify-center text-gray-400 font-display text-lg"
+                 th:text="${res.restaurant.restaurantName.substring(0,1)}">
+            </div>
+
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-1 flex-wrap">
+                <h3 class="font-display text-lg text-charcoal" th:text="${res.restaurant.restaurantName}"></h3>
+                <span class="badge badge-cancelled">Cancelled</span>
+              </div>
+
+              <p class="text-muted text-sm font-body mb-2" th:text="${res.restaurant.cuisine + ' · ' + res.restaurant.city}"></p>
+
+              <div class="flex flex-wrap gap-4 text-xs text-muted font-body">
+                <span>📅 <strong class="text-charcoal" th:text="${res.date}"></strong></span>
+                <span>⏰ <strong class="text-charcoal" th:text="${res.startingTime + ' - ' + res.endingTime}"></strong></span>
+                <span>👥 <strong class="text-charcoal" th:text="${res.noOfSeats + ' Guests'}"></strong></span>
+                <span>🔖 <strong class="text-charcoal" th:text="${res.reservationCode}"></strong></span>
+              </div>
+
+              <div th:if="${res.cancellationReason != null and !#strings.isEmpty(res.cancellationReason)}"
+                   class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-body">
+                <strong class="block text-charcoal mb-1">Cancellation note</strong>
+                <span th:text="${res.cancellationReason}"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- End of reservation sections -->
+  </main>
+</div>
+
+<script>
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('visible'));
+    document.getElementById('tab-' + tab).classList.add('visible');
+  }
+
+  let currentCancelForm = null;
+
+  function openCancelModal(reservationId, restaurantName, date, time, guests) {
+    // Populate modal
+    document.getElementById('modalRestaurant').textContent = restaurantName;
+    document.getElementById('modalDate').textContent = date;
+    document.getElementById('modalTime').textContent = time;
+    document.getElementById('modalGuests').textContent = guests + ' Guest' + (guests > 1 ? 's' : '');
+
+    // Create hidden form
+    currentCancelForm = document.createElement('form');
+    currentCancelForm.method = 'POST';
+    currentCancelForm.action = '/customer/reservation/cancel/' + reservationId;
+    currentCancelForm.style.display = 'none';
+    document.body.appendChild(currentCancelForm);
+
+    // Show modal
+    document.getElementById('cancelModal').classList.add('active');
+  }
+
+  function closeCancelModal() {
+    document.getElementById('cancelModal').classList.remove('active');
+    if (currentCancelForm) {
+      currentCancelForm.remove();
+      currentCancelForm = null;
+    }
+  }
+
+  function confirmCancel() {
+    if (currentCancelForm) {
+      currentCancelForm.submit();
+    }
+  }
+
+  // Event delegation for cancel buttons
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('cancel-btn')) {
+      const resId = e.target.getAttribute('data-res-id');
+      const restaurant = e.target.getAttribute('data-restaurant');
+      const date = e.target.getAttribute('data-date');
+      const time = e.target.getAttribute('data-time');
+      const guests = e.target.getAttribute('data-guests');
+
+      openCancelModal(resId, restaurant, date, time, guests);
+    }
+  });
+
+  // Close modal when clicking outside
+  document.getElementById('cancelModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeCancelModal();
+    }
+  });
+</script>
+
+<!-- Cancel Reservation Modal -->
+<div id="cancelModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-icon">⚠️</div>
+      <h2 class="modal-title">Cancel Booking?</h2>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-message">You're about to cancel this reservation. This action cannot be undone.</p>
+
+      <div class="modal-details">
+        <div class="modal-detail-item">
+          <span class="modal-detail-label">Restaurant</span>
+          <span class="modal-detail-value" id="modalRestaurant">—</span>
+        </div>
+        <div class="modal-detail-item">
+          <span class="modal-detail-label">Date</span>
+          <span class="modal-detail-value" id="modalDate">—</span>
+        </div>
+        <div class="modal-detail-item">
+          <span class="modal-detail-label">Time</span>
+          <span class="modal-detail-value" id="modalTime">—</span>
+        </div>
+        <div class="modal-detail-item">
+          <span class="modal-detail-label">Guests</span>
+          <span class="modal-detail-value" id="modalGuests">—</span>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeCancelModal()">
+        Keep Booking
+      </button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmCancel()">
+        Yes, Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{UserManagement/fragments/support-contact-modal :: supportContactModal(${user.email}, 'openProfileSupportModal')}"></div>
+</body>
+</html>

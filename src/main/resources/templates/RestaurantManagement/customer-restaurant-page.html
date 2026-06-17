@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ember & Oak — DineElite</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+  }}
+}
+</script>
+<style>
+  body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .topbar { background: rgba(28,25,23,0.96); backdrop-filter: blur(8px); }
+  .hero-gradient { background: linear-gradient(180deg, rgba(28,25,23,0) 0%, rgba(28,25,23,0.8) 100%); }
+  .tab-btn { padding: 12px 20px; font-family: 'Lato'; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 2px solid transparent; transition: all 0.2s; color: #8A7E78; cursor: pointer; }
+  .tab-btn.active { border-bottom-color: #C4633A; color: #C4633A; }
+  .tab-btn:hover { color: #1C1917; }
+  .time-slot { padding: 8px 16px; border: 1.5px solid #E5DFD8; border-radius: 4px; font-family: 'Lato'; font-size: 0.8rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
+  .time-slot:hover, .time-slot.selected { background: #C4633A; color: white; border-color: #C4633A; }
+  .time-slot.unavailable { background: #F0EBE3; color: #C9C0BB; border-color: #E5DFD8; cursor: not-allowed; }
+  .star { color: #D4A853; }
+  .menu-item { border-bottom: 1px solid #F0EBE3; }
+  .menu-item:last-child { border-bottom: none; }
+  .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s; }
+  .btn-primary:hover { background: #44312A; }
+  .photo-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 200px 200px; gap: 4px; }
+  .photo-grid > div:first-child { grid-row: span 2; }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topbar fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4">
+  <a th:href="@{/}" class="font-display text-2xl text-white">Dine<span style="color:#D4A853">Elite</span></a>
+
+
+  <div class="flex items-center gap-6">
+
+    <!-- Explore -->
+    <a th:href="@{/customer-restaurant-listing}"
+       class="text-gray-400 text-sm font-body hover:text-gold transition-colors">
+      Explore
+    </a>
+
+    <!-- Show only if NOT logged in -->
+    <div th:if="${customer == null}">
+      <a th:href="@{/sign-in}" class="text-gray-400 text-sm font-body hover:text-gold transition-colors">
+        Sign In
+      </a>
+    </div>
+
+    <!-- Show only if logged in -->
+    <div th:if="${customer != null}" class="flex items-center gap-2 cursor-pointer">
+
+      <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold"
+           th:text="${customer.firstname.substring(0,1)}">
+      </div>
+
+      <a th:href="@{/customer-profile-view}"
+         class="text-gray-300 text-sm font-body"
+         th:text="${customer.firstname + ' ' + customer.lastname}">
+      </a>
+
+    </div>
+
+  </div>
+
+  </div>
+</nav>
+
+<!-- HERO PHOTO GRID -->
+<div class="pt-16">
+  <div class="photo-grid h-96 px-0">
+    <div class="bg-gradient-to-br from-warm-brown to-charcoal flex items-center justify-center text-white font-display text-3xl opacity-80">Main Dining</div>
+    <div class="bg-gradient-to-br from-terracotta to-gold flex items-center justify-center text-white font-body text-sm">Bar Area</div>
+    <div class="bg-gradient-to-br from-sage to-warm-brown flex items-center justify-center text-white font-body text-sm">Private Room</div>
+    <div class="bg-gradient-to-br from-gold to-terracotta flex items-center justify-center text-white font-body text-sm">Terrace</div>
+    <div class="bg-gradient-to-br from-charcoal to-sage flex items-center justify-center text-white font-body text-sm relative">
+      <span class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-sm font-body font-bold">+12 photos</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="max-w-6xl mx-auto px-6 py-10 flex flex-col lg:flex-row gap-10">
+
+  <!-- LEFT: Details -->
+  <div class="flex-1">
+    <!-- Restaurant Header -->
+    <div class="mb-6">
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 class="font-display text-4xl text-charcoal mb-2" th:text="${restaurant.restaurantName}"></h1>
+          <div class="flex items-center gap-4 flex-wrap">
+            <span class="star" th:if="${restaurant.overallRating == 5.0}">★★★★★</span>
+            <span class="star" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E5DFD8; font-size:0.75rem;">★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E5DFD8; font-size:0.75rem;">★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E5DFD8; font-size:0.75rem;">★★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E5DFD8; font-size:0.75rem;">★★★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating == 0.0}">No Ratings</span>
+            <strong th:text="${restaurant.overallRating}">4.9</strong>
+            <span class="text-muted" th:text="'(' + ${reviews != null ? reviews.size() : 0} + ' reviews)'">(248 reviews)</span>
+            <span class="text-muted text-sm font-body">•</span>
+            <span class="text-sm font-body text-muted" th:text="${restaurant.cuisine}"></span>
+            <span class="text-muted text-sm font-body">•</span>
+            <span class="text-sm font-body text-muted" th:text="${restaurant.pricerange}"></span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 flex gap-0 mb-8">
+      <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
+      <button class="tab-btn" onclick="switchTab('reviews', this)">Reviews</button>
+      <button class="tab-btn" onclick="switchTab('photos', this)">Photos</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="tab-overview">
+      <p class="font-accent italic text-xl text-muted mb-4">"Where fire meets flavour"</p>
+      <p class="font-body text-sm leading-relaxed text-charcoal mb-6" th:text="${restaurant.description}"></p>
+      <p class="font-body text-sm leading-relaxed text-charcoal mb-8">
+        From our signature oak-smoked duck breast to the delicate saffron risotto, every dish tells the story of a region and a season. Our award-winning wine programme complements every course with selections from small-batch European producers.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-surface p-5 rounded">
+          <h3 class="font-display text-lg text-charcoal mb-4">Hours</h3>
+          <div class="flex flex-col gap-2 text-sm font-body">
+            <div class="flex justify-between"><span class="text-muted">Mon – Wed</span><span class="font-bold">6:00 PM – 10:00 PM</span></div>
+            <div class="flex justify-between"><span class="text-muted">Thu – Fri</span><span class="font-bold">6:00 PM – 11:00 PM</span></div>
+            <div class="flex justify-between"><span class="text-muted">Saturday</span><span class="font-bold">5:30 PM – 11:30 PM</span></div>
+            <div class="flex justify-between"><span class="text-muted">Sunday</span><span class="font-bold">5:30 PM – 9:30 PM</span></div>
+          </div>
+        </div>
+        <div class="bg-surface p-5 rounded">
+          <h3 class="font-display text-lg text-charcoal mb-4">Contact & Location</h3>
+          <div class="flex flex-col gap-2 text-sm font-body text-muted">
+            <p th:text="${restaurant.address}"></p>
+            <p th:text="${restaurant.phonenumber}"></p>
+            <p th:text="${restaurant.email}"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Tab (hidden) -->
+    <div id="tab-menu" class="hidden">
+      <div class="mb-8">
+        <h3 class="font-display text-2xl text-charcoal mb-1">Tasting Menu</h3>
+        <p class="text-muted font-accent italic mb-5">7 courses · $185 per person</p>
+        <div class="flex flex-col gap-0">
+          <div class="menu-item py-4 flex justify-between items-start"><div><p class="font-body font-bold text-charcoal text-sm">Oak-Smoked Duck Breast</p><p class="text-xs text-muted font-body mt-1">Cherry jus, roasted parsnip, micro herbs</p></div><span class="text-terracotta text-sm font-body font-bold">$42</span></div>
+          <div class="menu-item py-4 flex justify-between items-start"><div><p class="font-body font-bold text-charcoal text-sm">Saffron Risotto</p><p class="text-xs text-muted font-body mt-1">Bone marrow, aged parmesan, truffle oil</p></div><span class="text-terracotta text-sm font-body font-bold">$38</span></div>
+          <div class="menu-item py-4 flex justify-between items-start"><div><p class="font-body font-bold text-charcoal text-sm">Aged Wagyu Sirloin</p><p class="text-xs text-muted font-body mt-1">Herb butter, pommes dauphinoise, seasonal greens</p></div><span class="text-terracotta text-sm font-body font-bold">$78</span></div>
+          <div class="menu-item py-4 flex justify-between items-start"><div><p class="font-body font-bold text-charcoal text-sm">Valrhona Chocolate Soufflé</p><p class="text-xs text-muted font-body mt-1">Tonka bean ice cream, hazelnut praline</p></div><span class="text-terracotta text-sm font-body font-bold">$22</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Tab (hidden) -->
+    <div id="tab-reviews" class="hidden">
+      <div class="flex flex-col gap-6">
+        <div th:each="review : ${reviews}" class="bg-surface p-5 rounded">
+          <div class="flex items-center gap-3 mb-3">
+            <!-- First Letter -->
+            <div class="w-9 h-9 rounded-full bg-terracotta text-white flex items-center justify-center text-sm font-bold"
+                 th:text="${review.customer.firstname.substring(0,1)}">
+            </div>
+            <!-- Customer Name -->
+            <div>
+              <p class="font-body text-sm font-bold text-charcoal"
+                 th:text="${review.customer.firstname + ' ' + review.customer.lastname}">
+              </p>
+
+              <p class="text-xs text-muted font-body">
+                Recent Review
+              </p>
+              </div>
+            <!-- Stars -->
+            <div class="ml-auto star text-sm"
+                 th:text="${'★'.repeat(review.overall_rating)}">
+            </div>
+          </div>
+          <!-- Review Text -->
+          <p class="text-sm font-body text-charcoal leading-relaxed"
+             th:text="${review.review}">
+          </p>
+        </div>
+        <!-- Give Review Button -->
+        <a th:if="${customer != null}" th:href="@{/customer-restaurant-feedback/{id}(id=${restaurant.id})}"
+           class="btn-primary w-full rounded-sm text-center mt-5 px-3 py-3">
+          Give your review
+        </a>
+        </div>
+      </div>
+
+
+    <!-- Photos Tab (hidden) -->
+    <div id="tab-photos" class="hidden">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="aspect-square bg-gradient-to-br from-warm-brown to-terracotta rounded"></div>
+        <div class="aspect-square bg-gradient-to-br from-sage to-charcoal rounded"></div>
+        <div class="aspect-square bg-gradient-to-br from-gold to-terracotta rounded"></div>
+        <div class="aspect-square bg-gradient-to-br from-terracotta to-warm-brown rounded"></div>
+        <div class="aspect-square bg-gradient-to-br from-charcoal to-sage rounded"></div>
+        <div class="aspect-square bg-gradient-to-br from-gold to-charcoal rounded"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Booking Widget -->
+  <div class="lg:w-80 flex-shrink-0">
+    <div class="bg-white rounded-lg p-6 shadow-lg sticky top-24">
+      <h3 class="font-display text-xl text-charcoal mb-1">Make a Reservation</h3>
+      <p class="text-xs text-muted font-body mb-5">Instant confirmation</p>
+
+      <a th:href="${customer != null} ? @{/restaurant-seat-checking/{id}(id=${restaurant.id})} : @{/sign-in}"
+         class="btn-primary w-full rounded-sm text-center mt-5 px-3 py-3">
+        Reserve Table
+      </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+
+    ['overview','reviews','photos'].forEach(t => {
+      document.getElementById('tab-'+t).classList.add('hidden');
+    });
+
+    document.getElementById('tab-'+tab).classList.remove('hidden');
+  }
+</script>
+</body>
+</html>

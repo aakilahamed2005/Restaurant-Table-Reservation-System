@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DineElite — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+  }}
+}
+</script>
+<style>
+  body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .left-panel { background: linear-gradient(160deg, #1C1917 0%, #44312A 60%, #C4633A 100%); transition: background 0.35s ease; }
+  .left-panel.partner-mode { background: linear-gradient(160deg, #1C1917 0%, #2A1F1B 50%, #44312A 100%); }
+  .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
+  .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
+  .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; }
+  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+  .fade-in { animation: fadeUp 0.6s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+  .signin-tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #E5DFD8;
+  }
+  .signin-tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #8A7E78;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    font-family: 'Lato', sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .signin-tab-btn:hover { color: #1C1917; }
+  .signin-tab-btn.active {
+    color: #C4633A;
+    border-bottom-color: #C4633A;
+  }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen flex">
+
+<!-- LEFT PANEL -->
+<div id="leftPanel" class="left-panel hidden lg:flex flex-col justify-between w-1/2 p-16 text-white">
+  <a th:href="@{/}" class="font-display text-2xl tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <div>
+    <p id="leftTagline" class="font-accent italic text-gold text-xl mb-4">"A great meal begins with a great table."</p>
+    <h2 id="leftTitle" class="font-display text-5xl leading-tight mb-6">Welcome<br/>Back</h2>
+    <p id="leftDesc" class="text-gray-400 font-body font-light leading-relaxed max-w-sm">
+      Sign in to manage your reservations, discover new restaurants, and enjoy exclusive dining experiences.
+    </p>
+  </div>
+  <div class="flex gap-3">
+    <div class="w-2 h-2 rounded-full bg-terracotta"></div>
+    <div class="w-2 h-2 rounded-full bg-gold opacity-50"></div>
+    <div class="w-2 h-2 rounded-full bg-white opacity-30"></div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="flex-1 flex items-center justify-center px-6 py-12">
+  <div class="w-full max-w-md fade-in">
+    <div class="lg:hidden mb-10 text-center">
+      <a th:href="@{/}" class="font-display text-3xl text-charcoal">Dine<span style="color:#D4A853">Elite</span></a>
+    </div>
+
+    <div class="mb-6">
+      <h1 class="font-display text-3xl text-charcoal mb-2">Sign In</h1>
+      <p id="formSubtitle" class="text-muted font-body text-sm">Access your reservations and dining history</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="signin-tab-bar" role="tablist">
+      <button type="button" class="signin-tab-btn active" id="tab-customer" data-tab="customer" onclick="switchSignInTab('customer', this)">
+        Customer
+      </button>
+      <button type="button" class="signin-tab-btn" id="tab-partner" data-tab="partner" onclick="switchSignInTab('partner', this)">
+        Partner
+      </button>
+    </div>
+
+    <form id="signInForm" autocomplete="off" class="flex flex-col gap-5" method="post" th:action="@{/sign-in}" th:object="${loginDto}">
+      <input type="hidden" name="loginType" id="loginType" th:value="${activeTab != null ? activeTab : 'customer'}"/>
+
+      <div th:if="${error}" class="text-red-600 text-sm bg-red-100 p-3 rounded">
+        <p th:text="${error}"></p>
+      </div>
+
+      <div th:if="${accountDeactivated}" class="text-sm bg-amber-50 border border-amber-200 text-amber-950 p-4 rounded">
+        <p class="font-body font-bold text-charcoal mb-2">This account has been deactivated</p>
+        <p class="text-muted text-sm mb-3">You cannot sign in until an administrator restores your access. If you believe this is a mistake, you can send a message to the platform team.</p>
+        <p class="text-sm">
+          <a href="#" id="openDeactivatedSupportModal" class="text-terracotta font-bold hover:text-warm-brown underline">Contact admin</a>
+        </p>
+      </div>
+
+      <div th:if="${success_msg}" class="text-green-600 text-sm bg-green-100 p-3 rounded">
+        <p th:text="${success_msg}"></p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Email Address</label>
+        <input type="email" placeholder="you@example.com" name="email" th:field="*{email}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+      </div>
+      <div>
+        <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Password</label>
+        <input type="password" name="password" placeholder="••••••••••" th:field="*{password}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+      </div>
+
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded border-gray-300 text-terracotta focus:ring-terracotta"/>
+        <span class="text-sm text-muted font-body">Remember me</span>
+      </label>
+
+      <button type="submit" id="submitBtn" class="btn-primary w-full py-4 rounded-sm mt-2">Sign In</button>
+    </form>
+
+    <p class="text-center text-sm text-muted font-body mt-8">
+      <span id="registerPrompt">Don't have an account?</span>
+      <a id="registerLink" th:href="@{/customer-register}" class="text-terracotta font-bold hover:text-warm-brown transition-colors">Create one free</a>
+    </p>
+  </div>
+</div>
+
+<!-- Contact admin (deactivated / account issues) -->
+<div id="userSupportModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4" style="background:rgba(28,25,23,0.55); backdrop-filter: blur(2px);">
+  <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl relative" style="animation: fadeUp 0.25s ease;">
+    <button type="button" id="closeUserSupportModal" class="absolute top-3 right-3 text-muted hover:text-charcoal text-xl leading-none" aria-label="Close">&times;</button>
+    <h2 class="font-display text-xl text-charcoal mb-1">Contact platform admin</h2>
+    <p class="text-xs text-muted font-body mb-4">Describe your issue. Our team will review your message.</p>
+    <div id="userSupportFormError" class="hidden text-red-600 text-xs bg-red-50 border border-red-100 rounded p-2 mb-3"></div>
+    <div id="userSupportFormSuccess" class="hidden text-green-700 text-xs bg-green-50 border border-green-100 rounded p-2 mb-3">Message sent. We will get back to you as soon as possible.</div>
+    <div class="flex flex-col gap-3">
+      <div>
+        <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-1">Topic</label>
+        <select id="userSupportCategory" class="input-field w-full rounded px-3 py-2 text-sm">
+          <option value="DEACTIVATED_ACCOUNT">Deactivated account</option>
+
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-1">Your email</label>
+        <input type="email" id="userSupportEmail" class="input-field w-full rounded px-3 py-2 text-sm" placeholder="Where we can reach you"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-1">Description</label>
+        <textarea id="userSupportDescription" rows="4" class="input-field w-full rounded px-3 py-2 text-sm resize-y" placeholder="Please explain what happened"></textarea>
+      </div>
+      <button type="button" id="userSupportSendBtn" class="btn-primary w-full py-3 rounded-sm">Send</button>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  const activeTabOnLoad = /*[[${activeTab}]]*/ 'customer';
+
+  const tabContent = {
+    customer: {
+      subtitle: 'Access your reservations and dining history',
+      submitLabel: 'Sign In as Customer',
+      registerPrompt: "Don't have an account?",
+      registerHref: /*[[@{/customer-register}]]*/ '/customer-register',
+      registerLabel: 'Create one free',
+      leftTagline: '"A great meal begins with a great table."',
+      leftTitle: 'Welcome\nBack',
+      leftDesc: 'Sign in to manage your reservations, discover new restaurants, and enjoy exclusive dining experiences.',
+      partnerMode: false
+    },
+    partner: {
+      subtitle: 'Sign in to your restaurant partner dashboard',
+      submitLabel: 'Sign In as Partner',
+      registerPrompt: 'New restaurant partner?',
+      registerHref: /*[[@{/owner-register}]]*/ '/owner-register',
+      registerLabel: 'Register as Partner',
+      leftTagline: 'Grow your restaurant',
+      leftTitle: 'Partner\nDashboard',
+      leftDesc: 'Manage reservations, track performance, and reach thousands of new diners through DineElite.',
+      partnerMode: true
+    }
+  };
+
+  function switchSignInTab(tab, button) {
+    document.querySelectorAll('.signin-tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (button) button.classList.add('active');
+
+    const config = tabContent[tab] || tabContent.customer;
+    document.getElementById('loginType').value = tab;
+    document.getElementById('formSubtitle').textContent = config.subtitle;
+    document.getElementById('submitBtn').textContent = config.submitLabel;
+    document.getElementById('registerPrompt').textContent = config.registerPrompt;
+    const registerLink = document.getElementById('registerLink');
+    registerLink.href = config.registerHref;
+    registerLink.textContent = config.registerLabel;
+    document.getElementById('leftTagline').textContent = config.leftTagline;
+    document.getElementById('leftTitle').innerHTML = config.leftTitle.replace('\n', '<br/>');
+    document.getElementById('leftDesc').textContent = config.leftDesc;
+    document.getElementById('leftPanel').classList.toggle('partner-mode', config.partnerMode);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', tab);
+    window.history.replaceState({}, '', url);
+
+    loadSavedCredentials(tab);
+  }
+
+  function rememberStorageKey(tab) {
+    return tab === 'partner' ? 'dineelite_signin_partner' : 'dineelite_signin_customer';
+  }
+
+  function loadSavedCredentials(tab) {
+    const email = document.querySelector('#signInForm input[name="email"]');
+    const password = document.querySelector('#signInForm input[name="password"]');
+    const remember = document.getElementById('rememberMe');
+    const raw = localStorage.getItem(rememberStorageKey(tab));
+    if (!raw) {
+      if (remember) remember.checked = false;
+      return;
+    }
+    try {
+      const data = JSON.parse(raw);
+      if (data.remember) {
+        if (email) email.value = data.email || '';
+        if (password) password.value = data.password || '';
+        if (remember) remember.checked = true;
+      }
+    } catch (e) {
+      localStorage.removeItem(rememberStorageKey(tab));
+    }
+  }
+
+  function saveCredentials(tab) {
+    const remember = document.getElementById('rememberMe');
+    const email = document.querySelector('#signInForm input[name="email"]');
+    const password = document.querySelector('#signInForm input[name="password"]');
+    const key = rememberStorageKey(tab);
+    if (remember && remember.checked) {
+      localStorage.setItem(key, JSON.stringify({
+        remember: true,
+        email: email ? email.value : '',
+        password: password ? password.value : ''
+      }));
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+
+  const USER_SUPPORT_API = /*[[@{/support/contact-message}]]*/ '/support/contact-message';
+
+  function openUserSupportModal(opts) {
+    const modal = document.getElementById('userSupportModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    const err = document.getElementById('userSupportFormError');
+    const ok = document.getElementById('userSupportFormSuccess');
+    if (err) { err.classList.add('hidden'); err.textContent = ''; }
+    if (ok) ok.classList.add('hidden');
+    const emailInput = document.querySelector('#signInForm input[name="email"]');
+    const emailVal = emailInput ? emailInput.value.trim() : '';
+    const supportEmail = document.getElementById('userSupportEmail');
+    if (supportEmail && !supportEmail.value) supportEmail.value = emailVal;
+    const cat = document.getElementById('userSupportCategory');
+    if (cat && opts && opts.presetCategory) cat.value = opts.presetCategory;
+    const desc = document.getElementById('userSupportDescription');
+    if (desc && opts && opts.presetDescription) desc.value = opts.presetDescription;
+  }
+
+  function closeUserSupportModal() {
+    const modal = document.getElementById('userSupportModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const tab = (activeTabOnLoad === 'partner' || activeTabOnLoad === 'owner') ? 'partner' : 'customer';
+    const tabBtn = document.getElementById(tab === 'partner' ? 'tab-partner' : 'tab-customer');
+    switchSignInTab(tab, tabBtn);
+
+    const signInForm = document.getElementById('signInForm');
+    if (signInForm) {
+      signInForm.addEventListener('submit', function() {
+        const currentTab = document.getElementById('loginType').value === 'partner' ? 'partner' : 'customer';
+        saveCredentials(currentTab);
+      });
+    }
+
+    const openLink = document.getElementById('openDeactivatedSupportModal');
+    if (openLink) {
+      openLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        openUserSupportModal({
+          presetCategory: 'DEACTIVATED_ACCOUNT',
+          presetDescription: 'My account is deactivated and I would like to request access to be restored.'
+        });
+      });
+    }
+    const closeBtn = document.getElementById('closeUserSupportModal');
+    if (closeBtn) closeBtn.addEventListener('click', closeUserSupportModal);
+    const modal = document.getElementById('userSupportModal');
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeUserSupportModal();
+      });
+    }
+    const sendBtn = document.getElementById('userSupportSendBtn');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', async function() {
+        const err = document.getElementById('userSupportFormError');
+        const ok = document.getElementById('userSupportFormSuccess');
+        if (ok) ok.classList.add('hidden');
+        if (err) { err.classList.add('hidden'); err.textContent = ''; }
+        const category = document.getElementById('userSupportCategory').value;
+        const email = document.getElementById('userSupportEmail').value.trim();
+        const description = document.getElementById('userSupportDescription').value.trim();
+        const emailField = document.querySelector('#signInForm input[name="email"]');
+        const attemptedLoginEmail = emailField ? emailField.value.trim() : '';
+        sendBtn.disabled = true;
+        try {
+          const res = await fetch(USER_SUPPORT_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category, email, description, attemptedLoginEmail })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            if (err) {
+              err.textContent = data.message || 'Could not send message. Please try again.';
+              err.classList.remove('hidden');
+            }
+          } else if (ok) {
+            ok.classList.remove('hidden');
+          }
+        } catch (e) {
+          if (err) {
+            err.textContent = 'Network error. Please try again.';
+            err.classList.remove('hidden');
+          }
+        } finally {
+          sendBtn.disabled = false;
+        }
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

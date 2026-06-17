@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DineElite — Owner - Add Restaurant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+        }}
+    }
+  </script>
+  <style>
+    body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+    .topbar { background: #1C1917; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; color: #8A7E78; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+    .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
+    .sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 13px; }
+    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #8A7E78; padding: 8px 16px 4px; }
+    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; display: inline-flex; align-items: center; cursor: pointer; border: none; padding: 8px 12px; border-radius: 4px; }
+    .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+    .btn-ghost { background: transparent; border: 1.5px solid #E5DFD8; color: #8A7E78; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-ghost:hover { border-color: #8A7E78; color: #1C1917; }
+    .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; font-family: 'Lato'; }
+    .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
+    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #44312A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display'; font-size: 2rem; color: white; }
+    .section-divider { display: flex; align-items: center; gap: 12px; margin: 8px 0 4px; }
+    .section-divider span { font-family: 'Lato'; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8A7E78; white-space: nowrap; }
+    .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #E5DFD8; }
+    select.input-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238A7E78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 36px; }
+    .fade-in { animation: fadeUp 0.5s ease both; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+
+    /* ── Schedule Row ── */
+    .schedule-row {
+      display: grid;
+      grid-template-columns: 44px 110px 1fr;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 16px;
+      border-radius: 8px;
+      border: 1.5px solid #E5DFD8;
+      background: white;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .schedule-row.is-open { border-color: #C4633A; background: #FFFAF7; }
+    .schedule-row.is-closed { opacity: 0.55; }
+
+    /* Toggle switch */
+    .toggle-wrap { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+    .toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #E5DFD8;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      left: 3px; top: 3px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+      transition: transform 0.2s;
+    }
+    .toggle-wrap input:checked + .toggle-track { background: #C4633A; }
+    .toggle-wrap input:checked + .toggle-track::after { transform: translateX(16px); }
+
+    /* Day label */
+    .day-label {
+      font-family: 'Lato'; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; color: #1C1917;
+    }
+    .day-status-badge {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 1px 7px; border-radius: 999px;
+      margin-left: 6px;
+    }
+    .badge-open  { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .badge-closed{ background: #f3f4f6; color: #9ca3af; border: 1px solid #e5e7eb; }
+
+    /* Time inputs */
+    .time-block { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .time-group { display: flex; flex-direction: column; gap: 3px; }
+    .time-group label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #8A7E78; }
+    .time-input {
+      border: 1.5px solid #E5DFD8; background: #FAF7F2;
+      border-radius: 5px; padding: 6px 10px;
+      font-family: 'Lato'; font-size: 0.82rem; color: #1C1917;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 108px;
+    }
+    .time-input:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
+    .time-input:disabled { opacity: 0.3; cursor: not-allowed; background: #F0EBE3; }
+    .time-separator { color: #8A7E78; font-size: 1.1rem; font-weight: 300; margin-top: 16px; }
+
+    /* Closed banner */
+    .closed-banner {
+      flex: 1; text-align: center;
+      font-family: 'Lato'; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: #c4b5b0; padding: 8px 0;
+      border: 1.5px dashed #E5DFD8; border-radius: 5px;
+    }
+
+    /* Quick-set bar */
+    .quick-btn {
+      font-family: 'Lato'; font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      border: 1.5px solid #E5DFD8; color: #8A7E78;
+      padding: 4px 11px; border-radius: 999px;
+      cursor: pointer; background: white;
+      transition: all 0.15s;
+    }
+    .quick-btn:hover { border-color: #C4633A; color: #C4633A; background: #FFFAF7; }
+
+    .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 24px; }
+    .alert-error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  </style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP NAV -->
+<nav class="topbar flex items-center justify-between px-8 py-4">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="flex items-center gap-6">
+    <a th:href="@{/restaurant-listing}" class="text-gray-300 text-sm font-body hover:text-gold transition-colors">Explore</a>
+    <div class="flex items-center gap-2 cursor-pointer">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#44312A;" th:text="${firstLetter}">J</div>
+      <span class="text-gray-300 text-sm font-body" th:text="${userFullName}">John Doe</span>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE WRAPPER -->
+<div class="max-w-6xl mx-auto px-6 py-10 flex gap-8">
+
+  <div th:replace="~{UserManagement/fragments/owner-profile-sidebar :: ownerSidebar('register', ${userFullName}, ${firstLetter})}"></div>
+
+  <!-- MAIN -->
+  <main class="flex-1 fade-in">
+
+    <!-- Page Header -->
+    <div class="bg-white rounded-lg p-8 mb-6">
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <div class="w-10 h-0.5 bg-gold mb-3"></div>
+          <h2 class="font-display text-2xl text-charcoal">Add a New Restaurant</h2>
+          <p class="text-muted text-sm font-body mt-1">Fill in your restaurant's details to get listed on DineElite</p>
+        </div>
+        <a th:href="@{/owner-restaurants}" class="btn-ghost px-5 py-2 rounded-sm">← Back to My Restaurants</a>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg p-8">
+
+      <!-- Error Alert -->
+      <div th:if="${error}" class="alert alert-error">
+        <p th:text="${error}"></p>
+      </div>
+
+      <!-- Form -->
+      <form method="post" enctype="multipart/form-data" th:action="@{/restaurant-register}" th:object="${restaurantRegisterDto}" autocomplete="off" id="restaurantForm">
+
+        <!-- ── BASIC INFORMATION ── -->
+        <div class="section-divider"><span>Basic Information</span></div>
+        <div class="flex flex-col gap-5 mt-5 mb-6">
+
+          <div>
+            <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Restaurant Name</label>
+            <input type="text" placeholder="e.g. The Golden Fork" th:field="*{name}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-2">Cuisine</label>
+              <select th:field="*{cuisine}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required>
+                <option value="" disabled selected>Select cuisine</option>
+                <option th:each="cuisine : ${cuisines}" th:value="${cuisine}" th:text="${cuisine}"></option>
+              </select>
+              <p th:if="${#fields.hasErrors('cuisine')}" th:errors="*{cuisine}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Price Range</label>
+              <select th:field="*{priceRange}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required>
+                <option value="" disabled selected>Select range</option>
+                <option value="BUDGET">$ — Budget-friendly</option>
+                <option value="MODERATE">$$ — Moderate</option>
+                <option value="UPSCALE">$$$ — Upscale</option>
+                <option value="FINE_DINING">$$$$ — Fine Dining</option>
+              </select>
+              <p th:if="${#fields.hasErrors('priceRange')}" th:errors="*{priceRange}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Short Description</label>
+            <textarea id="shortDesc" rows="2" maxlength="120" placeholder="Short description for card view" th:field="*{shortDescription}" class="input-field w-full rounded px-4 py-3 font-body text-sm resize-none"></textarea>
+            <div class="text-xs text-gray-500 mt-1"><span id="count">0</span>/120</div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Description</label>
+            <textarea rows="4" placeholder="Tell diners what makes your restaurant special..." th:field="*{description}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal resize-none" required></textarea>
+            <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+
+        </div>
+
+        <!-- ── LOCATION & CONTACT ── -->
+        <div class="section-divider"><span>Location &amp; Contact</span></div>
+        <div class="flex flex-col gap-5 mt-5 mb-6">
+
+          <div>
+            <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Street Address</label>
+            <input type="text" placeholder="123 Galle Road" th:field="*{streetAddress}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+            <p th:if="${#fields.hasErrors('streetAddress')}" th:errors="*{streetAddress}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">City</label>
+              <input type="text" placeholder="Colombo" th:field="*{city}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+              <p th:if="${#fields.hasErrors('city')}" th:errors="*{city}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label for="province" class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Province</label>
+              <select id="province" th:field="*{province}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required>
+                <option value="" disabled selected>Select province</option>
+                <option value="Western">Western</option>
+                <option value="Central">Central</option>
+                <option value="Southern">Southern</option>
+                <option value="Northern">Northern</option>
+                <option value="Eastern">Eastern</option>
+                <option value="North Western">North Western</option>
+                <option value="North Central">North Central</option>
+                <option value="Uva">Uva</option>
+                <option value="Sabaragamuwa">Sabaragamuwa</option>
+              </select>
+              <p th:if="${#fields.hasErrors('province')}" th:errors="*{province}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Phone Number</label>
+              <input type="tel" placeholder="+94 11 234 5678" th:field="*{phoneNumber}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+              <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+            <div>
+              <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Email Address</label>
+              <input type="email" placeholder="reservations@restaurant.com" th:field="*{email}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+              <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-xs mt-1"></p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Website <span class="text-muted normal-case tracking-normal font-normal">(optional)</span></label>
+            <input type="url" placeholder="https://yourrestaurant.com" th:field="*{website}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal"/>
+          </div>
+
+        </div>
+
+        <!-- ── CAPACITY ── -->
+        <div class="section-divider"><span>Capacity</span></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 mb-6">
+          <div>
+            <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Seating Capacity</label>
+            <input type="number" min="1" max="500" placeholder="e.g. 60" th:field="*{seatingCapacity}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+            <p th:if="${#fields.hasErrors('seatingCapacity')}" th:errors="*{seatingCapacity}" class="text-red-500 text-xs mt-1"></p>
+          </div>
+          <div>
+            <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Max Party Size</label>
+            <input type="number" min="1" max="100" placeholder="e.g. 12" th:field="*{maxPartySize}" class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             OPENING HOURS — Weekly Schedule
+        ══════════════════════════════════════════ -->
+        <div class="section-divider"><span>Opening Hours</span></div>
+
+        <!-- Quick-set shortcuts -->
+        <div class="flex items-center gap-2 flex-wrap mt-4 mb-4">
+          <span class="text-xs text-muted font-body font-bold uppercase tracking-widest mr-1">Quick set:</span>
+          <button type="button" class="quick-btn" onclick="quickSet('all','09:00','22:00')">Open All Days</button>
+          <button type="button" class="quick-btn" onclick="quickSet('weekdays','09:00','22:00')">Mon – Fri Only</button>
+          <button type="button" class="quick-btn" onclick="quickSet('weekend','10:00','23:00')">Weekends Only</button>
+          <button type="button" class="quick-btn" onclick="quickSet('closeAll')">Close All</button>
+        </div>
+
+        <!-- Schedule rows - MONDAY -->
+        <div class="flex flex-col gap-3 mt-2 mb-6" id="schedule-grid">
+          <div class="schedule-row is-open" id="row_MON">
+            <label class="toggle-wrap">
+              <input type="checkbox" th:field="*{mondayOpen}" id="cb_MON" onchange="toggleDay('MON',this)"/>
+              <span class="toggle-track"></span>
+            </label>
+
+
+
+
+            <div>
+              <span class="day-label">Monday</span>
+              <span class="day-status-badge badge-open" id="badge_MON">Open</span>
+            </div>
+            <div class="time-block" id="times_MON">
+              <div class="time-group">
+                <label>Opens</label>
+                <input type="time" class="time-input" th:field="*{mondayOpeningTime}" id="open_MON"/>
+              </div>
+              <span class="time-separator">→</span>
+              <div class="time-group">
+                <label>Closes</label>
+                <input type="time" class="time-input" th:field="*{mondayClosingTime}" id="close_MON"/>
+              </div>
+            </div>
+            <div class="closed-banner hidden" id="closed_MON">Closed</div>
+          </div>
+
+          <!-- TUESDAY -->
+          <div class="schedule-row is-open" id="row_TUE">
+            <label class="toggle-wrap">
+              <input type="checkbox" th:field="*{tuesdayOpen}" id="cb_TUE" onchange="toggleDay('TUE',this)"/>
+              <span class="toggle-track"></span>
+            </label>
+            <div>
+              <span class="day-label">Tuesday</span>
+              <span class="day-status-badge badge-open" id="badge_TUE">Open</span>
+            </div>
+            <div class="time-block" id="times_TUE">
+              <div class="time-group">
+                <label>Opens</label>
+                <input type="time" class="time-input" th:field="*{tuesdayOpeningTime}" id="open_TUE"/>
+              </div>
+              <span class="time-separator">→</span>
+              <div class="time-group">
+                <label>Closes</label>
+                <input type="time" class="time-input" th:field="*{tuesdayClosingTime}" id="close_TUE"/>
+              </div>
+            </div>
+            <div class="closed-banner hidden" id="closed_TUE">Closed</div>
+          </div>
+
+          <!-- WEDNESDAY -->
+          <div class="schedule-row is-open" id="row_WED">
+            <label class="toggle-wrap">
+              <input type="checkbox" th:field="*{wednesdayOpen}" id="cb_WED" onchange="toggleDay('WED',this)"/>
+              <span class="toggle-track"></span>
+            </label>
+            <div>
+              <span class="day-label">Wednesday</span>
+              <span class="day-status-badge badge-open" id="badge_WED">Open</span>
+            </div>
+            <div class="time-block" id="times_WED">
+              <div class="time-group">
+                <label>Opens</label>
+                <input type="time" class="time-input" th:field="*{wednesdayOpeningTime}" id="open_WED"/>
+              </div>
+              <span class="time-separator">→</span>
+              <div class="time-group">
+                <label>Closes</label>
+                <input type="time" class="time-input" th:field="*{wednesdayClosingTime}" id="close_WED"/>
+              </div>
+            </div>
+            <div class="closed-banner hidden" id="closed_WED">Closed</div>
+          </div>
+
+          <!-- THURSDAY -->
+          <div class="schedule-row is-open" id="row_THU">
+            <label class="toggle-wrap">
+              <input type="checkbox" th:field="*{thursdayOpen}" id="cb_THU" onchange="toggleDay('THU',this)"/>
+              <span class="toggle-track"></span>
+            </label>
+            <div>
+              <span class="day-label">Thursday</span>
+              <span class="day-status-badge badge-open" id="badge_THU">Open</span>
+            </div>
+            <div class="time-block" id="times_THU">
+              <div class="time-group">
+                <label>Opens</label>
+                <input type="time" class="time-input" th:field="*{thursdayOpeningTime}" id="open_THU"/>
+              </div>
+              <span class="time-separator">→</span>
+              <div class="time-group">
+                <label>Closes</label>
+                <input type="time" class="time-input" th:field="*{thursdayClosingTime}" id="close_THU"/>
+              </div>
+            </div>
+            <div class="closed-banner hidden" id="closed_THU">Closed</div>
+          </div>
+
+          <!-- FRIDAY -->
+          <div class="schedule-row is-open" id="row_FRI">
+            <label class="toggle-wrap">
+              <input type="checkbox" th:field="*{fridayOpen}" id="cb_FRI" onchange="toggleDay('FRI',this)"/>
+              <span class="toggle-track"></span>
+            </label>
+            <div>
+              <span class="day-label">Friday</span>
+              <span class="day-status-badge badge-open" id="badge_FRI">Open</span>
+            </div>
+            <div class="time-block" id="times_FRI">
+              <div class="time-group">
+                <label>Opens</label>
+                <input type="time" class="time-input" th:field="*{fridayOpeningTime}" id="open_FRI"/>
+              </div>
+              <span class="time-separator">→</span>
+              <div class="time-group">
+                <label>Closes</label>
+                <input type="time" class="time-input" th:field="*{fridayClosingTime}" id="close_FRI"/>
+              </div>
+            </div>
+            <div class="closed-banner hidden" id="closed_FRI">Closed</div>
+          </div>
+
+          <!-- SATURDAY -->
+          <div class="schedule-row is-open" id="row_SAT">
+            <label class="toggle-wrap">
+              <input type="checkbox" th:field="*{saturdayOpen}" id="cb_SAT" onchange="toggleDay('SAT',this)"/>
+              <span class="toggle-track"></span>
+            </label>
+            <div>
+              <span class="day-label">Saturday</span>
+              <span class="day-status-badge badge-open" id="badge_SAT">Open</span>
+            </div>
+            <div class="time-block" id="times_SAT">
+              <div class="time-group">
+                <label>Opens</label>
+                <input type="time" class="time-input" th:field="*{saturdayOpeningTime}" id="open_SAT"/>
+              </div>
+              <span class="time-separator">→</span>
+              <div class="time-group">
+                <label>Closes</label>
+                <input type="time" class="time-input" th:field="*{saturdayClosingTime}" id="close_SAT"/>
+              </div>
+            </div>
+            <div class="closed-banner hidden" id="closed_SAT">Closed</div>
+          </div>
+
+          <!-- SUNDAY -->
+          <div class="schedule-row is-closed" id="row_SUN">
+            <label class="toggle-wrap">
+              <input type="checkbox" th:field="*{sundayOpen}" id="cb_SUN" onchange="toggleDay('SUN',this)"/>
+              <span class="toggle-track"></span>
+            </label>
+            <div>
+              <span class="day-label">Sunday</span>
+              <span class="day-status-badge badge-closed" id="badge_SUN">Closed</span>
+            </div>
+            <div class="time-block hidden" id="times_SUN">
+              <div class="time-group">
+                <label>Opens</label>
+                <input type="time" class="time-input" th:field="*{sundayOpeningTime}" id="open_SUN" disabled/>
+              </div>
+              <span class="time-separator">→</span>
+              <div class="time-group">
+                <label>Closes</label>
+                <input type="time" class="time-input" th:field="*{sundayClosingTime}" id="close_SUN" disabled/>
+              </div>
+            </div>
+            <div class="closed-banner" id="closed_SUN">Closed — toggle to set hours</div>
+          </div>
+
+        </div>
+        <!-- END schedule -->
+
+        <!-- ── RESTAURANT PHOTOS ── -->
+        <div class="section-divider"><span>Restaurant Photos</span></div>
+        <div class="mt-5 mb-8">
+          <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-2">Upload Photos</label>
+          <p class="text-xs text-muted font-body mb-3">Add up to 10 images (JPEG, PNG, or WebP, max 20MB each). These appear on your restaurant listing and detail page.</p>
+          <input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple
+                 class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal" required/>
+        </div>
+
+        <!-- ── FEATURES & AMENITIES ── -->
+        <div class="section-divider"><span>Features &amp; Amenities</span></div>
+        <div class="mt-5 mb-8">
+          <label class="block text-xs font-body font-bold text-charcoal uppercase tracking-widest mb-3">Select all that apply</label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <label class="flex items-center gap-3 cursor-pointer p-3 rounded border border-transparent hover:border-gold hover:bg-cream transition">
+              <input type="checkbox" th:field="*{hasParking}" class="w-4 h-4 accent-terracotta"/>
+              <span class="text-sm font-body text-charcoal">Parking Available</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer p-3 rounded border border-transparent hover:border-gold hover:bg-cream transition">
+              <input type="checkbox" th:field="*{hasWifi}" class="w-4 h-4 accent-terracotta"/>
+              <span class="text-sm font-body text-charcoal">Free Wi-Fi</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer p-3 rounded border border-transparent hover:border-gold hover:bg-cream transition">
+              <input type="checkbox" th:field="*{halalCertified}" class="w-4 h-4 accent-terracotta"/>
+              <span class="text-sm font-body text-charcoal">Halal Certified</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ── FORM ACTIONS ── -->
+        <div class="flex gap-3 pt-6 border-t border-gray-200 mt-4">
+          <button type="submit" class="btn-primary px-8 py-3 rounded-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            List My Restaurant
+          </button>
+          <a th:href="@{/owner-restaurants}" class="btn-ghost px-8 py-3 rounded-sm">Cancel</a>
+        </div>
+
+      </form>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+  // Character counter
+  const textarea = document.getElementById("shortDesc");
+  const counter = document.getElementById("count");
+
+  if (textarea) {
+    textarea.addEventListener("input", function() {
+      counter.textContent = textarea.value.length;
+    });
+    counter.textContent = textarea.value.length;
+  }
+
+  const DAYS = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+
+  function toggleDay(day, cb) {
+    const row = document.getElementById('row_' + day);
+    const badge = document.getElementById('badge_' + day);
+    const times = document.getElementById('times_' + day);
+    const closed = document.getElementById('closed_' + day);
+    const openInput = document.getElementById('open_' + day);
+    const closeInput = document.getElementById('close_' + day);
+
+    const isOpen = cb.checked;
+
+    row.classList.toggle('is-open', isOpen);
+    row.classList.toggle('is-closed', !isOpen);
+
+    badge.textContent = isOpen ? 'Open' : 'Closed';
+    badge.classList.toggle('badge-open', isOpen);
+    badge.classList.toggle('badge-closed', !isOpen);
+
+    times.classList.toggle('hidden', !isOpen);
+    closed.classList.toggle('hidden', isOpen);
+
+    openInput.disabled = !isOpen;
+    closeInput.disabled = !isOpen;
+  }
+
+  const WEEKDAYS = ['MON','TUE','WED','THU','FRI'];
+  const WEEKEND = ['SAT','SUN'];
+
+  function quickSet(preset, openTime, closeTime) {
+    let targetDays = [];
+
+    if (preset === 'all') targetDays = [...DAYS];
+    if (preset === 'weekdays') targetDays = [...WEEKDAYS];
+    if (preset === 'weekend') targetDays = [...WEEKEND];
+
+    if (preset === 'closeAll') {
+      DAYS.forEach(d => {
+        const cb = document.getElementById('cb_' + d);
+        if (cb.checked) { cb.checked = false; toggleDay(d, cb); }
+      });
+      return;
+    }
+
+    DAYS.forEach(d => {
+      const cb = document.getElementById('cb_' + d);
+      const shouldOpen = targetDays.includes(d);
+      cb.checked = shouldOpen;
+      toggleDay(d, cb);
+      if (shouldOpen) {
+        document.getElementById('open_' + d).value = openTime;
+        document.getElementById('close_' + d).value = closeTime;
+      }
+    });
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    DAYS.forEach(d => {
+      const cb = document.getElementById('cb_' + d);
+      if (cb) {
+        const row = document.getElementById('row_' + d);
+        const badge = document.getElementById('badge_' + d);
+        const times = document.getElementById('times_' + d);
+        const closed = document.getElementById('closed_' + d);
+
+        const isOpen = cb.checked;
+        row.classList.toggle('is-open', isOpen);
+        row.classList.toggle('is-closed', !isOpen);
+        badge.textContent = isOpen ? 'Open' : 'Closed';
+        badge.classList.toggle('badge-open', isOpen);
+        badge.classList.toggle('badge-closed', !isOpen);
+        times.classList.toggle('hidden', !isOpen);
+        closed.classList.toggle('hidden', isOpen);
+      }
+    });
+  });
+</script>
+
+<div th:replace="~{UserManagement/fragments/support-contact-modal :: supportContactModal(${user.email}, 'openProfileSupportModal')}"></div>
+</body>
+</html>

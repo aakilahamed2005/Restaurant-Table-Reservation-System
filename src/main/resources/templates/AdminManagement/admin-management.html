@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<!--
+  Manage platform admins: table of all admins, create form (SUPER_ADMIN only via isSuperAdmin).
+  Stats: totalAdmins, superAdminCount, standardAdminCount. Links to edit-admin per row.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>DineElite - Admin Management</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <th:block th:replace="AdminManagement/fragments/admin-style :: admin-style"></th:block>
+
+
+    <style>
+        .page-title{
+            font-size:34px;
+            font-family:'Playfair Display',serif;
+            font-weight:500;
+        }
+
+        .page-sub{
+            margin-top:8px;
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        /* STATS */
+
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:22px;
+            margin-bottom:28px;
+        }
+
+        .stat-card{
+            background:var(--card);
+            border-radius:22px;
+            padding:24px;
+            box-shadow:var(--shadow);
+        }
+
+        .stat-label{
+            color:var(--muted);
+            font-size:13px;
+            margin-bottom:12px;
+        }
+
+        .stat-value{
+            font-size:34px;
+            font-weight:700;
+            margin-bottom:10px;
+        }
+
+        .stat-change{
+            color:#6B8C73;
+            font-size:13px;
+        }
+
+        /* CARD */
+
+        .card{
+            background:white;
+            border-radius:22px;
+            padding:28px;
+            box-shadow:var(--shadow);
+            margin-bottom:28px;
+        }
+
+        .card-header{
+            margin-bottom:24px;
+        }
+
+        .card-title{
+            font-size:24px;
+            font-family:'Playfair Display',serif;
+            margin-bottom:6px;
+        }
+
+        .card-sub{
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        /* FORM */
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:20px;
+        }
+
+        .form-group{
+            display:flex;
+            flex-direction:column;
+        }
+
+        .form-group label{
+            margin-bottom:10px;
+            font-size:13px;
+            font-weight:600;
+            color:#5E534C;
+        }
+
+        .form-group input,
+        .form-group select{
+            padding:15px;
+            border:1px solid var(--border);
+            border-radius:14px;
+            font-size:14px;
+            background:white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus{
+            outline:none;
+            border-color:var(--terracotta);
+        }
+
+        .btn{
+            margin-top:24px;
+            border:none;
+            background:var(--terracotta);
+            color:white;
+            padding:15px 22px;
+            border-radius:14px;
+            cursor:pointer;
+            font-weight:600;
+        }
+
+        /* TABLE */
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th{
+            text-align:left;
+            padding:16px;
+            color:#8D8278;
+            font-size:13px;
+            border-bottom:1px solid var(--border);
+        }
+
+        td{
+            padding:20px 16px;
+            border-bottom:1px solid #F3ECE5;
+            font-size:14px;
+        }
+
+        tr:hover{
+            background:#FCFAF8;
+        }
+
+        .user{
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+
+        .table-avatar{
+            width:42px;
+            height:42px;
+            border-radius:50%;
+            background:var(--terracotta);
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+        }
+
+        .role{
+            display:inline-block;
+            padding:8px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:600;
+        }
+
+        .role-super{
+            background:#FFF1DC;
+            color:#9B6400;
+        }
+
+        .role-admin{
+            background:#EAF1FF;
+            color:#2457A5;
+        }
+
+        .status{
+            display:inline-block;
+            padding:8px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:600;
+        }
+
+        .active{
+            background:#E7F7EB;
+            color:#2D7A4F;
+        }
+
+        .actions{
+            display:flex;
+            gap:10px;
+        }
+
+        .action-btn{
+            border:none;
+            padding:9px 14px;
+            border-radius:10px;
+            font-size:12px;
+            cursor:pointer;
+            font-weight:600;
+        }
+
+        .view{
+            background:#F2F4F7;
+        }
+
+        .edit{
+            background:#FFF1DC;
+            color:#9B6400;
+        }
+
+        .delete{
+            background:#FDE8E8;
+            color:#B02A2A;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div th:replace="AdminManagement/fragments/sidebar :: sidebar('admins')"></div>
+<!-- MAIN -->
+
+<div class="main">
+    <div class="content">
+
+    <div class="topbar">
+
+        <div>
+            <div class="topbar-title">
+                Admin Accounts
+            </div>
+
+            <div class="topbar-sub">
+                Manage administrator accounts and platform access
+            </div>
+        </div>
+
+        <div th:replace="~{AdminManagement/fragments/admin-topbar-right :: topbarRight}"></div>
+
+    </div>
+
+    <!-- STATS -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                TOTAL ADMINS
+            </div>
+
+            <div class="stat-value" th:text="${totalAdmins}">0</div>
+
+            <div class="stat-change">
+                Registered administrators
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                SUPER ADMINS
+            </div>
+
+            <div class="stat-value" th:text="${superAdminCount}">0</div>
+
+            <div class="stat-change">
+                Full platform access
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                STANDARD ADMINS
+            </div>
+
+            <div class="stat-value" th:text="${standardAdminCount}">0</div>
+
+            <div class="stat-change">
+                Limited admin access
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                ROLES IN USE
+            </div>
+
+            <div class="stat-value" th:text="${superAdminCount > 0 and standardAdminCount > 0 ? '2' : '1'}">1</div>
+
+            <div class="stat-change">
+                Super + standard roles
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CREATE ADMIN (super admin only) -->
+
+    <div class="card" th:if="${isSuperAdmin}">
+
+        <div class="card-header">
+
+            <div class="card-title">
+                Create New Admin
+            </div>
+
+            <div class="card-sub">
+                Add new administrators with encrypted passwords
+            </div>
+
+        </div>
+
+        <form method="post" action="/admin/create-admin">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        Admin Name
+                    </label>
+
+                    <input type="text"
+                           name="adminName"
+                           placeholder="Enter admin name"
+                           required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        Email Address
+                    </label>
+
+                    <input type="email"
+                           name="email"
+                           placeholder="admin@dineelite.com"
+                           required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        Password
+                    </label>
+
+                    <input type="password"
+                           name="password"
+                           placeholder="Enter secure password"
+                           required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        Role
+                    </label>
+
+                    <select name="role">
+
+                        <option value="ADMIN">
+                            ADMIN
+                        </option>
+
+                        <option value="SUPER_ADMIN">
+                            SUPER ADMIN
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn">
+                Create Admin
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- TABLE -->
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <div class="card-title">
+                Existing Admins
+            </div>
+
+            <div class="card-sub">
+                Current administrators with system access
+            </div>
+
+        </div>
+
+        <table>
+
+            <thead>
+
+            <tr>
+                <th>Admin</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+
+
+            <tr th:each="admin : ${admins}">
+
+                <td>
+
+                    <div class="user">
+
+                        <div class="table-avatar">
+
+                <span th:text="${#strings.substring(admin.adminName,0,1)}">
+                </span>
+
+                        </div>
+
+                        <strong th:text="${admin.adminName}">
+                        </strong>
+
+                    </div>
+
+                </td>
+
+                <td>
+
+        <span
+                th:if="${admin.role == 'SUPER_ADMIN'}"
+                class="role role-super"
+                th:text="${admin.role}">
+        </span>
+
+                    <span
+                            th:if="${admin.role == 'ADMIN'}"
+                            class="role role-admin"
+                            th:text="${admin.role}">
+        </span>
+
+                </td>
+
+                <td th:text="${admin.email}">
+                </td>
+
+                <td>
+
+        <span class="status active">
+            Active
+        </span>
+
+                </td>
+
+                <td>
+                    Today
+                </td>
+
+                <td>
+
+                    <div class="actions">
+
+
+                        <a th:if="${loggedAdmin != null
+          and
+          (loggedAdmin.role.toUpperCase() == 'SUPER_ADMIN'
+          or
+          loggedAdmin.email == admin.email)}"
+
+                           th:href="@{/admin/edit/{id}(id=${admin.adminId})}"
+
+                           class="action-btn edit">
+
+                            Edit
+
+                        </a>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+
+
+        </table>
+
+    </div>
+    </div>
+
+</div>
+
+<th:block th:replace="~{AdminManagement/fragments/admin-sidebar-collapse :: collapse}"></th:block>
+
+</body>
+</html>

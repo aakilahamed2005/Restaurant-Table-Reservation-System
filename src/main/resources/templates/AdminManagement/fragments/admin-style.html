@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<!-- Shared admin layout CSS (sidebar, main, cards, tables). Pulls in admin-responsive for breakpoints. -->
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="admin-style">
+
+  <style>
+
+    :root{
+      --cream:#FAF7F2;
+      --surface:#F0EBE3;
+      --charcoal:#1C1917;
+      --warm-brown:#44312A;
+      --terracotta:#C4633A;
+      --gold:#D4A853;
+      --sage:#7A8C6E;
+      --muted:#8A7E78;
+
+      --card:#FFFFFF;
+      --border:#E7DFD7;
+      --shadow:0 4px 18px rgba(28,25,23,0.06);
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:#F0EBE3;
+      font-family:'Lato',sans-serif;
+      color:var(--charcoal);
+      min-height:100vh;
+      display:flex;
+    }
+
+    .sidebar{
+      width:260px;
+      height:100vh;
+      max-height:100vh;
+      transition:width 0.25s ease;
+      background:linear-gradient(
+              160deg,
+              #1C1917 0%,
+              #2A1F1B 50%,
+              #44312A 100%);
+      display:flex;
+      flex-direction:column;
+      position:fixed;
+      top:0;
+      left:0;
+      overflow:hidden;
+    }
+
+    .sidebar-logo{
+      padding:28px 24px 20px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand{
+      font-family:'Playfair Display',serif;
+      font-size:1.8rem;
+      color:white;
+    }
+
+    .brand span{
+      color:var(--gold);
+    }
+
+    .badge-text{
+      font-size:0.7rem;
+      color:#9CA3AF;
+      letter-spacing:0.15em;
+      text-transform:uppercase;
+      margin-top:4px;
+    }
+
+    .sidebar-nav{
+      flex:1;
+      min-height:0;
+      overflow-y:auto;
+      padding:20px 0;
+    }
+
+    .nav-section-title{
+      font-size:0.65rem;
+      letter-spacing:0.15em;
+      text-transform:uppercase;
+      color:#6B7280;
+      padding:18px 24px 8px;
+      font-weight:700;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 24px;
+      color:#9CA3AF;
+      text-decoration:none;
+      transition:0.2s;
+      border-left:3px solid transparent;
+    }
+
+    .nav-item:hover{
+      color:white;
+      background:rgba(255,255,255,0.05);
+    }
+
+    .nav-item.active{
+      color:white;
+      background:rgba(196,99,58,0.15);
+      border-left-color:var(--terracotta);
+    }
+
+    .sidebar-footer{
+      flex-shrink:0;
+      padding:12px 24px 14px;
+      border-top:1px solid rgba(255,255,255,0.08);
+    }
+
+    .admin-info{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .admin-avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:var(--terracotta);
+      color:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:bold;
+    }
+
+    .admin-name{
+      color:white;
+      font-size:0.9rem;
+      font-weight:700;
+    }
+
+    .admin-role{
+      color:#9CA3AF;
+      font-size:0.7rem;
+      letter-spacing:0.08em;
+    }
+
+    .admin-sign-out{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      width:100%;
+      padding:12px 16px;
+      border-radius:6px;
+      color:#ef4444;
+      font-family:'Lato',sans-serif;
+      font-size:0.875rem;
+      font-weight:400;
+      letter-spacing:0;
+      text-transform:none;
+      text-decoration:none;
+      transition:background 0.2s, color 0.2s;
+      cursor:pointer;
+    }
+
+    .admin-sign-out:hover{
+      background:rgba(255,255,255,0.05);
+      color:#ef4444;
+    }
+
+    .admin-sign-out svg{
+      flex-shrink:0;
+    }
+
+    .search-input,
+    .filter-select,
+    .date-input{
+      font-family:'Lato',sans-serif;
+      font-size:0.85rem;
+      color:var(--charcoal);
+    }
+
+    .filter-select,
+    .date-input{
+      cursor:pointer;
+    }
+
+    .filter-select:focus,
+    .search-input:focus,
+    .date-input:focus{
+      outline:none;
+      border-color:var(--terracotta);
+    }
+
+    .main{
+      margin-left:260px;
+      flex:1;
+      min-height:100vh;
+      transition:margin-left 0.25s ease;
+    }
+
+    body.admin-sidebar-collapsed .main{
+      margin-left:14px;
+    }
+
+    .topbar{
+      background:var(--cream);
+      border-bottom:1px solid #E5DFD8;
+      padding:18px 32px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .topbar-title{
+      font-family:'Playfair Display',serif;
+      font-size:1.7rem;
+    }
+
+    .topbar-sub{
+      color:var(--muted);
+      margin-top:4px;
+      font-size:0.85rem;
+    }
+
+    .content{
+      padding:32px;
+    }
+
+    .topbar-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .topbar-btn{
+      border:1px solid #E5DFD8;
+      background:white;
+      border-radius:8px;
+      width:40px;
+      height:40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      color:var(--charcoal);
+      transition:all 0.2s;
+    }
+
+    .topbar-btn:hover{
+      background:var(--cream);
+      border-color:var(--terracotta);
+    }
+
+    .topbar-signout{
+      color:#ef4444;
+      border-color:#DC2626;
+      background:#FEE2E2;
+    }
+
+    .topbar-signout:hover{
+      background:#DC2626;
+      color:white;
+      border-color:#DC2626;
+    }
+
+    .topbar-signout svg{
+      stroke:#ef4444;
+    }
+
+    .topbar-signout:hover svg{
+      stroke:white;
+    }
+
+    .notif-dot{
+      width:8px;
+      height:8px;
+      background:#DC2626;
+      border-radius:50%;
+      position:absolute;
+      top:10px;
+      right:10px;
+    }
+
+    .notif-dot.is-hidden{
+      display:none;
+    }
+
+    .admin-notif-wrap{
+      position:relative;
+    }
+
+    .admin-notif-panel{
+      position:absolute;
+      top:48px;
+      right:0;
+      width:min(420px, calc(100vw - 48px));
+      max-height:min(520px, 70vh);
+      overflow:auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      z-index:200;
+      display:none;
+    }
+
+    .admin-notif-panel.is-open{
+      display:block;
+    }
+
+    .admin-notif-head{
+      padding:0;
+      border-bottom:none;
+      font-size:0.75rem;
+      font-weight:700;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .admin-notif-head-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      background:#FAF7F2;
+    }
+
+    .admin-notif-toolbar{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-shrink:0;
+    }
+
+    .admin-notif-action{
+      width:28px;
+      height:28px;
+      border:none;
+      border-radius:6px;
+      background:#E7DFD7;
+      color:var(--charcoal);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      line-height:1;
+      transition:background 0.15s, color 0.15s;
+    }
+
+    .admin-notif-action:hover{
+      background:#D8CEC4;
+      color:var(--charcoal);
+    }
+
+    .admin-notif-list{
+      max-height:min(460px, 60vh);
+      overflow:auto;
+    }
+
+    .admin-notif-item{
+      position:relative;
+      padding:14px 40px 14px 16px;
+      border-bottom:1px solid #F0EBE3;
+      cursor:pointer;
+      text-align:left;
+    }
+
+    .admin-notif-item:last-child{
+      border-bottom:none;
+    }
+
+    .admin-notif-item:hover{
+      background:#FAF7F2;
+    }
+
+    .admin-notif-item.is-unread{
+      font-weight:700;
+    }
+
+    .admin-notif-item-title{
+      font-size:0.85rem;
+      padding-right:4px;
+    }
+
+    .admin-notif-item-delete{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:22px;
+      height:22px;
+      border:none;
+      border-radius:5px;
+      background:#E7DFD7;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:15px;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:background 0.15s, color 0.15s;
+    }
+
+    .admin-notif-item-delete:hover{
+      background:#D8CEC4;
+      color:var(--charcoal);
+    }
+
+    .admin-notif-meta{
+      font-size:0.72rem;
+      color:var(--muted);
+      margin-top:4px;
+      font-weight:400;
+    }
+
+    .admin-notif-body{
+      font-size:0.85rem;
+      margin-top:8px;
+      white-space:pre-wrap;
+      font-weight:400;
+    }
+
+    .admin-notif-empty{
+      padding:20px 16px;
+      font-size:0.85rem;
+      color:var(--muted);
+    }
+
+    /* Responsive rules live in admin-responsive fragment (included by each admin page). */
+
+  </style>
+
+  <th:block th:replace="~{AdminManagement/fragments/admin-responsive :: admin-responsive}"></th:block>
+
+</th:block>
+
+</html>

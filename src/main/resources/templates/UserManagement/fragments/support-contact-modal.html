@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="supportContactModal(defaultEmail, triggerId)">
+  <div th:id="${triggerId != null ? triggerId + '-modal' : 'profileSupportModal'}"
+       class="fixed inset-0 z-[100] hidden items-center justify-center px-4 profile-support-modal"
+       style="background:rgba(28,25,23,0.55); backdrop-filter: blur(2px);">
+    <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl relative" style="animation: fadeUp 0.25s ease;">
+      <button type="button"
+              class="profile-support-close absolute top-3 right-3 text-muted hover:text-charcoal text-xl leading-none"
+              aria-label="Close">&times;</button>
+      <h2 class="font-display text-xl text-charcoal mb-1">Contact platform support</h2>
+      <p class="text-xs text-muted font-body mb-4">Tell us what you need help with. Our team will review your message.</p>
+      <div class="profile-support-error hidden text-red-600 text-xs bg-red-50 border border-red-100 rounded p-2 mb-3"></div>
+      <div class="profile-support-success hidden text-green-700 text-xs bg-green-50 border border-green-100 rounded p-2 mb-3">Message sent. We will get back to you as soon as possible.</div>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-1">Topic</label>
+          <select class="profile-support-category w-full rounded px-3 py-2 text-sm border border-gray-200">
+            <option value="ACCOUNT_ACCESS">Account access</option>
+            <option value="DEACTIVATED_ACCOUNT">Deactivated account</option>
+            <option value="RESERVATION_ISSUE">Reservation issue</option>
+            <option value="SUSPENDED_RESTAURANT">Suspended restaurant</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-1">Your email</label>
+          <input type="email"
+                 class="profile-support-email w-full rounded px-3 py-2 text-sm border border-gray-200"
+                 placeholder="Where we can reach you"
+                 th:value="${defaultEmail}"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-charcoal uppercase tracking-widest mb-1">Description</label>
+          <textarea rows="4"
+                    class="profile-support-description w-full rounded px-3 py-2 text-sm border border-gray-200 resize-y"
+                    placeholder="Please explain what happened"></textarea>
+        </div>
+        <button type="button" class="profile-support-send btn-primary w-full py-3 rounded-sm">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    (function () {
+      const triggerId = /*[[${triggerId != null ? triggerId : 'openProfileSupportModal'}]]*/ 'openProfileSupportModal';
+      const modalId = triggerId + '-modal';
+      const apiUrl = /*[[@{/support/contact-message}]]*/ '/support/contact-message';
+
+      function openModal() {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        const err = modal.querySelector('.profile-support-error');
+        const ok = modal.querySelector('.profile-support-success');
+        if (err) { err.classList.add('hidden'); err.textContent = ''; }
+        if (ok) ok.classList.add('hidden');
+      }
+
+      function closeModal() {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const trigger = document.getElementById(triggerId);
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        if (trigger) {
+          trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            openModal();
+          });
+        }
+
+        modal.querySelector('.profile-support-close').addEventListener('click', closeModal);
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) closeModal();
+        });
+
+        modal.querySelector('.profile-support-send').addEventListener('click', async function () {
+          const err = modal.querySelector('.profile-support-error');
+          const ok = modal.querySelector('.profile-support-success');
+          const sendBtn = modal.querySelector('.profile-support-send');
+          if (ok) ok.classList.add('hidden');
+          if (err) { err.classList.add('hidden'); err.textContent = ''; }
+
+          const category = modal.querySelector('.profile-support-category').value;
+          const email = modal.querySelector('.profile-support-email').value.trim();
+          const description = modal.querySelector('.profile-support-description').value.trim();
+
+          sendBtn.disabled = true;
+          try {
+            const res = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ category, email, description })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+              if (err) {
+                err.textContent = data.message || 'Could not send message. Please try again.';
+                err.classList.remove('hidden');
+              }
+            } else if (ok) {
+              ok.classList.remove('hidden');
+            }
+          } catch (e) {
+            if (err) {
+              err.textContent = 'Network error. Please try again.';
+              err.classList.remove('hidden');
+            }
+          } finally {
+            sendBtn.disabled = false;
+          }
+        });
+      });
+    })();
+  </script>
+</th:block>
+</html>

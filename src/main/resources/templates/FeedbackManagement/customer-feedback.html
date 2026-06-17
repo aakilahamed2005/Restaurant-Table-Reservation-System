@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DineElite — Leave a Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+  }}
+}
+</script>
+<style>
+  body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .topbar { background: #1C1917; }
+  .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
+  .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
+  .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; }
+  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+  .star-row { display: flex; gap: 8px; }
+  .star-btn { font-size: 2rem; cursor: pointer; color: #E5DFD8; transition: color 0.15s, transform 0.1s; line-height: 1; }
+  .star-btn:hover, .star-btn.active { color: #D4A853; transform: scale(1.15); }
+  .cat-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #F0EBE3; }
+  .cat-row:last-child { border-bottom: none; }
+  .cat-stars { display: flex; gap: 4px; }
+  .cat-star { font-size: 1.2rem; cursor: pointer; color: #E5DFD8; transition: color 0.12s; }
+  .cat-star.lit { color: #D4A853; }
+  .fade-in { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP NAV -->
+<nav class="topbar flex items-center justify-between px-8 py-4">
+  <a th:href="@{/}" class="font-display text-2xl text-white">Dine<span style="color:#D4A853">Elite</span></a>
+  <div class="flex items-center gap-6">
+    <a th:href="customer-booking-history.html" class="text-gray-400 text-sm font-body hover:text-gold transition-colors">My Bookings</a>
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-terracotta flex items-center justify-center text-white text-sm font-bold" th:text="${firstLetter}">J</div>
+      <span class="text-gray-300 text-sm font-body" th:text="${customerFullName}">Jane Doe</span>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-3xl mx-auto px-6 py-10 fade-in">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="w-12 h-0.5 bg-gold mb-4"></div>
+    <h1 class="font-display text-4xl text-charcoal mb-2">Leave a Review</h1>
+    <p class="font-accent italic text-muted text-lg">Share your dining experience</p>
+  </div>
+
+  <!-- Restaurant Summary -->
+  <div class="bg-white rounded-lg p-5 mb-6 flex gap-4 items-center">
+    <div class="w-14 h-14 rounded bg-gradient-to-br from-warm-brown to-terracotta flex-shrink-0 flex items-center justify-center text-white font-display text-lg">E</div>
+    <div class="flex-1">
+      <h2 class="font-display text-lg text-charcoal" th:text="${restaurant.restaurantName}">Ember &amp; Oak</h2>
+      <p class="text-muted text-sm font-body" th:text="${'📍 ' + restaurant.city}">📍 Downtown</p>
+    </div>
+    <div class="text-xs font-body text-sage bg-sage bg-opacity-10 px-3 py-1.5 rounded-full font-bold">Verified Diner</div>
+  </div>
+
+  <!-- Review Form -->
+  <div class="bg-white rounded-lg p-8 mb-6">
+    <form method="post" th:action="@{/restaurant-feedback}" id="feedback_form" th:object="${feedback_form}">
+
+      <!-- Overall Rating -->
+      <div class="mb-8">
+        <h3 class="font-display text-xl text-charcoal mb-1">Overall Rating</h3>
+        <p class="text-sm text-muted font-body mb-4">How was your overall experience?</p>
+        <div class="star-row" id="overallStars">
+          <span class="star-btn" onclick="setOverall(1)">★</span>
+          <span class="star-btn" onclick="setOverall(2)">★</span>
+          <span class="star-btn" onclick="setOverall(3)">★</span>
+          <span class="star-btn" onclick="setOverall(4)">★</span>
+          <span class="star-btn" onclick="setOverall(5)">★</span>
+        </div>
+        <p id="overallLabel" class="mt-2 text-sm font-body font-bold text-muted"></p>
+      </div>
+
+      <!-- Category Ratings -->
+      <div class="mb-8">
+        <h3 class="font-display text-xl text-charcoal mb-4">Rate by Category</h3>
+        <div class="cat-row">
+          <span class="text-sm font-body font-bold text-charcoal">Food &amp; Cuisine</span>
+          <div class="cat-stars" data-cat="food">
+            <span class="cat-star" onclick="setCat('food',1)">★</span><span class="cat-star" onclick="setCat('food',2)">★</span><span class="cat-star" onclick="setCat('food',3)">★</span><span class="cat-star" onclick="setCat('food',4)">★</span><span class="cat-star" onclick="setCat('food',5)">★</span>
+          </div>
+        </div>
+        <div class="cat-row">
+          <span class="text-sm font-body font-bold text-charcoal">Service &amp; Staff</span>
+          <div class="cat-stars" data-cat="service">
+            <span class="cat-star" onclick="setCat('service',1)">★</span><span class="cat-star" onclick="setCat('service',2)">★</span><span class="cat-star" onclick="setCat('service',3)">★</span><span class="cat-star" onclick="setCat('service',4)">★</span><span class="cat-star" onclick="setCat('service',5)">★</span>
+          </div>
+        </div>
+        <div class="cat-row">
+          <span class="text-sm font-body font-bold text-charcoal">Ambience &amp; Atmosphere</span>
+          <div class="cat-stars" data-cat="ambience">
+            <span class="cat-star" onclick="setCat('ambience',1)">★</span><span class="cat-star" onclick="setCat('ambience',2)">★</span><span class="cat-star" onclick="setCat('ambience',3)">★</span><span class="cat-star" onclick="setCat('ambience',4)">★</span><span class="cat-star" onclick="setCat('ambience',5)">★</span>
+          </div>
+        </div>
+        <div class="cat-row">
+          <span class="text-sm font-body font-bold text-charcoal">Value for Money</span>
+          <div class="cat-stars" data-cat="value">
+            <span class="cat-star" onclick="setCat('value',1)">★</span><span class="cat-star" onclick="setCat('value',2)">★</span><span class="cat-star" onclick="setCat('value',3)">★</span><span class="cat-star" onclick="setCat('value',4)">★</span><span class="cat-star" onclick="setCat('value',5)">★</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Written Review -->
+      <div class="mb-8">
+        <h3 class="font-display text-xl text-charcoal mb-2">Your Review</h3>
+        <p class="text-sm text-muted font-body mb-3">Tell other diners about your experience</p>
+        <textarea id="reviewText" th:field="*{review}" rows="5" maxlength="300"
+          placeholder="Describe the food, service, atmosphere — what made your evening memorable?"
+          class="input-field w-full rounded px-4 py-3 font-body text-sm text-charcoal resize-none"
+          oninput="updateCount()"></textarea>
+        <div class="flex justify-between mt-1">
+          <p class="text-xs text-muted font-body">Minimum 25 characters</p>
+          <p class="text-xs text-muted font-body"><span id="charCount">0</span> / 300</p>
+        </div>
+      </div>
+
+      <!-- Hidden Fields -->
+      <input type="hidden" th:field="*{restaurantId}">
+      <input type="hidden" th:field="*{customerId}">
+      <input type="hidden" th:field="*{overallRating}" id="overall_rating">
+      <input type="hidden" th:field="*{foodCuisineRating}" id="food_rating">
+      <input type="hidden" th:field="*{staffServiceRating}" id="service_rating">
+      <input type="hidden" th:field="*{ambienceAtmosphereRating}" id="ambience_rating">
+      <input type="hidden" th:field="*{valueForMoneyRating}" id="value_rating">
+
+
+
+
+      <button type="button" onclick="submitReview()" class="btn-primary w-full py-4 rounded-sm">Submit Review</button>
+    </form>
+  </div>
+
+</div>
+
+<script>
+  const labels = ['', 'Poor', 'Below Average', 'Good', 'Very Good', 'Exceptional'];
+  let overallVal = 0;
+  const catVals = {}
+  ;
+
+  function setOverall(val) {
+    overallVal = val;
+    document.querySelectorAll('#overallStars .star-btn').forEach((s, i) => {
+      s.classList.toggle('active', i < val);
+    });
+    const label = document.getElementById('overallLabel');
+    label.textContent = labels[val];
+    label.style.color = val >= 4 ? '#D4A853' : val >= 3 ? '#7A8C6E' : '#C4633A';
+  }
+
+  function setCat(cat, val) {
+    catVals[cat] = val;
+    document.querySelectorAll(`.cat-stars[data-cat="${cat}"] .cat-star`).forEach((s, i) => {
+      s.classList.toggle('lit', i < val);
+    });
+  }
+
+  function updateCount() {
+    document.getElementById('charCount').textContent = document.getElementById('reviewText').value.length;
+  }
+
+  function submitReview()
+   {
+    if (document.getElementById('reviewText').value.length < 25) {
+      alert('Please provide a more detailed review (at least 25 characters).');
+      return;
+    }
+    document.getElementById('overall_rating').value = overallVal;
+    document.getElementById('food_rating').value = catVals.food || 0;
+    document.getElementById('service_rating').value = catVals.service || 0;
+    document.getElementById('ambience_rating').value = catVals.ambience || 0;
+    document.getElementById('value_rating').value = catVals.value || 0;
+
+
+    document.getElementById('feedback_form').submit();
+  }
+</script>
+</body>
+</html>

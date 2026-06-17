@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DineElite — Booking Confirmed</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
+    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
+  }}
+}
+</script>
+<style>
+  body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
+  .topbar { background: #1C1917; }
+
+  /* Confetti animation */
+  .confetti-dot { position: absolute; border-radius: 50%; animation: drop 1.8s ease-in both; }
+  @keyframes drop {
+    from { transform: translateY(-60px) rotate(0deg); opacity: 1; }
+    to   { transform: translateY(300px) rotate(720deg); opacity: 0; }
+  }
+
+  /* Check circle pulse */
+  .check-circle { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* Card fade up */
+  .fade-in { animation: fadeUp 0.6s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
+
+  .summary-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Lato'; font-size: 0.875rem; }
+
+  .btn-primary { background: linear-gradient(135deg, #C4633A 0%, #44312A 100%); color: white; font-family: 'Lato'; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.75rem; transition: opacity 0.2s, transform 0.15s; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* Step bar — all done */
+  .step-line  { height: 2px; flex: 1; background: #C4633A; }
+  .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Lato'; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; background: #44312A; color: white; }
+</style>
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+</head>
+<body class="min-h-screen">
+
+
+<!-- NAV -->
+<nav class="flex items-center justify-between px-8 py-4" style="background:#1C1917">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">
+    Dine<span style="color:#D4A853">Elite</span>
+  </a>
+  <div class="flex items-center gap-2 cursor-pointer">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+         style="background:#C4633A" th:text="${firstLetter}">J</div>
+    <a th:href="@{/customer-profile-view}">
+    <span class="text-gray-300 text-sm font-body" th:text="${customerFullName}">Jane Doe</span>
+    </a>
+  </div>
+</nav>
+
+
+<!-- SUCCESS CONTENT -->
+<div class="max-w-lg mx-auto px-6 py-14 fade-in">
+
+  <!-- Success Card -->
+  <div class="bg-white rounded-2xl shadow-xl overflow-hidden relative">
+
+    <!-- Confetti dots (purely decorative) -->
+    <div class="confetti-dot w-3 h-3 bg-gold absolute left-10 top-5"      style="animation-delay:0.1s"></div>
+    <div class="confetti-dot w-2 h-2 bg-terracotta absolute left-24 top-3" style="animation-delay:0.3s"></div>
+    <div class="confetti-dot w-3 h-3 bg-sage absolute right-14 top-6"     style="animation-delay:0.2s"></div>
+    <div class="confetti-dot w-2 h-2 bg-gold absolute right-8 top-4"      style="animation-delay:0.4s"></div>
+    <div class="confetti-dot w-2 h-2 bg-terracotta absolute left-6 top-20" style="animation-delay:0.5s"></div>
+    <div class="confetti-dot w-3 h-3 bg-sage absolute right-6 top-16"     style="animation-delay:0.15s"></div>
+    <div class="confetti-dot w-2 h-2 bg-gold absolute left-36 top-2"      style="animation-delay:0.35s"></div>
+    <div class="confetti-dot w-2 h-2 bg-terracotta absolute right-28 top-8" style="animation-delay:0.25s"></div>
+
+    <!-- Restaurant colour header -->
+    <div class="h-24 bg-gradient-to-br from-warm-brown via-terracotta to-gold relative flex items-end p-5">
+      <div>
+        <p class="font-display text-lg text-white" th:text="${restaurant.restaurantName}">Ember &amp; Oak</p>
+        <p class="text-white text-xs font-body opacity-80" th:text="${restaurant.cuisine}">Modern European · Downtown</p>
+      </div>
+      <div class="absolute top-3 right-3 flex items-center gap-1 bg-black bg-opacity-30 px-2 py-1 rounded-full">
+        <span class="text-gold text-xs">★</span>
+        <span class="text-white text-xs font-body font-bold" th:text="${restaurant.overallRating}">4.9</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="px-10 pb-10 pt-8 text-center">
+
+      <!-- Check icon -->
+      <div class="check-circle w-20 h-20 rounded-full bg-gradient-to-br from-sage to-warm-brown flex items-center justify-center mx-auto mb-5 text-white text-4xl shadow-lg">✓</div>
+
+      <h1 class="font-display text-4xl text-charcoal mb-1">Booking Confirmed!</h1>
+      <p class="text-muted text-sm font-body mb-8">Your table is secured. We look forward to seeing you!</p>
+
+      <!-- Booking Details Box -->
+      <div class="bg-surface rounded-xl p-5 mb-5 text-left">
+
+        <div class="summary-row mb-2">
+          <span class="text-muted">Restaurant</span>
+          <span class="font-bold text-charcoal" th:text="${restaurant.restaurantName}">Ember &amp; Oak</span>
+        </div>
+
+        <div class="summary-row mb-2">
+          <span class="text-muted">Date</span>
+          <span class="font-bold text-charcoal" th:text="${#temporals.format(reservation.date,'EEE, MMM d yyyy')}">March 15, 2026</span>
+        </div>
+
+        <div class="summary-row mb-2">
+          <span class="text-muted">Time</span>
+          <span class="font-bold text-charcoal" th:text="${reservation.startingTime + ' – ' + reservation.endingTime}">6:30 PM – 8:30 PM</span>
+        </div>
+
+        <div class="summary-row mb-2">
+          <span class="text-muted">Party Size</span>
+          <span class="font-bold text-charcoal" th:text="${reservation.noOfSeats + ' Guests'}">2 Guests</span>
+        </div>
+
+        <div class="summary-row mb-4">
+          <span class="text-muted">Booking Ref</span>
+          <span class="font-bold text-charcoal tracking-widest" th:text="${reservation.getReservationCode()}">TN-284739</span>
+        </div>
+      </div>
+
+     
+
+      <!-- Action buttons -->
+      <div class="flex gap-3">
+        <a th:href="@{/customer-booking-records}"
+           class="flex-1 py-3.5 text-xs font-body font-bold border-2 border-gray-200 rounded-lg
+                  hover:bg-surface hover:border-terracotta transition-colors text-charcoal text-center">
+          View My Bookings
+        </a>
+        <a th:href="@{/restaurant-listing}"
+           class="flex-1 py-3.5 text-xs font-body font-bold btn-primary rounded-lg text-center">
+          Explore More
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Print / download hint -->
+  <p class="text-center text-xs text-muted mt-5 font-body">
+    <span class="cursor-pointer hover:text-terracotta transition-colors" onclick="window.print()">🖨 Print confirmation</span>
+    &nbsp;·&nbsp;
+    <a th:href="@{/}" class="hover:text-terracotta transition-colors">Return to home</a>
+  </p>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<!--
+  Edit single admin account. SUPER_ADMIN can change role; normal admin editing self cannot.
+  Form POST /admin/update with adminId, adminName, email, role (role field hidden/disabled when not super).
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8"/>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0"/>
+
+    <title>Edit Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+          rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream:'#FAF7F2',
+                        charcoal:'#1C1917',
+                        terracotta:'#C4633A',
+                        gold:'#D4A853',
+                        muted:'#8A7E78'
+                    },
+                    fontFamily:{
+                        display:['"Playfair Display"','serif'],
+                        body:['Lato','sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+  <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
+  <th:block th:replace="~{AdminManagement/fragments/admin-responsive-auth :: admin-responsive-auth}"></th:block>
+</head>
+
+<body class="bg-cream min-h-screen font-body">
+
+<!-- NAV -->
+
+<nav class="bg-charcoal px-10 py-5 flex justify-between items-center">
+
+    <div class="font-display text-3xl text-white">
+        Dine<span class="text-gold">Elite</span>
+    </div>
+
+    <a href="/admin/manage-admins"
+       class="text-sm text-gray-300 hover:text-gold transition">
+
+        Back to Admins
+
+    </a>
+
+</nav>
+
+<!-- FORM -->
+
+<div class="max-w-3xl mx-auto py-16 px-6">
+
+    <div class="bg-white rounded-xl shadow-sm p-10">
+
+        <div class="mb-10">
+
+            <p class="text-gold italic text-lg">
+                Administrator Settings
+            </p>
+
+            <h1 class="font-display text-5xl text-charcoal mt-2">
+                Edit Admin
+            </h1>
+
+        </div>
+
+        <form method="post"
+              action="/admin/update">
+
+            <input
+                    type="hidden"
+                    name="adminId"
+                    th:value="${admin.adminId}">
+
+            <!-- NAME -->
+
+            <div class="mb-6">
+
+                <label class="block text-sm font-bold
+                              tracking-widest uppercase
+                              text-muted mb-3">
+
+                    Admin Name
+
+                </label>
+
+                <input
+                        type="text"
+                        name="adminName"
+                        th:value="${admin.adminName}"
+
+                        class="w-full border border-gray-200
+                               rounded-lg px-5 py-4
+                               focus:outline-none
+                               focus:border-terracotta">
+
+            </div>
+
+            <!-- EMAIL -->
+
+            <div class="mb-6">
+
+                <label class="block text-sm font-bold
+                              tracking-widest uppercase
+                              text-muted mb-3">
+
+                    Email Address
+
+                </label>
+
+                <input
+                        type="email"
+                        name="email"
+                        th:value="${admin.email}"
+
+                        class="w-full border border-gray-200
+                               rounded-lg px-5 py-4
+                               focus:outline-none
+                               focus:border-terracotta">
+
+            </div>
+
+            <!-- ROLE (super admin only) -->
+
+            <div class="mb-10" th:if="${isSuperAdmin}">
+
+                <label class="block text-sm font-bold
+                              tracking-widest uppercase
+                              text-muted mb-3">
+
+                    Admin Role
+
+                </label>
+
+                <select
+                        name="role"
+
+                        class="w-full border border-gray-200
+                               rounded-lg px-5 py-4
+                               focus:outline-none
+                               focus:border-terracotta">
+
+                    <option value="ADMIN"
+                            th:selected="${admin.role == 'ADMIN'}">
+
+                        ADMIN
+
+                    </option>
+
+                    <option value="SUPER_ADMIN"
+                            th:selected="${admin.role == 'SUPER_ADMIN'}">
+
+                        SUPER ADMIN
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <input type="hidden"
+                   name="role"
+                   th:if="${!isSuperAdmin}"
+                   th:value="${admin.role}"/>
+
+            <!-- BUTTONS -->
+
+            <div class="flex gap-4">
+
+                <button
+                        type="submit"
+
+                        class="bg-terracotta text-white
+                               px-8 py-4 rounded-md
+                               uppercase tracking-widest
+                               text-sm font-bold
+                               hover:bg-charcoal transition">
+
+                    Update Admin
+
+                </button>
+
+                <a href="/admin/manage-admins"
+
+                   class="border border-gray-300
+                          px-8 py-4 rounded-md
+                          uppercase tracking-widest
+                          text-sm font-bold
+                          hover:bg-gray-100 transition">
+
+                    Cancel
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

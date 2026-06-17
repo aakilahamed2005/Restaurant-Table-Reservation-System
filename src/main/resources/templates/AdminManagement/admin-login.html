@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<!--
+  ADMIN LOGIN PAGE — Full line-by-line guide: see ADMIN_MANAGEMENT_EXPLAINED.md
+
+  Flow: GET /admin/login shows this page → form POST /admin/login → AdminAuthController
+  On success: session.loggedAdmin set → redirect /admin/dashboard
+  On failure: same page with ${error} message
+
+  CSS: * reset | body flex row | .left-panel 50% branding | .right-panel 50% form
+  Remember me: JavaScript localStorage only (not server session)
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>DineElite Admin Login</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Lato',sans-serif;
+            background:#FAF7F2;
+            min-height:100vh;
+            display:flex;
+        }
+
+        .left-panel{
+            width:50%;
+            background:linear-gradient(160deg,#1C1917 0%,#44312A 60%,#C4633A 100%);
+            color:white;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+            padding:60px;
+        }
+
+        .brand{
+            font-family:'Playfair Display',serif;
+            font-size:34px;
+        }
+
+        .brand span{
+            color:#D4A853;
+        }
+
+        .welcome{
+            margin-top:120px;
+        }
+
+        .welcome h1{
+            font-family:'Playfair Display',serif;
+            font-size:60px;
+            margin-bottom:20px;
+        }
+
+        .welcome p{
+            color:#ddd;
+            line-height:1.8;
+            max-width:400px;
+        }
+
+        .right-panel{
+            width:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:40px;
+        }
+
+        .login-card{
+            width:100%;
+            max-width:420px;
+        }
+
+        .login-card h2{
+            font-family:'Playfair Display',serif;
+            font-size:42px;
+            margin-bottom:10px;
+            color:#1C1917;
+        }
+
+        .subtitle{
+            color:#8A7E78;
+            margin-bottom:35px;
+        }
+
+        .form-group{
+            margin-bottom:22px;
+        }
+
+        label{
+            display:block;
+            margin-bottom:10px;
+            font-size:12px;
+            font-weight:700;
+            letter-spacing:2px;
+            text-transform:uppercase;
+        }
+
+        input{
+            width:100%;
+            padding:14px;
+            border:1px solid #ddd;
+            border-radius:6px;
+            font-size:15px;
+        }
+
+        input:focus{
+            outline:none;
+            border-color:#C4633A;
+            box-shadow:0 0 0 3px rgba(196,99,58,0.1);
+        }
+
+        .login-btn{
+            width:100%;
+            padding:15px;
+            border:none;
+            background:#C4633A;
+            color:white;
+            font-weight:700;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            border-radius:6px;
+            cursor:pointer;
+            margin-top:10px;
+            transition:0.3s;
+        }
+
+        .login-btn:hover{
+            background:#44312A;
+        }
+
+        .error{
+            background:#FEE2E2;
+            color:#DC2626;
+            padding:12px;
+            border-radius:6px;
+            margin-bottom:20px;
+            font-size:14px;
+        }
+
+        .remember-row{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin:4px 0 8px;
+            cursor:pointer;
+            user-select:none;
+        }
+
+        .remember-row input{
+            width:auto;
+            margin:0;
+        }
+
+        .remember-row span{
+            font-size:14px;
+            color:#8A7E78;
+        }
+
+    </style>
+
+    <th:block th:replace="~{AdminManagement/fragments/admin-responsive-auth :: admin-responsive-auth}"></th:block>
+
+</head>
+<body>
+
+<!-- Branding / marketing panel (hidden on very small screens via responsive fragment) -->
+<div class="left-panel">
+
+    <div class="brand">
+        Dine<span>Elite</span>
+    </div>
+
+    <div class="welcome">
+        <h1>Admin Portal</h1>
+
+        <p>
+            Manage restaurants, customers, reservations and monitor the entire DineElite platform securely.
+        </p>
+    </div>
+
+</div>
+
+<div class="right-panel">
+
+    <div class="login-card">
+
+        <h2>Sign In</h2>
+
+        <p class="subtitle">
+            Access the DineElite administration dashboard
+        </p>
+
+        <div th:if="${error}" class="error">
+            <p th:text="${error}"></p>
+        </div>
+
+        <form method="post" action="/admin/login" id="adminLoginForm">
+
+            <div class="form-group">
+                <label>Email Address</label>
+
+                <input
+                        type="email"
+                        id="adminLoginEmail"
+                        name="email"
+                        placeholder="admin@dineelite.com"
+                        required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+
+                <input
+                        type="password"
+                        id="adminLoginPassword"
+                        name="password"
+                        placeholder="••••••••"
+                        required>
+            </div>
+
+            <label class="remember-row">
+                <input type="checkbox" id="adminRememberMe">
+                <span>Remember me</span>
+            </label>
+
+            <button type="submit" class="login-btn">
+                Sign In
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'dineelite_signin_admin';
+  const emailEl = document.getElementById('adminLoginEmail');
+  const passwordEl = document.getElementById('adminLoginPassword');
+  const rememberEl = document.getElementById('adminRememberMe');
+  const form = document.getElementById('adminLoginForm');
+
+  function loadSaved() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      if (rememberEl) rememberEl.checked = false;
+      return;
+    }
+    try {
+      const data = JSON.parse(raw);
+      if (data.remember) {
+        if (emailEl) emailEl.value = data.email || '';
+        if (passwordEl) passwordEl.value = data.password || '';
+        if (rememberEl) rememberEl.checked = true;
+      }
+    } catch (e) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  function saveCredentials() {
+    if (rememberEl && rememberEl.checked) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        remember: true,
+        email: emailEl ? emailEl.value : '',
+        password: passwordEl ? passwordEl.value : ''
+      }));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  loadSaved();
+  if (form) {
+    form.addEventListener('submit', saveCredentials);
+  }
+})();
+</script>
+
+</body>
+</html>

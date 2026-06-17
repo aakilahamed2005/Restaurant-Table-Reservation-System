@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  Shared responsive layout rules for every Admin Management screen.
+  Include once per page (alongside admin-style / admin-sidebar-collapse).
+  Frontend-only: no backend or feature changes.
+-->
+<th:block th:fragment="admin-responsive">
+  <style>
+    /* Fluid main area: never wider than viewport minus sidebar */
+    .main {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: hidden;
+    }
+
+    .content,
+    .main > .content {
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    /* Filter / search rows wrap on narrow widths */
+    .search-bar,
+    .admin-filter-form .search-bar,
+    form.admin-filter-form > .search-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .search-bar .search-input,
+    .search-bar .filter-select,
+    .search-bar .date-input {
+      flex: 1 1 180px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    /* Stat cards: 4 → 2 → 1 columns */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+    }
+
+    /* Two-column forms stack on tablet */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Top bar stacks title and actions */
+    .topbar {
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .topbar-right {
+      flex-wrap: wrap;
+    }
+
+    .page-header,
+    .topbar > div:first-child {
+      min-width: 0;
+      flex: 1 1 200px;
+    }
+
+    /* Tables scroll horizontally instead of breaking layout */
+    .card,
+    .table-card {
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .card table,
+    .table-card table,
+    .main table {
+      width: 100%;
+      min-width: 560px;
+    }
+
+    /* Tab bars and view toggles wrap */
+    .tab-bar,
+    .view-tabs,
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Dashboard grid */
+    .dashboard-grid,
+    .grid-2,
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .bar-chart,
+    .chart-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      max-width: 100%;
+    }
+
+    .section {
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .action-group {
+      flex-wrap: wrap;
+    }
+
+    /* Modals fit small screens */
+    .modal-overlay {
+      padding: 16px;
+      align-items: flex-start;
+    }
+
+    .modal,
+    .modal-content,
+    .modal-view-panel {
+      width: 100%;
+      max-width: min(520px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      margin: auto;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .dashboard-grid,
+      .grid-2,
+      .two-col,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .content {
+        padding: 24px 20px;
+      }
+
+      .topbar {
+        padding: 16px 20px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .main {
+        margin-left: 14px !important;
+      }
+
+      body.admin-sidebar-collapsed .main {
+        margin-left: 14px !important;
+      }
+
+      .sidebar {
+        z-index: 400;
+      }
+
+      .sidebar:hover {
+        width: 260px !important;
+      }
+
+      .topbar-title,
+      .page-title {
+        font-size: 1.35rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main {
+        margin-left: 0 !important;
+        width: 100%;
+      }
+
+      body.admin-sidebar-collapsed .main {
+        margin-left: 0 !important;
+      }
+
+      .sidebar {
+        width: 14px !important;
+      }
+
+      .sidebar:hover {
+        width: min(260px, 85vw) !important;
+      }
+
+      .content {
+        padding: 16px 14px;
+      }
+
+      .topbar {
+        padding: 14px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .search-bar .search-input,
+      .search-bar .filter-select,
+      .search-bar .date-input {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+
+      .card table,
+      .main table {
+        min-width: 480px;
+        font-size: 0.82rem;
+      }
+
+      .admin-notif-panel {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        top: auto;
+        width: auto;
+        max-width: none;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-bar {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar-title,
+      .page-title {
+        font-size: 1.2rem;
+      }
+
+      .brand {
+        font-size: 1.4rem;
+      }
+
+      .action-btn,
+      .btn {
+        padding: 8px 12px;
+        font-size: 11px;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 14px;
+      }
+    }
+  </style>
+</th:block>
+</body>
+</html>

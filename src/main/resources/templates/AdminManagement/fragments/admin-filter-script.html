@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!--
+  Client-side admin filter helper: builds query string from form.admin-filter-form
+  and navigates without empty or "all" values (pairs with AdminFilterHelper on server).
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="admin-filter-script">
+<script>
+  function submitAdminFilterForm(form) {
+    if (!form) return;
+    const params = new URLSearchParams();
+    new FormData(form).forEach(function(value, key) {
+      if (value !== null && String(value).trim() !== '') {
+        params.append(key, String(value).trim());
+      }
+    });
+  const action = form.getAttribute('action') || window.location.pathname;
+    const query = params.toString();
+    window.location.href = query ? action + '?' + query : action;
+  }
+
+  function handleAdminFilterChange(el) {
+    var form = el && el.form ? el.form : document.querySelector('form.admin-filter-form');
+    submitAdminFilterForm(form);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form.admin-filter-form').forEach(function(form) {
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitAdminFilterForm(form);
+      });
+    });
+  });
+</script>
+</th:block>
+</body>
+</html>
