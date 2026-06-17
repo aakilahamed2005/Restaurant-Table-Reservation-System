@@ -151,6 +151,7 @@ This project demonstrates:
 # 👨‍💻 Contributors
 
 - [Aakil Ahamed](https://github.com/aakilahamed2005)
+- [Rithika Rameshkumar](https://github.com/rithikark-12)
 
 ---
 
