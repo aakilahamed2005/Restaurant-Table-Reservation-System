@@ -44,6 +44,9 @@ import java.util.List;
 public class RestaurantController {
 
     @Autowired
+    MarkupRenderer markupRenderer;
+
+    @Autowired
     RestaurantService restaurantService;
     // Service that handles restaurant-related operations (CRUD, listings, filters)
 
@@ -212,6 +215,9 @@ public class RestaurantController {
             model.addAttribute("user", user);
             model.addAttribute("firstLetter", user.getFirstName().charAt(0));
         }
+
+        String safeHtml = markupRenderer.renderToSafeHtml(restaurant.getDescription());
+        restaurant.setDescription(safeHtml);
 
         model.addAttribute("restaurant", restaurant);
         model.addAttribute("restaurantImages", restaurantImageService.getImagesForRestaurant(restaurant));
