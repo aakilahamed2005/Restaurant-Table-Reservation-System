@@ -43,16 +43,16 @@ public class ChatController {
             // Verify token is configured and has valid format
             // Accept both classic (ghp_) and fine-grained (github_pat_) token formats
             if (token == null || token.isBlank()) {
-                System.err.println("⚠️ INVALID TOKEN: Token is missing or empty in application.properties");
+                System.err.println("INVALID TOKEN: Token is missing or empty in application.properties");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("reply", "❌ Chatbot is not properly configured. The API token is missing. Please contact the administrator to update github.models.token in application.properties"));
+                        .body(Map.of("reply", "Chatbot is not properly configured. The API token is missing. Please contact the administrator to update github.models.token in application.properties"));
             }
 
             if (!token.startsWith("ghp_") && !token.startsWith("github_pat_")) {
-                System.err.println("⚠️ INVALID TOKEN FORMAT: Token must start with 'ghp_' (classic) or 'github_pat_' (fine-grained)");
+                System.err.println("INVALID TOKEN FORMAT: Token must start with 'ghp_' (classic) or 'github_pat_' (fine-grained)");
                 System.err.println("Token preview: " + token.substring(0, Math.min(20, token.length())) + "...");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("reply", "❌ Chatbot is not properly configured. The API token format is invalid.\n\nExpected format:\n• Classic token: ghp_...\n• Fine-grained token: github_pat_...\n\nPlease check application.properties"));
+                        .body(Map.of("reply", "Chatbot is not properly configured. The API token format is invalid.\n\nExpected format:\n• Classic token: ghp_...\n• Fine-grained token: github_pat_...\n\nPlease check application.properties"));
             }
 
             // Get or create history from session
@@ -62,8 +62,27 @@ public class ChatController {
 
             // Build messages for API
             List<Map<String, String>> messages = new ArrayList<>();
+
             messages.add(Map.of("role", "system",
-                    "content", "You are a helpful support assistant for DineElite restaurant reservation system. Answer questions about restaurants, reservations, and dining experiences. Answer clearly and concisely."));
+                    "content", """
+            You are a support assistant for DineElite restaurant table reservation system ONLY.
+            SCOPE - You can only help with:
+            - what this system is about 
+                  -> This platform allow customers to explore restaurants and reserve their seat online itself. For reservation they need to have a account in this account for identification purpose.
+         
+            - How the reservations can be done
+                  -> Customers can explore and look for interested restaurants according to rating, cuisine and price range. After the selecting the restaurant they could see the restaurants page and through that they could reserve the seats. Still the reservations can only be done by customers who have accounts in the system. but in future we make it to save without even a account.
+                  
+            - If a restaurant owner, what can they do in this system
+                -> they could add their restaurants to the system. 
+                -> Can Update, Delete, look for reservation through their end.
+                
+            RESPONSE RULES:
+            - Maximum 2-3 sentences per answer unless listing options.
+            - Do NOT explain background, history, or general advice unless asked.
+            - Do NOT repeat the question back to the user.
+            - If you don't have enough data to answer, say so directly and ask ONE clarifying question.
+            """));
             for (ChatMessage msg : history) {
                 messages.add(Map.of("role", msg.getRole(), "content", msg.getContent()));
             }
@@ -73,7 +92,8 @@ public class ChatController {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", model);
             requestBody.put("messages", messages);
-            requestBody.put("max_tokens", 1000);
+            requestBody.put("max_tokens", 200);
+            requestBody.put("temperature", 0.3);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
