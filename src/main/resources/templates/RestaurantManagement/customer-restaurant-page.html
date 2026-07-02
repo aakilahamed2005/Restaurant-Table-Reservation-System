@@ -4,31 +4,22 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ember & Oak — DineElite</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: { extend: {
-    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-  }}
-}
-</script>
+<th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
 <style>
-  body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
-  .topbar { background: rgba(28,25,23,0.96); backdrop-filter: blur(8px); }
-  .hero-gradient { background: linear-gradient(180deg, rgba(28,25,23,0) 0%, rgba(28,25,23,0.8) 100%); }
-  .tab-btn { padding: 12px 20px; font-family: 'Lato'; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 2px solid transparent; transition: all 0.2s; color: #8A7E78; cursor: pointer; }
-  .tab-btn.active { border-bottom-color: #C4633A; color: #C4633A; }
-  .tab-btn:hover { color: #1C1917; }
-  .time-slot { padding: 8px 16px; border: 1.5px solid #E5DFD8; border-radius: 4px; font-family: 'Lato'; font-size: 0.8rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
-  .time-slot:hover, .time-slot.selected { background: #C4633A; color: white; border-color: #C4633A; }
-  .time-slot.unavailable { background: #F0EBE3; color: #C9C0BB; border-color: #E5DFD8; cursor: not-allowed; }
-  .star { color: #D4A853; }
-  .menu-item { border-bottom: 1px solid #F0EBE3; }
+  
+  .topbar { background: rgba(11,17,32,0.96); backdrop-filter: blur(8px); }
+  .hero-gradient { background: linear-gradient(180deg, rgba(11,17,32,0) 0%, rgba(11,17,32,0.8) 100%); }
+  .tab-btn { padding: 12px 20px; font-family: 'Plus Jakarta Sans'; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 2px solid transparent; transition: all 0.2s; color: #64748B; cursor: pointer; }
+  .tab-btn.active { border-bottom-color: #6366F1; color: #6366F1; }
+  .tab-btn:hover { color: #0B1120; }
+  .time-slot { padding: 8px 16px; border: 1.5px solid #E2E8F0; border-radius: 4px; font-family: 'Plus Jakarta Sans'; font-size: 0.8rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
+  .time-slot:hover, .time-slot.selected { background: #6366F1; color: white; border-color: #6366F1; }
+  .time-slot.unavailable { background: #EEF2FF; color: #C9C0BB; border-color: #E2E8F0; cursor: not-allowed; }
+  .star { color: #22D3EE; }
+  .menu-item { border-bottom: 1px solid #EEF2FF; }
   .menu-item:last-child { border-bottom: none; }
-  .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s; }
-  .btn-primary:hover { background: #44312A; }
+  
+  
   .photo-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 200px 200px; gap: 4px; }
   .photo-grid > div:first-child { grid-row: span 2; }
 </style>
@@ -38,7 +29,7 @@ tailwind.config = {
 
 <!-- NAV -->
 <nav class="topbar fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4">
-  <a th:href="@{/}" class="font-display text-2xl text-white">Dine<span style="color:#D4A853">Elite</span></a>
+  <a th:href="@{/}" class="font-display text-2xl text-white">Dine<span style="color:#22D3EE">Elite</span></a>
 
 
   <div class="flex items-center gap-6">
@@ -100,10 +91,10 @@ tailwind.config = {
           <h1 class="font-display text-4xl text-charcoal mb-2" th:text="${restaurant.restaurantName}"></h1>
           <div class="flex items-center gap-4 flex-wrap">
             <span class="star" th:if="${restaurant.overallRating == 5.0}">★★★★★</span>
-            <span class="star" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E5DFD8; font-size:0.75rem;">★</span></span>
-            <span class="star" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E5DFD8; font-size:0.75rem;">★★</span></span>
-            <span class="star" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E5DFD8; font-size:0.75rem;">★★★</span></span>
-            <span class="star" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E5DFD8; font-size:0.75rem;">★★★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E2E8F0; font-size:0.75rem;">★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E2E8F0; font-size:0.75rem;">★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E2E8F0; font-size:0.75rem;">★★★</span></span>
+            <span class="star" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E2E8F0; font-size:0.75rem;">★★★★</span></span>
             <span class="star" th:if="${restaurant.overallRating == 0.0}">No Ratings</span>
             <strong th:text="${restaurant.overallRating}">4.9</strong>
             <span class="text-muted" th:text="'(' + ${reviews != null ? reviews.size() : 0} + ' reviews)'">(248 reviews)</span>

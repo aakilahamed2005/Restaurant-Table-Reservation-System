@@ -4,32 +4,23 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DineElite — Owner - My Profile</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: {
-          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-        }}
-    }
-  </script>
-  <style>
-    body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
-    .topbar { background: #1C1917; }
-    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; color: #8A7E78; transition: all 0.2s; cursor: pointer; text-decoration: none; }
-    .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
-    .sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 13px; }
-    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #8A7E78; padding: 8px 16px 4px; }
-    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; }
-    .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
-    .btn-outline { border: 1.5px solid #C4633A; color: #C4633A; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; }
-    .btn-outline:hover { background: #C4633A; color: white; }
-    .info-row { display: flex; flex-direction: column; gap: 4px; padding: 16px 0; border-bottom: 1px solid #F0EBE3; }
+  <th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
+<style>
+    
+    .topbar { background: #0B1120; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Plus Jakarta Sans'; font-size: 0.875rem; color: #64748B; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+    .sidebar-link:hover { background: #F8FAFC; color: #0B1120; }
+    .sidebar-link.active { background: #F8FAFC; border-left: 3px solid #6366F1; color: #6366F1; font-weight: 700; padding-left: 13px; }
+    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #64748B; padding: 8px 16px 4px; }
+    
+    
+    .btn-outline { border: 1.5px solid #6366F1; color: #6366F1; font-family: 'Plus Jakarta Sans'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; }
+    .btn-outline:hover { background: #6366F1; color: white; }
+    .info-row { display: flex; flex-direction: column; gap: 4px; padding: 16px 0; border-bottom: 1px solid #EEF2FF; }
     .info-row:last-child { border-bottom: none; }
-    .info-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8A7E78; }
-    .info-value { font-size: 0.95rem; color: #1C1917; font-weight: 400; }
-    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #44312A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display'; font-size: 2rem; color: white; }
+    .info-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748B; }
+    .info-value { font-size: 0.95rem; color: #0B1120; font-weight: 400; }
+    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #22D3EE); display: flex; align-items: center; justify-content: center; font-family: 'Outfit'; font-size: 2rem; color: white; }
     .stat-card { background: white; border-radius: 8px; }
   </style>
   <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
@@ -38,11 +29,11 @@
 
 <!-- TOP NAV -->
 <nav class="topbar flex items-center justify-between px-8 py-4">
-  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#22D3EE">Elite</span></a>
   <div class="flex items-center gap-6">
     <a th:href="@{/restaurant-listing}" class="text-gray-300 text-sm font-body hover:text-gold transition-colors">Explore</a>
     <div class="flex items-center gap-2 cursor-pointer">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#44312A;" th:text="${firstLetter}">J</div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#1E293B;" th:text="${firstLetter}">J</div>
       <span class="text-gray-300 text-sm font-body" th:text="${userFullName}">John Doe</span>
     </div>
   </div>

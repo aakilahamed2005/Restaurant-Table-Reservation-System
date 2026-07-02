@@ -6,32 +6,15 @@
         name="viewport" content="width=device-width, initial-scale=1.0"
 >
 <title>DineElite – My Reviews</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet">
-<script
-        src="https://cdn.tailwindcss.com">
-
-</script>
-<script>
-  tailwind.config = {
-    theme: { extend: {
-        colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-        fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-      }
-
-      }
-  }
-</script>
+<th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
 <style>
-body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
-
-/* ── Topbar ── */
-.topbar { background: #1C1917; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 56px; }
-.logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: white; text-decoration: none; letter-spacing: -0.01em; }
-.logo span { color: #D4A853; }
-.nav-link { color: #9CA3AF; font-size: 0.85rem; font-family: 'Lato', sans-serif; text-decoration: none; transition: color 0.2s; }
-.nav-link:hover { color: #D4A853; }
+.topbar { background: #0B1120; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 56px; }
+.logo { font-family: 'Outfit', serif; font-size: 1.4rem; color: white; text-decoration: none; letter-spacing: -0.01em; }
+.logo span { color: #22D3EE; }
+.nav-link { color: #9CA3AF; font-size: 0.85rem; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; transition: color 0.2s; }
+.nav-link:hover { color: #22D3EE; }
 .nav-user { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: #C4633A; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; }
+.nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: #6366F1; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; }
 .nav-name { color: #9CA3AF; font-size: 0.85rem; }
 
 /* ── Layout ── */
@@ -40,68 +23,68 @@ body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C191
 /* ── Sidebar ── */
 .sidebar { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
 .sb-profile { background: white; border-radius: 8px; padding: 20px 16px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #C4633A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 2rem; color: white; }
-.sb-name { font-family: 'Playfair Display', serif; font-size: 1rem; color: #1C1917; }
-.sb-role { font-size: 0.72rem; color: #8A7E78; margin-top: 2px; }
-.sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; color: #8A7E78; text-decoration: none; transition: all 0.18s; cursor: pointer; border: none; background: none; width: 100%; font-family: 'Lato', sans-serif; text-align: left; }
-.sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
-.sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 11px; border-radius: 0 6px 6px 0; }
+.avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #6366F1, #22D3EE); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', serif; font-size: 2rem; color: white; }
+.sb-name { font-family: 'Outfit', serif; font-size: 1rem; color: #0B1120; }
+.sb-role { font-size: 0.72rem; color: #64748B; margin-top: 2px; }
+.sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; color: #64748B; text-decoration: none; transition: all 0.18s; cursor: pointer; border: none; background: none; width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; text-align: left; }
+.sidebar-link:hover { background: #F8FAFC; color: #0B1120; }
+.sidebar-link.active { background: #F8FAFC; border-left: 3px solid #6366F1; color: #6366F1; font-weight: 700; padding-left: 11px; border-radius: 0 6px 6px 0; }
 .sidebar-link svg { width: 15px; height: 15px; flex-shrink: 0; }
-.sb-divider { border: none; border-top: 1px solid #F0EBE3; margin: 10px 0; }
-.sidebar-link.danger { color: #C4633A; }
+.sb-divider { border: none; border-top: 1px solid #EEF2FF; margin: 10px 0; }
+.sidebar-link.danger { color: #6366F1; }
 .sidebar-link.signout { color: #ef4444; }
 
 /* ── Main ── */
 .main { flex: 1; min-width: 0; }
 .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
 .stat-card { background: white; border-radius: 8px; padding: 18px; text-align: center; }
-.stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; line-height: 1; }
-.stat-lbl { font-size: 0.68rem; color: #8A7E78; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.stat-num { font-family: 'Outfit', serif; font-size: 2rem; line-height: 1; }
+.stat-lbl { font-size: 0.68rem; color: #64748B; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
 
 /* ── Section Card ── */
 .section-card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
-.gold-bar { width: 36px; height: 2px; background: #D4A853; margin-bottom: 10px; }
-.section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #1C1917; }
-.section-sub { font-size: 0.8rem; color: #8A7E78; margin-top: 3px; }
+.gold-bar { width: 36px; height: 2px; background: #22D3EE; margin-bottom: 10px; }
+.section-title { font-family: 'Outfit', serif; font-size: 1.4rem; color: #0B1120; }
+.section-sub { font-size: 0.8rem; color: #64748B; margin-top: 3px; }
 
 /* ── Buttons ── */
-.btn-primary { background: #C4633A; color: white; font-family: 'Lato', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.18s; }
-.btn-primary:hover { background: #44312A; }
-.btn-sm { background: none; border: 1px solid #E8E2DB; border-radius: 4px; padding: 4px 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #8A7E78; cursor: pointer; font-family: 'Lato', sans-serif; transition: all 0.18s; }
-.btn-sm:hover { border-color: #C4633A; color: #C4633A; }
+.btn-primary { background: #6366F1; color: white; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.18s; }
+.btn-primary:hover { background: #1E293B; }
+.btn-sm { background: none; border: 1px solid #E8E2DB; border-radius: 4px; padding: 4px 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
+.btn-sm:hover { border-color: #6366F1; color: #6366F1; }
 .btn-sm.del:hover { border-color: #ef4444; color: #ef4444; }
-.btn-cancel { background: none; border: 1px solid #E8E2DB; border-radius: 4px; padding: 9px 16px; font-family: 'Lato', sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #8A7E78; cursor: pointer; }
+.btn-cancel { background: none; border: 1px solid #E8E2DB; border-radius: 4px; padding: 9px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748B; cursor: pointer; }
 
 /* ── Filter ── */
 .filter-row { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
-.filter-btn { background: white; border: 1px solid #E8E2DB; border-radius: 999px; padding: 4px 14px; font-size: 0.72rem; font-weight: 700; color: #8A7E78; cursor: pointer; font-family: 'Lato', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; transition: all 0.18s; }
-.filter-btn.active { background: #1C1917; color: white; border-color: #1C1917; }
+.filter-btn { background: white; border: 1px solid #E8E2DB; border-radius: 999px; padding: 4px 14px; font-size: 0.72rem; font-weight: 700; color: #64748B; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; transition: all 0.18s; }
+.filter-btn.active { background: #0B1120; color: white; border-color: #0B1120; }
 
 /* ── Review Cards ── */
-.review-card { border-top: 1px solid #F0EBE3; padding: 18px 0; }
+.review-card { border-top: 1px solid #EEF2FF; padding: 18px 0; }
 .review-card:first-child { border-top: none; padding-top: 4px; }
-.rest-badge { display: inline-flex; align-items: center; padding: 3px 10px; background: rgba(196, 99, 58, 0.08); color: #C4633A; border: 1px solid rgba(196, 99, 58, 0.2); border-radius: 999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.rest-badge { display: inline-flex; align-items: center; padding: 3px 10px; background: rgba(99, 102, 241, 0.08); color: #6366F1; border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
 .cuisine-tag { display: inline-flex; padding: 4px 10px; background: rgba(122, 140, 110, 0.12); color: #5E7A50; border: 1px solid rgba(122, 140, 110, 0.3); border-radius: 999px; font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
-.review-text { font-size: 0.88rem; color: #44312A; line-height: 1.65; margin: 10px 0 12px; }
+.review-text { font-size: 0.88rem; color: #1E293B; line-height: 1.65; margin: 10px 0 12px; }
 
 /* ── Modal ── */
-.modal-wrap { display: none; position: fixed; inset: 0; background: rgba(28, 25, 23, 0.55); align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+.modal-wrap { display: none; position: fixed; inset: 0; background: rgba(11, 17, 32, 0.55); align-items: center; justify-content: center; z-index: 100; padding: 24px; }
 .modal-wrap.open { display: flex; }
 .modal { background: white; border-radius: 10px; padding: 28px; width: 100%; max-width: 440px; }
-.modal-hd { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #1C1917; margin-bottom: 4px; }
-.modal-sub2 { font-size: 0.78rem; color: #8A7E78; margin-bottom: 18px; }
-.field-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #8A7E78; margin-bottom: 6px; }
-.field-input { width: 100%; border: 1px solid #E8E2DB; border-radius: 6px; padding: 9px 12px; font-family: 'Lato', sans-serif; font-size: 0.85rem; color: #1C1917; outline: none; margin-bottom: 12px; }
-.field-input:focus { border-color: #C4633A; }
+.modal-hd { font-family: 'Outfit', serif; font-size: 1.2rem; color: #0B1120; margin-bottom: 4px; }
+.modal-sub2 { font-size: 0.78rem; color: #64748B; margin-bottom: 18px; }
+.field-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748B; margin-bottom: 6px; }
+.field-input { width: 100%; border: 1px solid #E8E2DB; border-radius: 6px; padding: 9px 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; color: #0B1120; outline: none; margin-bottom: 12px; }
+.field-input:focus { border-color: #6366F1; }
 .star-row span { font-size: 26px; cursor: pointer; color: #E8E2DB; transition: color 0.12s; line-height: 1; }
-.star-row span.lit { color: #D4A853; }
+.star-row span.lit { color: #22D3EE; }
 textarea.field-input { resize: vertical; min-height: 90px; }
 
 /* ── Delete Modal ── */
-.delete-info { background: #FAF7F2; border: 1px solid #E8E2DB; border-radius: 8px; padding: 14px 16px; margin-bottom: 18px; }
-.delete-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #1C1917; margin-bottom: 4px; }
-.delete-text { font-size: 0.84rem; color: #44312A; line-height: 1.6; }
-.btn-danger { background: #ef4444; color: white; font-family: 'Lato', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.18s; }
+.delete-info { background: #F8FAFC; border: 1px solid #E8E2DB; border-radius: 8px; padding: 14px 16px; margin-bottom: 18px; }
+.delete-title { font-family: 'Outfit', serif; font-size: 1.05rem; color: #0B1120; margin-bottom: 4px; }
+.delete-text { font-size: 0.84rem; color: #1E293B; line-height: 1.6; }
+.btn-danger { background: #ef4444; color: white; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.18s; }
 .btn-danger:hover { background: #b91c1c; }
 
 /* ── Empty state ── */
@@ -112,7 +95,7 @@ textarea.field-input { resize: vertical; min-height: 90px; }
 <body class="min-h-screen">
 
 <nav class="topbar flex items-center justify-between px-8 py-4">
-  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#22D3EE">Elite</span></a>
   <div class="flex items-center gap-6">
     <a th:href="@{/restaurant-listing}" class="text-gray-300 text-sm font-body hover:text-gold transition-colors">Explore</a>
     <div class="flex items-center gap-2 cursor-pointer">
@@ -127,10 +110,10 @@ textarea.field-input { resize: vertical; min-height: 90px; }
 
   <main class="flex-1">
     <div class="stat-grid">
-      <div class="stat-card"><div class="stat-num" style="color:#C4633A;" id="s-total" th:text="${totalReviews}">0</div><div class="stat-lbl">Total Reviews</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:#7A8C6E;" id="s-five" th:text="${fiveStarCount}">0</div><div class="stat-lbl">5-Star</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#6366F1;" id="s-total" th:text="${totalReviews}">0</div><div class="stat-lbl">Total Reviews</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#34D399;" id="s-five" th:text="${fiveStarCount}">0</div><div class="stat-lbl">5-Star</div></div>
       <div class="stat-card">
-        <div class="stat-num" style="color:#1C1917;" id="s-avg" th:text="${avgRating}">0.0</div>
+        <div class="stat-num" style="color:#0B1120;" id="s-avg" th:text="${avgRating}">0.0</div>
         <div class="stat-lbl">Avg Rating</div>
         <div style="margin-top:8px;">
           <span th:each="i : ${#numbers.sequence(1,5)}" th:classappend="${i <= avgRating} ? 'text-yellow-600' : 'text-gray-300'" style="font-size:14px;">★</span>
@@ -160,8 +143,8 @@ textarea.field-input { resize: vertical; min-height: 90px; }
       >
         <div th:if="${feedbacks == null || #lists.isEmpty(feedbacks)}" class="empty-state">
           <div style="font-size:1.8rem;color:#E8E2DB;margin-bottom:10px;">✦</div>
-          <p style="font-family:'Playfair Display',serif;font-size:1rem;color:#1C1917;margin:0 0 4px;">No reviews here</p>
-          <p style="font-size:0.8rem;color:#8A7E78;">Write a review to see it here.</p>
+          <p style="font-family:'Outfit',serif;font-size:1rem;color:#0B1120;margin:0 0 4px;">No reviews here</p>
+          <p style="font-size:0.8rem;color:#64748B;">Write a review to see it here.</p>
         </div>
         <div th:each="review : ${feedbacks}" class="review-card" th:attr="data-rating=${review.overall_rating}">
           <!-- hidden fields for client-side editing -->
@@ -179,7 +162,7 @@ textarea.field-input { resize: vertical; min-height: 90px; }
               <span class="ml-1 text-sm text-yellow-600" th:text="${review.overall_rating} + '.0 ★'">4.0</span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:0.7rem;color:#8A7E78;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;flex-shrink:0;">
+              <span style="font-size:0.7rem;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;flex-shrink:0;">
                 <span th:text="${review.createdAt != null ? #temporals.format(review.createdAt, 'dd MMMM yyyy') : '—'}">
                   Date</span>
               </span>
@@ -189,7 +172,7 @@ textarea.field-input { resize: vertical; min-height: 90px; }
               </form>
             </div>
           </div>
-          <div style="color:#D4A853;font-size:14px;letter-spacing:1px;margin-bottom:8px;">
+          <div style="color:#22D3EE;font-size:14px;letter-spacing:1px;margin-bottom:8px;">
 
 
 
@@ -211,7 +194,7 @@ textarea.field-input { resize: vertical; min-height: 90px; }
           <div class="modal-hd" id="m-title">Edit Review</div>
           <div class="modal-sub2" id="m-sub">Update your dining feedback</div>
         </div>
-        <button type="button" onclick="closeModal()" style="background:none;border:none;font-size:18px;color:#8A7E78;cursor:pointer;">✕</button>
+        <button type="button" onclick="closeModal()" style="background:none;border:none;font-size:18px;color:#64748B;cursor:pointer;">✕</button>
       </div>
       <input type="hidden" name="id" id="m-id" />
       <input type="hidden" name="overallRating" id="m-overall" />
@@ -241,7 +224,7 @@ textarea.field-input { resize: vertical; min-height: 90px; }
         <div class="modal-hd">Delete Review</div>
         <div class="modal-sub2">Please confirm before removing this feedback</div>
       </div>
-      <button type="button" onclick="closeDeleteModal()" style="background:none;border:none;font-size:18px;color:#8A7E78;cursor:pointer;">✕</button>
+      <button type="button" onclick="closeDeleteModal()" style="background:none;border:none;font-size:18px;color:#64748B;cursor:pointer;">✕</button>
     </div>
 
     <div class="delete-info">

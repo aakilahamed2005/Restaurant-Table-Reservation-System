@@ -4,73 +4,43 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>DineElite — Make a Reservation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: { extend: {
-                    colors: {
-                        cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917',
-                        'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853',
-                        sage: '#7A8C6E', muted: '#8A7E78'
-                    },
-                    fontFamily: {
-                        display: ['"Playfair Display"', 'serif'],
-                        body: ['Lato', 'sans-serif'],
-                        accent: ['"Cormorant Garamond"', 'serif']
-                    }
-                }}
-        }
-    </script>
-    <style>
-        body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
-        .topbar { background: #1C1917; }
+    <th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
+<style>
+        
+        .topbar { background: #0B1120; }
 
-        .input-field {
-            border: 1.5px solid #E5DFD8;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background: white;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #C4633A;
-            box-shadow: 0 0 0 3px rgba(196,99,58,0.1);
-        }
+        
+        
 
-        .btn-primary {
-            background: #C4633A; color: white;
-            font-family: 'Lato'; letter-spacing: 0.08em;
-            text-transform: uppercase; font-size: 0.75rem;
-            font-weight: 700; transition: background 0.2s;
-        }
-        .btn-primary:hover { background: #44312A; }
+        
+        
 
         /* Duration pills */
         .duration-pill {
             flex: 1;
             padding: 14px 10px;
-            border: 1.5px solid #E5DFD8;
+            border: 1.5px solid #E2E8F0;
             border-radius: 8px;
             cursor: pointer;
             background: white;
             transition: all 0.2s;
             text-align: center;
-            font-family: 'Lato';
+            font-family: 'Plus Jakarta Sans';
         }
-        .duration-pill:hover { border-color: #C4633A; background: rgba(196,99,58,0.04); }
+        .duration-pill:hover { border-color: #6366F1; background: rgba(99,102,241,0.04); }
         .duration-pill.sel {
-            background: #C4633A; color: white;
-            border-color: #C4633A;
+            background: #6366F1; color: white;
+            border-color: #6366F1;
         }
         .duration-pill.sel .pill-sub { color: rgba(255,255,255,0.75); }
 
         .pill-main { font-size: 0.9rem; font-weight: 700; display: block; }
-        .pill-sub  { font-size: 0.7rem; color: #8A7E78; display: block; margin-top: 2px; }
+        .pill-sub  { font-size: 0.7rem; color: #64748B; display: block; margin-top: 2px; }
 
         /* Seat selector */
         .seat-btn {
             width: 38px; height: 38px;
-            border: 1.5px solid #E5DFD8;
+            border: 1.5px solid #E2E8F0;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; background: white;
@@ -78,7 +48,7 @@
             transition: all 0.2s;
             user-select: none;
         }
-        .seat-btn:hover { border-color: #C4633A; color: #C4633A; }
+        .seat-btn:hover { border-color: #6366F1; color: #6366F1; }
 
         .fade-in { animation: fadeUp 0.5s ease both; }
         @keyframes fadeUp {
@@ -96,27 +66,27 @@
         .info-tip .tip-box {
             display: none; position: absolute; bottom: 130%;
             left: 50%; transform: translateX(-50%);
-            background: #1C1917; color: white;
+            background: #0B1120; color: white;
             font-size: 0.7rem; padding: 6px 10px;
             border-radius: 5px; white-space: nowrap;
-            font-family: 'Lato';
+            font-family: 'Plus Jakarta Sans';
         }
         .info-tip:hover .tip-box { display: block; }
 
         .occasion-chip {
             padding: 8px 10px;
-            border: 1.5px solid #E5DFD8;
+            border: 1.5px solid #E2E8F0;
             border-radius: 6px;
             font-size: 0.75rem;
             cursor: pointer;
             background: white;
             transition: all 0.2s;
             text-align: center;
-            font-family: 'Lato';
+            font-family: 'Plus Jakarta Sans';
             user-select: none;
         }
-        .occasion-chip:hover { border-color: #C4633A; background: rgba(196,99,58,0.04); }
-        .occasion-chip.sel   { border-color: #C4633A; background: rgba(196,99,58,0.08); color: #C4633A; font-weight: 700; }
+        .occasion-chip:hover { border-color: #6366F1; background: rgba(99,102,241,0.04); }
+        .occasion-chip.sel   { border-color: #6366F1; background: rgba(99,102,241,0.08); color: #6366F1; font-weight: 700; }
     </style>
   <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
 </head>
@@ -125,7 +95,7 @@
 <!-- NAV -->
 <nav class="topbar flex items-center justify-between px-8 py-4">
     <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">
-        Dine<span style="color:#D4A853">Elite</span>
+        Dine<span style="color:#22D3EE">Elite</span>
     </a>
 
     <a class="flex items-center gap-2 cursor-pointer" th:href="@{/customer-profile-view}">
@@ -157,7 +127,7 @@
     <div class="flex-1">
 
         <!-- Restaurant mini-header -->
-        <div class="bg-white rounded-lg p-5 mb-6 flex items-center gap-4 border-l-4" style="border-color:#C4633A;">
+        <div class="bg-white rounded-lg p-5 mb-6 flex items-center gap-4 border-l-4" style="border-color:#6366F1;">
             <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-warm-brown to-terracotta flex-shrink-0 flex items-center justify-center text-white text-xl font-display"
             th:text="${restaurantNameFirstLetter}">
                 E

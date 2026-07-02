@@ -4,69 +4,60 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DineElite — Explore Restaurants</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: {
-          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-        }}
-    }
-  </script>
-  <style>
-    body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
-    .topbar { background: rgba(28,25,23,0.97); backdrop-filter: blur(8px); }
+  <th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
+<style>
+    
+    .topbar { background: rgba(11,17,32,0.97); backdrop-filter: blur(8px); }
     .nav-link { transition: color 0.2s; }
-    .nav-link:hover { color: #D4A853; }
-    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.15s; }
-    .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+    .nav-link:hover { color: #22D3EE; }
+    
+    
 
     /* Search bar */
-    .search-bar { background: white; border: 1.5px solid #E5DFD8; border-radius: 6px; transition: box-shadow 0.2s, border-color 0.2s; }
-    .search-bar:focus-within { border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
-    .search-input { outline: none; background: transparent; font-family: 'Lato'; font-size: 0.875rem; color: #1C1917; }
-    .search-input::placeholder { color: #8A7E78; }
+    .search-bar { background: white; border: 1.5px solid #E2E8F0; border-radius: 6px; transition: box-shadow 0.2s, border-color 0.2s; }
+    .search-bar:focus-within { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .search-input { outline: none; background: transparent; font-family: 'Plus Jakarta Sans'; font-size: 0.875rem; color: #0B1120; }
+    .search-input::placeholder { color: #64748B; }
 
     /* Filter chips */
-    .chip { padding: 6px 16px; border-radius: 999px; font-family: 'Lato'; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.18s; border: 1.5px solid #E5DFD8; background: white; color: #8A7E78; white-space: nowrap; }
-    .chip:hover { border-color: #C4633A; color: #C4633A; }
-    .chip.active { background: #1C1917; color: white; border-color: #1C1917; }
-    .chip.cuisine-active { background: #C4633A; color: white; border-color: #C4633A; }
+    .chip { padding: 6px 16px; border-radius: 999px; font-family: 'Plus Jakarta Sans'; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.18s; border: 1.5px solid #E2E8F0; background: white; color: #64748B; white-space: nowrap; }
+    .chip:hover { border-color: #6366F1; color: #6366F1; }
+    .chip.active { background: #0B1120; color: white; border-color: #0B1120; }
+    .chip.cuisine-active { background: #6366F1; color: white; border-color: #6366F1; }
 
     /* Select dropdowns */
-    .filter-select { border: 1.5px solid #E5DFD8; border-radius: 999px; padding: 6px 14px; font-family: 'Lato'; font-size: 0.78rem; font-weight: 700; color: #8A7E78; background: white; cursor: pointer; outline: none; transition: border-color 0.18s; appearance: none; padding-right: 28px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A7E78'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
-    .filter-select:focus { border-color: #C4633A; color: #1C1917; }
+    .filter-select { border: 1.5px solid #E2E8F0; border-radius: 999px; padding: 6px 14px; font-family: 'Plus Jakarta Sans'; font-size: 0.78rem; font-weight: 700; color: #64748B; background: white; cursor: pointer; outline: none; transition: border-color 0.18s; appearance: none; padding-right: 28px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A7E78'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+    .filter-select:focus { border-color: #6366F1; color: #0B1120; }
 
     /* Restaurant cards */
     .rest-card { background: white; border-radius: 10px; overflow: hidden; transition: transform 0.25s ease, box-shadow 0.25s ease; display: flex; flex-direction: column; }
-    .rest-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(28,25,23,0.13); }
+    .rest-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(11,17,32,0.13); }
     .card-thumb { height: 190px; position: relative; flex-shrink: 0; }
-    .badge-tag { display: inline-flex; align-items: center; font-size: 0.65rem; font-family: 'Lato'; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
-    .badge-featured { background: #D4A853; color: #1C1917; }
-    .badge-new { background: white; color: #1C1917; }
-    .badge-popular { background: #1C1917; color: white; }
-    .star-row { color: #D4A853; font-size: 0.75rem; }
-    .avail-dot { width: 7px; height: 7px; border-radius: 50%; background: #7A8C6E; flex-shrink: 0; }
+    .badge-tag { display: inline-flex; align-items: center; font-size: 0.65rem; font-family: 'Plus Jakarta Sans'; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+    .badge-featured { background: #22D3EE; color: #0B1120; }
+    .badge-new { background: white; color: #0B1120; }
+    .badge-popular { background: #0B1120; color: white; }
+    .star-row { color: #22D3EE; font-size: 0.75rem; }
+    .avail-dot { width: 7px; height: 7px; border-radius: 50%; background: #34D399; flex-shrink: 0; }
 
     /* List view card */
     .rest-card-list { background: white; border-radius: 10px; overflow: hidden; display: flex; transition: box-shadow 0.25s; }
-    .rest-card-list:hover { box-shadow: 0 8px 28px rgba(28,25,23,0.1); }
+    .rest-card-list:hover { box-shadow: 0 8px 28px rgba(11,17,32,0.1); }
 
     /* Pagination */
-    .page-btn { width: 36px; height: 36px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Lato'; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.18s; border: 1.5px solid #E5DFD8; background: white; color: #8A7E78; }
-    .page-btn:hover { border-color: #C4633A; color: #C4633A; }
-    .page-btn.active { background: #C4633A; border-color: #C4633A; color: white; }
+    .page-btn { width: 36px; height: 36px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans'; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.18s; border: 1.5px solid #E2E8F0; background: white; color: #64748B; }
+    .page-btn:hover { border-color: #6366F1; color: #6366F1; }
+    .page-btn.active { background: #6366F1; border-color: #6366F1; color: white; }
 
     /* Sidebar filter */
-    .sidebar-section { border-bottom: 1px solid #F0EBE3; padding-bottom: 20px; margin-bottom: 20px; }
+    .sidebar-section { border-bottom: 1px solid #EEF2FF; padding-bottom: 20px; margin-bottom: 20px; }
     .sidebar-section:last-child { border-bottom: none; }
-    .range-slider { accent-color: #C4633A; width: 100%; }
+    .range-slider { accent-color: #6366F1; width: 100%; }
     .fade-in { animation: fadeUp 0.5s ease both; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
-    .view-toggle-btn { padding: 6px 10px; border: 1.5px solid #E5DFD8; background: white; cursor: pointer; transition: all 0.18s; }
-    .view-toggle-btn.active { background: #1C1917; border-color: #1C1917; color: white; }
+    .view-toggle-btn { padding: 6px 10px; border: 1.5px solid #E2E8F0; background: white; cursor: pointer; transition: all 0.18s; }
+    .view-toggle-btn.active { background: #0B1120; border-color: #0B1120; color: white; }
     .view-toggle-btn:first-child { border-radius: 4px 0 0 4px; }
     .view-toggle-btn:last-child { border-radius: 0 4px 4px 0; }
   </style>
@@ -75,8 +66,8 @@
 <body class="min-h-screen">
 
 <!-- NAV -->
-<nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4" style="background: rgba(28,25,23,0.96); backdrop-filter: blur(8px);">
-  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight cursor-pointer">Dine<span style="color:#D4A853">Elite</span></a>
+<nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4" style="background: rgba(11,17,32,0.96); backdrop-filter: blur(8px);">
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight cursor-pointer">Dine<span style="color:#22D3EE">Elite</span></a>
   <div class="hidden md:flex items-center gap-8">
     <a th:href="@{/restaurant-listing}" class="nav-link text-sm text-gray-300 font-body cursor-pointer">Explore</a>
 
@@ -220,10 +211,10 @@
           <div class="flex items-center gap-1 mb-3">
 
             <span class="star-row" th:if="${restaurant.overallRating == 5.0}">★★★★★</span>
-            <span class="star-row" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E5DFD8; font-size:0.75rem;">★</span></span>
-            <span class="star-row" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E5DFD8; font-size:0.75rem;">★★</span></span>
-            <span class="star-row" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E5DFD8; font-size:0.75rem;">★★★</span></span>
-            <span class="star-row" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E5DFD8; font-size:0.75rem;">★★★★</span></span>
+            <span class="star-row" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E2E8F0; font-size:0.75rem;">★</span></span>
+            <span class="star-row" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E2E8F0; font-size:0.75rem;">★★</span></span>
+            <span class="star-row" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E2E8F0; font-size:0.75rem;">★★★</span></span>
+            <span class="star-row" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E2E8F0; font-size:0.75rem;">★★★★</span></span>
             <span class="star-row" th:if="${restaurant.overallRating == 0.0}">No Ratings</span>
 
             <span class="text-xs font-body font-bold text-charcoal ml-1" th:text="${restaurant.overallRating}">4.9</span>
@@ -255,10 +246,10 @@
               <p class="text-xs text-muted font-body mb-2" th:text="${'📍 '+restaurant.city}">Modern European · Downtown · 0.3 mi · $$$</p>
               <div class="flex items-center gap-1 mb-3">
                 <span class="star-row" th:if="${restaurant.overallRating == 5.0}">★★★★★</span>
-                <span class="star-row" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E5DFD8; font-size:0.75rem;">★</span></span>
-                <span class="star-row" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E5DFD8; font-size:0.75rem;">★★</span></span>
-                <span class="star-row" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E5DFD8; font-size:0.75rem;">★★★</span></span>
-                <span class="star-row" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E5DFD8; font-size:0.75rem;">★★★★</span></span>
+                <span class="star-row" th:if="${restaurant.overallRating >= 4.0 && restaurant.overallRating < 5.0}">★★★★<span style="color:#E2E8F0; font-size:0.75rem;">★</span></span>
+                <span class="star-row" th:if="${restaurant.overallRating >= 3.0 && restaurant.overallRating < 4.0}">★★★<span style="color:#E2E8F0; font-size:0.75rem;">★★</span></span>
+                <span class="star-row" th:if="${restaurant.overallRating >= 2.0 && restaurant.overallRating < 3.0}">★★<span style="color:#E2E8F0; font-size:0.75rem;">★★★</span></span>
+                <span class="star-row" th:if="${restaurant.overallRating >= 1.0 && restaurant.overallRating < 2.0}">★<span style="color:#E2E8F0; font-size:0.75rem;">★★★★</span></span>
                 <span class="star-row" th:if="${restaurant.overallRating == 0.0}">No Ratings</span>
 
                 <span class="text-xs font-body font-bold text-charcoal ml-1" th:text="${restaurant.overallRating}">4.9</span>
@@ -282,7 +273,7 @@
 <footer class="bg-charcoal py-12 px-6">
   <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-8">
     <div>
-      <p class="font-display text-2xl text-white mb-2 cursor-pointer">Dine<span style="color:#D4A853">Elite</span></p>
+      <p class="font-display text-2xl text-white mb-2 cursor-pointer">Dine<span style="color:#22D3EE">Elite</span></p>
       <p class="text-gray-500 text-sm font-body max-w-xs">The world's finest restaurant reservation platform.</p>
     </div>
     <div class="flex gap-16">

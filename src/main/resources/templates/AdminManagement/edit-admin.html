@@ -13,30 +13,7 @@
 
     <title>Edit Admin</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
-          rel="stylesheet"/>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cream:'#FAF7F2',
-                        charcoal:'#1C1917',
-                        terracotta:'#C4633A',
-                        gold:'#D4A853',
-                        muted:'#8A7E78'
-                    },
-                    fontFamily:{
-                        display:['"Playfair Display"','serif'],
-                        body:['Lato','sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+    <th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
 
   <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
   <th:block th:replace="~{AdminManagement/fragments/admin-responsive-auth :: admin-responsive-auth}"></th:block>

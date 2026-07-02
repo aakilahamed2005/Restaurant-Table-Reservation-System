@@ -4,31 +4,22 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>DineElite — Leave a Review</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: { extend: {
-    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-  }}
-}
-</script>
+<th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
 <style>
-  body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
-  .topbar { background: #1C1917; }
-  .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
-  .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
-  .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; }
-  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+  
+  .topbar { background: #0B1120; }
+  
+  
+  
+  
   .star-row { display: flex; gap: 8px; }
-  .star-btn { font-size: 2rem; cursor: pointer; color: #E5DFD8; transition: color 0.15s, transform 0.1s; line-height: 1; }
-  .star-btn:hover, .star-btn.active { color: #D4A853; transform: scale(1.15); }
-  .cat-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #F0EBE3; }
+  .star-btn { font-size: 2rem; cursor: pointer; color: #E2E8F0; transition: color 0.15s, transform 0.1s; line-height: 1; }
+  .star-btn:hover, .star-btn.active { color: #22D3EE; transform: scale(1.15); }
+  .cat-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #EEF2FF; }
   .cat-row:last-child { border-bottom: none; }
   .cat-stars { display: flex; gap: 4px; }
-  .cat-star { font-size: 1.2rem; cursor: pointer; color: #E5DFD8; transition: color 0.12s; }
-  .cat-star.lit { color: #D4A853; }
+  .cat-star { font-size: 1.2rem; cursor: pointer; color: #E2E8F0; transition: color 0.12s; }
+  .cat-star.lit { color: #22D3EE; }
   .fade-in { animation: fadeUp 0.5s ease both; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 </style>
@@ -38,7 +29,7 @@ tailwind.config = {
 
 <!-- TOP NAV -->
 <nav class="topbar flex items-center justify-between px-8 py-4">
-  <a th:href="@{/}" class="font-display text-2xl text-white">Dine<span style="color:#D4A853">Elite</span></a>
+  <a th:href="@{/}" class="font-display text-2xl text-white">Dine<span style="color:#22D3EE">Elite</span></a>
   <div class="flex items-center gap-6">
     <a th:href="customer-booking-history.html" class="text-gray-400 text-sm font-body hover:text-gold transition-colors">My Bookings</a>
     <div class="flex items-center gap-2">
@@ -159,7 +150,7 @@ tailwind.config = {
     });
     const label = document.getElementById('overallLabel');
     label.textContent = labels[val];
-    label.style.color = val >= 4 ? '#D4A853' : val >= 3 ? '#7A8C6E' : '#C4633A';
+    label.style.color = val >= 4 ? '#22D3EE' : val >= 3 ? '#34D399' : '#6366F1';
   }
 
   function setCat(cat, val) {

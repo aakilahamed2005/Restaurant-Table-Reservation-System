@@ -4,33 +4,24 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DineElite — Owner - Restaurant Reservations</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: {
-          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-        }}
-    }
-  </script>
-  <style>
-    body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
-    .topbar { background: #1C1917; }
-    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; color: #8A7E78; transition: all 0.2s; cursor: pointer; text-decoration: none; }
-    .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
-    .sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 13px; }
-    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #8A7E78; padding: 8px 16px 4px; }
-    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; display: inline-flex; align-items: center; }
-    .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
-    .btn-ghost { background: transparent; border: 1.5px solid #E5DFD8; color: #8A7E78; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
-    .btn-ghost:hover { border-color: #8A7E78; color: #1C1917; }
-    .btn-danger { background: transparent; border: 1.5px solid #fca5a5; color: #ef4444; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; display: inline-flex; align-items: center; }
+  <th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
+<style>
+    
+    .topbar { background: #0B1120; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Plus Jakarta Sans'; font-size: 0.875rem; color: #64748B; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+    .sidebar-link:hover { background: #F8FAFC; color: #0B1120; }
+    .sidebar-link.active { background: #F8FAFC; border-left: 3px solid #6366F1; color: #6366F1; font-weight: 700; padding-left: 13px; }
+    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #64748B; padding: 8px 16px 4px; }
+    
+    
+    .btn-ghost { background: transparent; border: 1.5px solid #E2E8F0; color: #64748B; font-family: 'Plus Jakarta Sans'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-ghost:hover { border-color: #64748B; color: #0B1120; }
+    .btn-danger { background: transparent; border: 1.5px solid #fca5a5; color: #ef4444; font-family: 'Plus Jakarta Sans'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; display: inline-flex; align-items: center; }
     .btn-danger:hover { background: #fef2f2; border-color: #ef4444; }
-    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #44312A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display'; font-size: 2rem; color: white; }
+    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #22D3EE); display: flex; align-items: center; justify-content: center; font-family: 'Outfit'; font-size: 2rem; color: white; }
     .section-divider { display: flex; align-items: center; gap: 12px; margin: 8px 0 4px; }
-    .section-divider span { font-family: 'Lato'; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8A7E78; white-space: nowrap; }
-    .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #E5DFD8; }
+    .section-divider span { font-family: 'Plus Jakarta Sans'; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #64748B; white-space: nowrap; }
+    .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #E2E8F0; }
     .fade-in { animation: fadeUp 0.5s ease both; }
     @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -39,11 +30,11 @@
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
     .badge-confirmed .badge-dot { background: #059669; }
     .badge-cancelled .badge-dot { background: #dc2626; }
-    .filter-tab { font-family: 'Lato'; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; color: #8A7E78; }
-    .filter-tab:hover { background: #FAF7F2; color: #1C1917; }
-    .filter-tab.active { background: #1C1917; color: white; border-color: #1C1917; }
-    .reservation-card { background: white; border-radius: 10px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; border: 1px solid #F0EBE3; padding: 20px; margin-bottom: 16px; }
-    .reservation-card:hover { box-shadow: 0 8px 30px rgba(28,25,23,0.1); transform: translateY(-2px); }
+    .filter-tab { font-family: 'Plus Jakarta Sans'; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; color: #64748B; }
+    .filter-tab:hover { background: #F8FAFC; color: #0B1120; }
+    .filter-tab.active { background: #0B1120; color: white; border-color: #0B1120; }
+    .reservation-card { background: white; border-radius: 10px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; border: 1px solid #EEF2FF; padding: 20px; margin-bottom: 16px; }
+    .reservation-card:hover { box-shadow: 0 8px 30px rgba(11,17,32,0.1); transform: translateY(-2px); }
     .empty-state { text-align: center; padding: 64px 24px; }
     .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; }
     .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; }
@@ -59,10 +50,10 @@
 
 <!-- TOP NAV -->
 <nav class="topbar flex items-center justify-between px-8 py-4">
-  <a href="/" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <a href="/" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#22D3EE">Elite</span></a>
   <div class="flex items-center gap-6">
     <div class="flex items-center gap-2 cursor-pointer">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#44312A;" th:text="${firstLetter}">J</div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#1E293B;" th:text="${firstLetter}">J</div>
       <span class="text-gray-300 text-sm font-body" th:text="${userFullName}">John Doe</span>
     </div>
   </div>
@@ -97,7 +88,7 @@
       My Restaurants
     </a>
     <div class="mt-4 pt-4 border-t border-gray-100">
-      <a href="/owner-profile-delete" class="sidebar-link" style="color:#C4633A;">
+      <a href="/owner-profile-delete" class="sidebar-link" style="color:#6366F1;">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         Deactivate Account
       </a>
@@ -301,7 +292,7 @@
 </div>
 
 <!-- Cancel Confirmation Modal -->
-<div id="cancel-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background:rgba(28,25,23,0.5); backdrop-filter: blur(2px);">
+<div id="cancel-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background:rgba(11,17,32,0.5); backdrop-filter: blur(2px);">
   <div class="bg-white rounded-lg p-8 max-w-sm w-full mx-4 shadow-2xl" style="animation: fadeUp 0.25s ease;">
     <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-4">
       <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

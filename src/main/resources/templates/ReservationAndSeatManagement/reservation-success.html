@@ -4,19 +4,10 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>DineElite — Booking Confirmed</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: { extend: {
-    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-  }}
-}
-</script>
+<th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
 <style>
-  body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
-  .topbar { background: #1C1917; }
+  
+  .topbar { background: #0B1120; }
 
   /* Confetti animation */
   .confetti-dot { position: absolute; border-radius: 50%; animation: drop 1.8s ease-in both; }
@@ -36,14 +27,14 @@ tailwind.config = {
   .fade-in { animation: fadeUp 0.6s ease both; }
   @keyframes fadeUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
 
-  .summary-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Lato'; font-size: 0.875rem; }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Plus Jakarta Sans'; font-size: 0.875rem; }
 
-  .btn-primary { background: linear-gradient(135deg, #C4633A 0%, #44312A 100%); color: white; font-family: 'Lato'; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.75rem; transition: opacity 0.2s, transform 0.15s; }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  
+  
 
   /* Step bar — all done */
-  .step-line  { height: 2px; flex: 1; background: #C4633A; }
-  .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Lato'; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; background: #44312A; color: white; }
+  .step-line  { height: 2px; flex: 1; background: #6366F1; }
+  .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans'; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; background: #1E293B; color: white; }
 </style>
   <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
 </head>
@@ -51,13 +42,13 @@ tailwind.config = {
 
 
 <!-- NAV -->
-<nav class="flex items-center justify-between px-8 py-4" style="background:#1C1917">
+<nav class="flex items-center justify-between px-8 py-4" style="background:#0B1120">
   <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">
-    Dine<span style="color:#D4A853">Elite</span>
+    Dine<span style="color:#22D3EE">Elite</span>
   </a>
   <div class="flex items-center gap-2 cursor-pointer">
     <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-         style="background:#C4633A" th:text="${firstLetter}">J</div>
+         style="background:#6366F1" th:text="${firstLetter}">J</div>
     <a th:href="@{/customer-profile-view}">
     <span class="text-gray-300 text-sm font-body" th:text="${customerFullName}">Jane Doe</span>
     </a>

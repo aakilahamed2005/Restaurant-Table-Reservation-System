@@ -29,7 +29,7 @@
 
   <title>DineElite — Restaurant Management</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;700&display=swap"
         rel="stylesheet"/>
 
   <style>
@@ -41,19 +41,19 @@
     }
 
     :root {
-      --cream: #FAF7F2;
-      --surface: #F0EBE3;
-      --charcoal: #1C1917;
-      --warm-brown: #44312A;
-      --terracotta: #C4633A;
-      --gold: #D4A853;
-      --sage: #7A8C6E;
-      --muted: #8A7E78;
+      --cream: #F8FAFC;
+      --surface: #EEF2FF;
+      --charcoal: #0B1120;
+      --warm-brown: #1E293B;
+      --terracotta: #6366F1;
+      --gold: #22D3EE;
+      --sage: #34D399;
+      --muted: #64748B;
     }
 
     body {
-      background: #F0EBE3;
-      font-family: 'Lato', sans-serif;
+      background: #EEF2FF;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--charcoal);
       min-height: 100vh;
       display: flex;
@@ -65,9 +65,9 @@
       width: 260px;
       min-height: 100vh;
       background: linear-gradient(160deg,
-      #1C1917 0%,
-      #2A1F1B 50%,
-      #44312A 100%);
+      #0B1120 0%,
+      #1E293B 50%,
+      #1E293B 100%);
       display: flex;
       flex-direction: column;
       position: fixed;
@@ -82,7 +82,7 @@
     }
 
     .brand {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 1.8rem;
       color: white;
     }
@@ -131,7 +131,7 @@
 
     .nav-item.active {
       color: white;
-      background: rgba(196,99,58,0.15);
+      background: rgba(99,102,241,0.15);
       border-left-color: var(--terracotta);
     }
 
@@ -182,7 +182,7 @@
 
     .topbar {
       background: var(--cream);
-      border-bottom: 1px solid #E5DFD8;
+      border-bottom: 1px solid #E2E8F0;
       padding: 18px 32px;
       display: flex;
       justify-content: space-between;
@@ -190,7 +190,7 @@
     }
 
     .topbar-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 1.7rem;
     }
 
@@ -201,7 +201,7 @@
     }
 
     .topbar-btn {
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
       background: transparent;
       border-radius: 6px;
       padding: 10px;
@@ -239,7 +239,7 @@
     }
 
     .page-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 2rem;
     }
 
@@ -259,7 +259,7 @@
 
     .stat-card {
       background: var(--cream);
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
       border-radius: 10px;
       padding: 20px 22px;
       position: relative;
@@ -298,7 +298,7 @@
     }
 
     .stat-value {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 2rem;
       color: var(--charcoal);
       line-height: 1;
@@ -323,7 +323,7 @@
       display: flex;
       gap: 8px;
       margin-bottom: 22px;
-      border-bottom: 1px solid #E5DFD8;
+      border-bottom: 1px solid #E2E8F0;
       padding-bottom: 0;
     }
 
@@ -337,7 +337,7 @@
       color: var(--muted);
       border-bottom: 3px solid transparent;
       transition: all 0.2s;
-      font-family: 'Lato';
+      font-family: 'Plus Jakarta Sans';
     }
 
     .tab-btn:hover {
@@ -361,12 +361,12 @@
 
     .search-input,
     .filter-select {
-      border: 1.5px solid #E5DFD8;
+      border: 1.5px solid #E2E8F0;
       background: var(--cream);
       border-radius: 6px;
       padding: 12px 14px;
       font-size: 0.85rem;
-      font-family: 'Lato', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--charcoal);
     }
 
@@ -383,7 +383,7 @@
       padding: 12px 16px;
       border-radius: 6px;
       color: #ef4444;
-      font-family: 'Lato', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 0.875rem;
       font-weight: 400;
       letter-spacing: 0;
@@ -411,14 +411,14 @@
     .filter-select:focus {
       outline: none;
       border-color: var(--terracotta);
-      box-shadow: 0 0 0 3px rgba(196, 99, 58, 0.1);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
 
     /* CARD */
 
     .card {
       background: var(--cream);
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
       border-radius: 10px;
       overflow: hidden;
       margin-bottom: 20px;
@@ -426,14 +426,14 @@
 
     .card-header {
       padding: 20px 24px;
-      border-bottom: 1px solid #E5DFD8;
+      border-bottom: 1px solid #E2E8F0;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .card-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 1.5rem;
     }
 
@@ -457,17 +457,17 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
-      border-bottom: 1px solid #E5DFD8;
+      border-bottom: 1px solid #E2E8F0;
     }
 
     tbody td {
       padding: 18px 20px;
-      border-bottom: 1px solid #F0EBE3;
+      border-bottom: 1px solid #EEF2FF;
       vertical-align: middle;
     }
 
     tbody tr:hover {
-      background: #FAF7F2;
+      background: #F8FAFC;
     }
 
     /* RESTAURANT INFO */
@@ -574,13 +574,13 @@
       cursor: pointer;
       text-decoration: none;
       transition: all 0.2s;
-      font-family: 'Lato';
+      font-family: 'Plus Jakarta Sans';
     }
 
     .btn-view {
       background: var(--surface);
       color: var(--charcoal);
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
     }
 
     .btn-view:hover {
@@ -632,7 +632,7 @@
     }
 
     .empty-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 1.3rem;
       margin-bottom: 8px;
     }
@@ -688,7 +688,7 @@
 
     .modal-header {
       padding: 24px 28px;
-      border-bottom: 1px solid #E5DFD8;
+      border-bottom: 1px solid #E2E8F0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -698,7 +698,7 @@
     }
 
     .modal-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 1.3rem;
     }
 
@@ -723,7 +723,7 @@
 
     .modal-footer {
       padding: 18px 28px;
-      border-top: 1px solid #E5DFD8;
+      border-top: 1px solid #E2E8F0;
       display: flex;
       justify-content: flex-end;
       gap: 10px;
@@ -739,7 +739,7 @@
       align-items: center;
       gap: 16px;
       background: white;
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
       border-radius: 8px;
       padding: 16px;
     }
@@ -763,7 +763,7 @@
       gap: 12px;
       font-size: 0.85rem;
       padding: 6px 0;
-      border-bottom: 1px solid #F0EBE3;
+      border-bottom: 1px solid #EEF2FF;
     }
 
     .schedule-row:last-child {
@@ -797,7 +797,7 @@
 
     .info-item {
       background: white;
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
       border-radius: 8px;
       padding: 14px;
     }
@@ -836,7 +836,7 @@
 
     .modal-view-panel .modal-footer {
       background: white;
-      border-top: 1px solid #E5DFD8;
+      border-top: 1px solid #E2E8F0;
     }
 
     .profile-card {
@@ -845,7 +845,7 @@
       gap: 20px;
       padding: 20px;
       background: var(--cream);
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
       border-radius: 12px;
     }
 
@@ -859,13 +859,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 1.35rem;
       font-weight: 700;
     }
 
     .profile-name {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Outfit', serif;
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--charcoal);
@@ -896,7 +896,7 @@
       color: var(--muted);
       margin-bottom: 12px;
       padding-bottom: 8px;
-      border-bottom: 1px solid #E5DFD8;
+      border-bottom: 1px solid #E2E8F0;
     }
 
     .detail-rows {
@@ -910,7 +910,7 @@
       align-items: flex-start;
       gap: 16px;
       padding: 14px 4px;
-      border-bottom: 1px solid #F0EBE3;
+      border-bottom: 1px solid #EEF2FF;
     }
 
     .detail-row:last-child {
@@ -939,7 +939,7 @@
       padding: 10px 22px;
       border-radius: 10px;
       cursor: pointer;
-      font-family: 'Lato', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
       font-size: 0.8rem;
       color: var(--charcoal);
@@ -954,7 +954,7 @@
       flex-direction: column;
       gap: 0;
       background: white;
-      border: 1px solid #E5DFD8;
+      border: 1px solid #E2E8F0;
       border-radius: 12px;
       overflow: hidden;
     }
@@ -966,7 +966,7 @@
       gap: 16px;
       border: none;
       border-radius: 0;
-      border-bottom: 1px solid #F0EBE3;
+      border-bottom: 1px solid #EEF2FF;
       padding: 14px 18px;
     }
 
@@ -997,11 +997,11 @@
 
     .form-input {
       width: 100%;
-      border: 1.5px solid #E5DFD8;
+      border: 1.5px solid #E2E8F0;
       border-radius: 6px;
       padding: 12px 14px;
       font-size: 0.85rem;
-      font-family: 'Lato';
+      font-family: 'Plus Jakarta Sans';
       color: var(--charcoal);
       background: white;
     }
@@ -1022,7 +1022,7 @@
       cursor: pointer;
       font-weight: 700;
       font-size: 0.78rem;
-      font-family: 'Lato';
+      font-family: 'Plus Jakarta Sans';
       transition: all 0.2s;
     }
 
@@ -1031,14 +1031,14 @@
     }
 
     .btn-secondary {
-      border: 1.5px solid #E5DFD8;
+      border: 1.5px solid #E2E8F0;
       background: transparent;
       padding: 10px 20px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 700;
       font-size: 0.78rem;
-      font-family: 'Lato';
+      font-family: 'Plus Jakarta Sans';
       transition: all 0.2s;
     }
 
@@ -2045,7 +2045,7 @@
         <div style="flex: 1;">
 
           <div id="review-name"
-               style="font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700;">
+               style="font-family: 'Outfit', serif; font-size: 1.1rem; font-weight: 700;">
             —
           </div>
 

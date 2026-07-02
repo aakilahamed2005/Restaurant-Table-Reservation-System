@@ -4,47 +4,20 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>DineElite — Thank You</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-<script
-        src="https://cdn.tailwindcss.com">
-
-</script>
-<script>
-tailwind.config = {
-  theme: { extend: {
-    colors: {
-      cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917',
-      'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853',
-      sage: '#7A8C6E', muted: '#8A7E78'
-    }
-    ,
-    fontFamily:
-    {
-      display: ['"Playfair Display"', 'serif'],
-      body: ['Lato', 'sans-serif'],
-      accent: ['"Cormorant Garamond"', 'serif']
-    }
-  }
-
-  }
-
-}
-</script>
+<th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
 <style>
-  body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917;
+  .topbar { background: #0B1120;
   }
-  .topbar { background: #1C1917;
-  }
-  .btn-primary { background: #C4633A; color: white; font-family: 'Lato', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
-  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
-  .btn-outline { border: 1.5px solid #E5DFD8; background: white; color: #1C1917; font-family: 'Lato', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, border-color 0.2s; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
-  .btn-outline:hover { border-color: #C4633A; background: #FAF7F2; }
+  .btn-primary { background: #6366F1; color: white; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+  .btn-primary:hover { background: #1E293B; transform: translateY(-1px); }
+  .btn-outline { border: 1.5px solid #E2E8F0; background: white; color: #0B1120; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, border-color 0.2s; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+  .btn-outline:hover { border-color: #6366F1; background: #F8FAFC; }
   .fade-in { animation: fadeUp 0.6s ease both; }
   .fade-in-delay { animation: fadeUp 0.6s ease 0.15s both; }
   .fade-in-delay-2 { animation: fadeUp 0.6s ease 0.3s both; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-  .star-icon { color: #D4A853; font-size: 2.5rem; line-height: 1; }
-  .divider { width: 48px; height: 2px; background: #D4A853;
+  .star-icon { color: #22D3EE; font-size: 2.5rem; line-height: 1; }
+  .divider { width: 48px; height: 2px; background: #22D3EE;
   }
 </style>
   <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
@@ -53,11 +26,11 @@ tailwind.config = {
 
 <!-- TOP NAV -->
 <nav class="topbar flex items-center justify-between px-8 py-4">
-  <a th:href="@{/}" href="#" class="font-display text-2xl text-white">Dine<span style="color:#D4A853">Elite</span></a>
+  <a th:href="@{/}" href="#" class="font-display text-2xl text-white">Dine<span style="color:#22D3EE">Elite</span></a>
   <div class="flex items-center gap-6">
     <a th:href="@{/customer-booking-records}" class="text-gray-400 text-sm font-body hover:text-yellow-400 transition-colors">My Bookings</a>
     <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#C4633A;" th:text="${firstLetter}">J</div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#6366F1;" th:text="${firstLetter}">J</div>
       <a class="text-gray-300 text-sm font-body cursor-pointer" th:text="${customerFullName}" th:href="@{/customer-profile-view}">Jane Doe</a>
     </div>
   </div>
@@ -69,7 +42,7 @@ tailwind.config = {
 
     <!-- Star badge -->
     <div class="fade-in flex items-center justify-center mb-8">
-      <div class="w-24 h-24 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #D4A853 0%, #C4633A 100%);">
+      <div class="w-24 h-24 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #22D3EE 0%, #6366F1 100%);">
         <span class="star-icon" style="color:white; font-size:2.8rem;">★</span>
       </div>
     </div>
@@ -80,7 +53,7 @@ tailwind.config = {
     <div class="fade-in-delay mb-6">
       <div class="divider mx-auto mb-5"></div>
       <h1 class="font-display text-5xl text-charcoal mb-3">Thank You!</h1>
-      <p class="font-accent italic text-2xl" style="color:#D4A853;">Review Submitted</p>
+      <p class="font-accent italic text-2xl" style="color:#22D3EE;">Review Submitted</p>
     </div>
 
     <!-- Message -->
@@ -91,9 +64,9 @@ tailwind.config = {
       <p class="font-display text-xl text-charcoal mb-8" th:text="${feedback.restaurant.restaurantName}">Ember &amp; Oak</p>
 
       <!-- Decorative rating summary strip -->
-      <div class="bg-white rounded-lg px-6 py-5 mb-10 flex items-center justify-center gap-3" style="border: 1px solid #E5DFD8;">
+      <div class="bg-white rounded-lg px-6 py-5 mb-10 flex items-center justify-center gap-3" style="border: 1px solid #E2E8F0;">
         <span class="text-sm font-body text-muted">Your review is now live</span>
-        <span class="text-xs font-body font-bold px-3 py-1 rounded-full" style="background:rgba(122,140,110,0.12); color:#7A8C6E;">Verified Diner</span>
+        <span class="text-xs font-body font-bold px-3 py-1 rounded-full" style="background:rgba(122,140,110,0.12); color:#34D399;">Verified Diner</span>
       </div>
 
       <!-- CTA buttons -->

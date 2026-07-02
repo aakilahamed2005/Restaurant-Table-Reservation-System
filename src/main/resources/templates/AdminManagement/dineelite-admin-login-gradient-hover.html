@@ -28,7 +28,7 @@
     width: 340px;
     height: 340px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(196,99,58,0.13) 0%, rgba(212,168,83,0.06) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(99,102,241,0.13) 0%, rgba(34,211,238,0.06) 40%, transparent 70%);
     transform: translate(-50%, -50%);
     transition: opacity 0.3s;
     opacity: 0;
@@ -48,7 +48,7 @@
     position: absolute;
     top: -40px; right: -40px;
     width: 140px; height: 140px;
-    background: radial-gradient(circle, rgba(196,99,58,0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -59,16 +59,16 @@
     letter-spacing: -0.3px;
   }
 
-  .brand span { color: #D4A853; }
+  .brand span { color: #22D3EE; }
   .sub { font-size: 11.5px; color: #4A4540; margin-top: 2px; }
 
   .abadge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(196,99,58,0.1);
-    border: 0.5px solid rgba(196,99,58,0.25);
-    color: #C4633A;
+    background: rgba(99,102,241,0.1);
+    border: 0.5px solid rgba(99,102,241,0.25);
+    color: #6366F1;
     font-size: 10.5px;
     font-weight: 600;
     letter-spacing: 0.09em;
@@ -80,7 +80,7 @@
 
   .bdot {
     width: 5px; height: 5px;
-    background: #C4633A;
+    background: #6366F1;
     border-radius: 50%;
     animation: pulse 2s infinite;
   }
@@ -113,7 +113,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(196,99,58,0.15), rgba(212,168,83,0.1));
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(34,211,238,0.1));
     opacity: 0;
     transition: opacity 0.25s;
     border-radius: 8px;
@@ -121,12 +121,12 @@
 
   .rb:hover::before { opacity: 1; }
   .rb:hover { border-color: #3A2A18; color: #9A8A70; }
-  .rb.active { background: #1E1812; color: #D4A853; border-color: #3A2E1A; }
+  .rb.active { background: #1E1812; color: #22D3EE; border-color: #3A2E1A; }
   .rb.active::before { opacity: 1; }
 
   .wbar {
-    background: rgba(212,168,83,0.06);
-    border: 0.5px solid rgba(212,168,83,0.14);
+    background: rgba(34,211,238,0.06);
+    border: 0.5px solid rgba(34,211,238,0.14);
     border-radius: 7px;
     padding: 7px 11px;
     font-size: 11.5px;
@@ -183,13 +183,13 @@
   }
 
   .fi:focus {
-    border-color: #C4633A;
-    box-shadow: 0 0 0 3px rgba(196,99,58,0.1);
+    border-color: #6366F1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
     background: #161310;
   }
 
   .iw:hover .ii { color: #5A4A38; }
-  .fi:focus + .ii, .iw:focus-within .ii { color: #C4633A; }
+  .fi:focus + .ii, .iw:focus-within .ii { color: #6366F1; }
 
   .fi::placeholder { color: #302A25; }
 
@@ -222,8 +222,8 @@
 
   .mb:hover { border-color: #3A2820; background: #161310; transform: translateY(-1px); }
   .mb:focus {
-    border-color: #C4633A;
-    box-shadow: 0 0 0 3px rgba(196,99,58,0.1);
+    border-color: #6366F1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
     background: #161310;
     transform: translateY(-1px);
   }
@@ -231,7 +231,7 @@
   .bsign {
     width: 100%;
     padding: 11px;
-    background: linear-gradient(135deg, #C4633A 0%, #9A3A20 100%);
+    background: linear-gradient(135deg, #6366F1 0%, #9A3A20 100%);
     color: #FAF5EE;
     border: none;
     border-radius: 9px;
@@ -256,7 +256,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(212,168,83,0.25) 0%, rgba(196,99,58,0) 60%);
+    background: linear-gradient(135deg, rgba(34,211,238,0.25) 0%, rgba(99,102,241,0) 60%);
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -264,7 +264,7 @@
   .bsign:hover::before { opacity: 1; }
   .bsign:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(196,99,58,0.3), 0 2px 8px rgba(196,99,58,0.2);
+    box-shadow: 0 6px 24px rgba(99,102,241,0.3), 0 2px 8px rgba(99,102,241,0.2);
     background-position: 100% 50%;
   }
 
@@ -301,12 +301,12 @@
     position: absolute;
     bottom: -1px; left: 0; right: 0;
     height: 0.5px;
-    background: linear-gradient(90deg, transparent, #C4633A, transparent);
+    background: linear-gradient(90deg, transparent, #6366F1, transparent);
     transform: scaleX(0);
     transition: transform 0.3s;
   }
 
-  .forgot:hover { color: #C4633A; }
+  .forgot:hover { color: #6366F1; }
   .forgot:hover::after { transform: scaleX(1); }
   @media (max-width: 480px) {
     .ar {
@@ -376,7 +376,7 @@
           <input class="fi" type="password" placeholder="••••••••••••" id="pw-input" />
           <i class="ti ti-eye" id="eye-tog" aria-hidden="true"
             style="position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:15px;color:#3A3530;cursor:pointer;transition:color 0.2s;"
-            onclick="togglePw()" onmouseenter="this.style.color='#C4633A'" onmouseleave="this.style.color='#3A3530'"></i>
+            onclick="togglePw()" onmouseenter="this.style.color='#6366F1'" onmouseleave="this.style.color='#3A3530'"></i>
         </div>
       </div>
 

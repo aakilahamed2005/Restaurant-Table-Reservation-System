@@ -4,52 +4,21 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>DineElite — Sign In</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: { extend: {
-    colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-    fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-  }}
-}
-</script>
+<th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
 <style>
-  body { background-color: #FAF7F2; font-family: 'Lato', sans-serif; color: #1C1917; }
-  .left-panel { background: linear-gradient(160deg, #1C1917 0%, #44312A 60%, #C4633A 100%); transition: background 0.35s ease; }
-  .left-panel.partner-mode { background: linear-gradient(160deg, #1C1917 0%, #2A1F1B 50%, #44312A 100%); }
-  .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
-  .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
-  .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; }
-  .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
+  
+  
+  
+  
+  
+  
+  
   .fade-in { animation: fadeUp 0.6s ease both; }
   @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
-  .signin-tab-bar {
-    display: flex;
-    gap: 0;
-    margin-bottom: 28px;
-    border-bottom: 1px solid #E5DFD8;
-  }
-  .signin-tab-btn {
-    flex: 1;
-    padding: 12px 16px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #8A7E78;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
-    font-family: 'Lato', sans-serif;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .signin-tab-btn:hover { color: #1C1917; }
-  .signin-tab-btn.active {
-    color: #C4633A;
-    border-bottom-color: #C4633A;
-  }
+  
+  
+  
+  
 </style>
   <th:block th:replace="~{fragments/site-responsive :: site-responsive}"></th:block>
 </head>
@@ -57,7 +26,7 @@ tailwind.config = {
 
 <!-- LEFT PANEL -->
 <div id="leftPanel" class="left-panel hidden lg:flex flex-col justify-between w-1/2 p-16 text-white">
-  <a th:href="@{/}" class="font-display text-2xl tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <a th:href="@{/}" class="font-display text-2xl tracking-tight">Dine<span class="brand-accent">Elite</span></a>
   <div>
     <p id="leftTagline" class="font-accent italic text-gold text-xl mb-4">"A great meal begins with a great table."</p>
     <h2 id="leftTitle" class="font-display text-5xl leading-tight mb-6">Welcome<br/>Back</h2>
@@ -76,7 +45,7 @@ tailwind.config = {
 <div class="flex-1 flex items-center justify-center px-6 py-12">
   <div class="w-full max-w-md fade-in">
     <div class="lg:hidden mb-10 text-center">
-      <a th:href="@{/}" class="font-display text-3xl text-charcoal">Dine<span style="color:#D4A853">Elite</span></a>
+      <a th:href="@{/}" class="font-display text-3xl text-charcoal">Dine<span class="brand-accent">Elite</span></a>
     </div>
 
     <div class="mb-6">
@@ -138,7 +107,7 @@ tailwind.config = {
 </div>
 
 <!-- Contact admin (deactivated / account issues) -->
-<div id="userSupportModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4" style="background:rgba(28,25,23,0.55); backdrop-filter: blur(2px);">
+<div id="userSupportModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4" style="background:rgba(11,17,32,0.55); backdrop-filter: blur(2px);">
   <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl relative" style="animation: fadeUp 0.25s ease;">
     <button type="button" id="closeUserSupportModal" class="absolute top-3 right-3 text-muted hover:text-charcoal text-xl leading-none" aria-label="Close">&times;</button>
     <h2 class="font-display text-xl text-charcoal mb-1">Contact platform admin</h2>

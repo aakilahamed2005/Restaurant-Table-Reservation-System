@@ -4,34 +4,25 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DineElite — Owner - Add Restaurant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: {
-          colors: { cream: '#FAF7F2', surface: '#F0EBE3', charcoal: '#1C1917', 'warm-brown': '#44312A', terracotta: '#C4633A', gold: '#D4A853', sage: '#7A8C6E', muted: '#8A7E78' },
-          fontFamily: { display: ['"Playfair Display"', 'serif'], body: ['Lato', 'sans-serif'], accent: ['"Cormorant Garamond"', 'serif'] }
-        }}
-    }
-  </script>
-  <style>
-    body { background-color: #F0EBE3; font-family: 'Lato', sans-serif; color: #1C1917; }
-    .topbar { background: #1C1917; }
-    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Lato'; font-size: 0.875rem; color: #8A7E78; transition: all 0.2s; cursor: pointer; text-decoration: none; }
-    .sidebar-link:hover { background: #FAF7F2; color: #1C1917; }
-    .sidebar-link.active { background: #FAF7F2; border-left: 3px solid #C4633A; color: #C4633A; font-weight: 700; padding-left: 13px; }
-    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #8A7E78; padding: 8px 16px 4px; }
-    .btn-primary { background: #C4633A; color: white; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: background 0.2s, transform 0.2s; display: inline-flex; align-items: center; cursor: pointer; border: none; padding: 8px 12px; border-radius: 4px; }
-    .btn-primary:hover { background: #44312A; transform: translateY(-1px); }
-    .btn-ghost { background: transparent; border: 1.5px solid #E5DFD8; color: #8A7E78; font-family: 'Lato'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
-    .btn-ghost:hover { border-color: #8A7E78; color: #1C1917; }
-    .input-field { border: 1.5px solid #E5DFD8; transition: border-color 0.2s, box-shadow 0.2s; background: white; font-family: 'Lato'; }
-    .input-field:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
-    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #44312A, #D4A853); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display'; font-size: 2rem; color: white; }
+  <th:block th:replace="~{fragments/site-theme :: site-head}"></th:block>
+<style>
+    
+    .topbar { background: #0B1120; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 6px; font-family: 'Plus Jakarta Sans'; font-size: 0.875rem; color: #64748B; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+    .sidebar-link:hover { background: #F8FAFC; color: #0B1120; }
+    .sidebar-link.active { background: #F8FAFC; border-left: 3px solid #6366F1; color: #6366F1; font-weight: 700; padding-left: 13px; }
+    .sidebar-section-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #64748B; padding: 8px 16px 4px; }
+    
+    
+    .btn-ghost { background: transparent; border: 1.5px solid #E2E8F0; color: #64748B; font-family: 'Plus Jakarta Sans'; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-ghost:hover { border-color: #64748B; color: #0B1120; }
+    
+    
+    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #1E293B, #22D3EE); display: flex; align-items: center; justify-content: center; font-family: 'Outfit'; font-size: 2rem; color: white; }
     .section-divider { display: flex; align-items: center; gap: 12px; margin: 8px 0 4px; }
-    .section-divider span { font-family: 'Lato'; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8A7E78; white-space: nowrap; }
-    .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #E5DFD8; }
-    select.input-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238A7E78'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 36px; }
+    .section-divider span { font-family: 'Plus Jakarta Sans'; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #64748B; white-space: nowrap; }
+    .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #E2E8F0; }
+    select
     .fade-in { animation: fadeUp 0.5s ease both; }
     @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
 
@@ -43,11 +34,11 @@
       gap: 14px;
       padding: 11px 16px;
       border-radius: 8px;
-      border: 1.5px solid #E5DFD8;
+      border: 1.5px solid #E2E8F0;
       background: white;
       transition: border-color 0.2s, background 0.2s;
     }
-    .schedule-row.is-open { border-color: #C4633A; background: #FFFAF7; }
+    .schedule-row.is-open { border-color: #6366F1; background: #FFFAF7; }
     .schedule-row.is-closed { opacity: 0.55; }
 
     /* Toggle switch */
@@ -55,7 +46,7 @@
     .toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
     .toggle-track {
       position: absolute; inset: 0;
-      background: #E5DFD8;
+      background: #E2E8F0;
       border-radius: 999px;
       cursor: pointer;
       transition: background 0.2s;
@@ -70,13 +61,13 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.18);
       transition: transform 0.2s;
     }
-    .toggle-wrap input:checked + .toggle-track { background: #C4633A; }
+    .toggle-wrap input:checked + .toggle-track { background: #6366F1; }
     .toggle-wrap input:checked + .toggle-track::after { transform: translateX(16px); }
 
     /* Day label */
     .day-label {
-      font-family: 'Lato'; font-size: 0.8rem; font-weight: 700;
-      letter-spacing: 0.06em; text-transform: uppercase; color: #1C1917;
+      font-family: 'Plus Jakarta Sans'; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; color: #0B1120;
     }
     .day-status-badge {
       font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
@@ -89,37 +80,37 @@
     /* Time inputs */
     .time-block { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .time-group { display: flex; flex-direction: column; gap: 3px; }
-    .time-group label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #8A7E78; }
+    .time-group label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; }
     .time-input {
-      border: 1.5px solid #E5DFD8; background: #FAF7F2;
+      border: 1.5px solid #E2E8F0; background: #F8FAFC;
       border-radius: 5px; padding: 6px 10px;
-      font-family: 'Lato'; font-size: 0.82rem; color: #1C1917;
+      font-family: 'Plus Jakarta Sans'; font-size: 0.82rem; color: #0B1120;
       transition: border-color 0.2s, box-shadow 0.2s;
       width: 108px;
     }
-    .time-input:focus { outline: none; border-color: #C4633A; box-shadow: 0 0 0 3px rgba(196,99,58,0.1); }
-    .time-input:disabled { opacity: 0.3; cursor: not-allowed; background: #F0EBE3; }
-    .time-separator { color: #8A7E78; font-size: 1.1rem; font-weight: 300; margin-top: 16px; }
+    .time-input:focus { outline: none; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .time-input:disabled { opacity: 0.3; cursor: not-allowed; background: #EEF2FF; }
+    .time-separator { color: #64748B; font-size: 1.1rem; font-weight: 300; margin-top: 16px; }
 
     /* Closed banner */
     .closed-banner {
       flex: 1; text-align: center;
-      font-family: 'Lato'; font-size: 0.75rem; font-weight: 700;
+      font-family: 'Plus Jakarta Sans'; font-size: 0.75rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.1em;
       color: #c4b5b0; padding: 8px 0;
-      border: 1.5px dashed #E5DFD8; border-radius: 5px;
+      border: 1.5px dashed #E2E8F0; border-radius: 5px;
     }
 
     /* Quick-set bar */
     .quick-btn {
-      font-family: 'Lato'; font-size: 0.65rem; font-weight: 700;
+      font-family: 'Plus Jakarta Sans'; font-size: 0.65rem; font-weight: 700;
       letter-spacing: 0.07em; text-transform: uppercase;
-      border: 1.5px solid #E5DFD8; color: #8A7E78;
+      border: 1.5px solid #E2E8F0; color: #64748B;
       padding: 4px 11px; border-radius: 999px;
       cursor: pointer; background: white;
       transition: all 0.15s;
     }
-    .quick-btn:hover { border-color: #C4633A; color: #C4633A; background: #FFFAF7; }
+    .quick-btn:hover { border-color: #6366F1; color: #6366F1; background: #FFFAF7; }
 
     .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 24px; }
     .alert-error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
@@ -130,11 +121,11 @@
 
 <!-- TOP NAV -->
 <nav class="topbar flex items-center justify-between px-8 py-4">
-  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#D4A853">Elite</span></a>
+  <a th:href="@{/}" class="font-display text-2xl text-white tracking-tight">Dine<span style="color:#22D3EE">Elite</span></a>
   <div class="flex items-center gap-6">
     <a th:href="@{/restaurant-listing}" class="text-gray-300 text-sm font-body hover:text-gold transition-colors">Explore</a>
     <div class="flex items-center gap-2 cursor-pointer">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#44312A;" th:text="${firstLetter}">J</div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#1E293B;" th:text="${firstLetter}">J</div>
       <span class="text-gray-300 text-sm font-body" th:text="${userFullName}">John Doe</span>
     </div>
   </div>
